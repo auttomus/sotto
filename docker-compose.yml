@@ -1,0 +1,66 @@
+services:
+  # 1. PRIMARY DATABASE
+  postgres:
+    image: postgres:15-alpine
+    container_name: sotto_postgres
+    restart: unless-stopped
+    env_file:
+      - ./infrastructure/.env.docker
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - platform_net
+
+  # 2. HIGH-VELOCITY DATABASE
+  scylladb:
+    image: scylladb/scylla:5.4.1
+    container_name: sotto_scylla
+    restart: unless-stopped
+    # biar ga makan banyak ram
+    command: --smp 1 --memory 768M --reserve-memory 0 --developer-mode 1
+    ports:
+      - "9042:9042"
+    volumes:
+      - scylla_data:/var/lib/scylla
+    networks:
+      - platform_net
+
+  # 3. CACHE & QUEUE BROKER
+  redis:
+    image: redis:7-alpine
+    container_name: sotto_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - platform_net
+
+  # 4. OBJECT STORAGE
+  minio:
+    image: minio/minio:latest
+    container_name: sotto_minio
+    restart: unless-stopped
+    env_file:
+      - ./infrastructure/.env.docker
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - platform_net
+
+networks:
+  platform_net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  scylla_data:
+  redis_data:
+  minio_data:

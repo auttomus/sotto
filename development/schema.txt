@@ -1,0 +1,323 @@
+// ==========================================
+// ENUMS
+// ==========================================
+Enum listing_status {
+  draft
+  active
+  paused    // Bisa dipause manual oleh user, atau otomatis oleh sistem
+  archived
+}
+
+Enum order_status {
+  pending_payment
+  in_progress
+  completed
+  cancelled
+}
+
+Enum conversation_type {
+  direct    // DM 1-on-1 (Siswa A ke Siswa B)
+  group     // Bisa untuk diskusi proyek/kolaborasi tim lintas sekolah
+  order     // Chat khusus yang terikat ke sebuah Order/Transaksi (Penting untuk resolusi konflik)
+}
+
+Enum notification_type {
+  follow
+  order_update
+  new_message
+  mention       // Jika ada yang nge-tag di feed ScyllaDB
+}
+
+// ==========================================
+// 1. IDENTITY & PUBLIC PERSONA (MVP)
+// ==========================================
+Table users {
+  id bigint [primary key, increment]
+  account_id bigint [not null, unique, note: 'Tautan absolut ke tabel accounts (Public Profile)']
+  email varchar [not null, unique, note: 'Gunakan email sekolah (.sch.id) jika memungkinkan untuk validasi organik']
+  encrypted_password varchar [not null]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  Note: 'THE VAULT: Tabel ini super rahasia. Hanya untuk autentikasi. Jangan pernah di-query untuk endpoint GraphQL profil publik.'
+}
+
+Table accounts {
+  id bigint [primary key, increment]
+  username varchar [not null, unique, note: 'Handle user, misal: @arya_pranata']
+  display_name varchar [not null]
+  
+  // Biodata Minimalis
+  school_id bigint [note: 'TBD: Nanti butuh tabel master schools. Untuk MVP bisa diganti varchar (nama sekolah) jika mau cepat.']
+  major varchar [note: 'Jurusan siswa, misal: RPL, DKV, Akuntansi. Krusial untuk algoritma feed ScyllaDB nanti.']
+  
+  // Profil Visual Minimalis
+  note text [note: 'Bio singkat user']
+  avatar_object_key varchar [note: 'KOREKSI: Jangan pakai URL. Simpan MinIO object key-nya di sini sebagai cache (Denormalisasi) agar tidak perlu JOIN ke tabel media terus menerus saat meload feed.']
+  
+  // Aggregates (Denormalisasi untuk kecepatan read)
+  followers_count bigint [default: 0, note: 'Di-update via background job / Redis queue setiap ada yang follow']
+  following_count bigint [default: 0]
+  trust_score decimal [default: 0.0, note: 'Agregat otomatis dari rata-rata tabel reviews']
+  
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  Note: 'PUBLIC PERSONA: Tabel ini yang mondar-mandir di frontend Vite-mu. Semua data di sini aman dikonsumsi publik.'
+}
+
+// ==========================================
+// 2. THE GIG ECONOMY (MVP)
+// ==========================================
+Table listings {
+  id bigint [primary key, increment]
+  account_id bigint [not null]
+  
+  type listing_type [default: 'service', note: 'Menentukan behaviour dari listing ini']
+  
+  title varchar [not null]
+  description text [not null]
+  price decimal [not null]
+  delivery_time_days int [note: 'Bisa NULL jika tipenya digital_product yang instan']
+  
+  // -- PENAMBAHAN VITAL UNTUK FITUR "SOLD OUT" / "FULLY BOOKED" --
+  max_active_orders int [note: 'Batas maksimal order yang bisa dikerjakan bersamaan. Jika antrean menyentuh angka ini, status otomatis di-hide/paused di frontend.']
+  is_unlimited boolean [default: false, note: 'Jika TRUE (biasanya untuk digital product), abaikan max_active_orders.']
+  // -------------------------------------------------------------
+  
+  status listing_status [default: 'active']
+  
+  lock_version int [default: 0]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+}
+
+// Catatan: Ingat untuk mengubah semua Foreign Key di tabel 'orders' 
+// dari 'service_id' menjadi 'listing_id'
+Table orders {
+  id bigint [primary key, increment]
+  buyer_account_id bigint [not null, note: 'Siswa pembeli jasa']
+  seller_account_id bigint [not null, note: 'Siswa penjual jasa']
+  service_id bigint [not null]
+  custom_offer_id bigint [note: 'Null jika beli langsung dari etalase. Terisi jika via negosiasi chat.']
+  
+  agreed_price decimal [not null]
+  status order_status [default: 'pending_payment']
+  
+  lock_version int [default: 0, note: 'TAMBAHAN VITAL: Optimistic Locking. Mencegah bug data jika buyer & seller klik "Selesai" di milidetik yang sama.']
+  
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  Note: 'KONTRAK: Menyimpan state transaksi. Perubahan status di sini wajib di-trigger lewat sistem Escrow/Payment.'
+}
+
+Table reviews {
+  id bigint [primary key, increment]
+  order_id bigint [not null, unique, note: '1 Order = 1 Review']
+  reviewer_account_id bigint [not null, note: 'Biasanya si Buyer']
+  target_account_id bigint [not null, note: 'Biasanya si Seller']
+  rating int [not null, note: 'Rating 1-5']
+  comment text
+  
+  created_at timestamp [not null]
+  Note: 'REPUTASI: Data dari tabel ini akan mengakumulasi trust_score di tabel accounts.'
+}
+
+// ==========================================
+// 3. SOCIAL GRAPH (MVP)
+// ==========================================
+Table follows {
+  id bigint [primary key, increment]
+  account_id bigint [not null, note: 'User yang menekan tombol follow']
+  target_account_id bigint [not null, note: 'User yang di-follow']
+  created_at timestamp [not null]
+  
+  Indexes {
+    (account_id, target_account_id) [unique]
+  }
+  Note: 'SOCIAL GRAPH: Penentu utama siapa melihat apa di timeline feed ScyllaDB.'
+}
+
+// ==========================================
+// 4. CHAT SYSTEM METADATA (PostgreSQL)
+// ==========================================
+Table conversations {
+  id bigint [primary key, increment]
+  type conversation_type [default: 'direct']
+  
+  order_id bigint [note: 'Tautkan chat langsung ke order jika sedang ada proyek. Memudahkan moderator jika ada sengketa nanti.']
+  
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  Note: 'ROOM: Metadata ruangan chat. Isi pesannya (payload) tidak ada di sini, melainkan di ScyllaDB.'
+}
+
+Table conversation_participants {
+  id bigint [primary key, increment]
+  conversation_id bigint [not null]
+  account_id bigint [not null]
+  
+  last_read_message_id varchar [note: 'Menyimpan UUID pesan terakhir dari ScyllaDB. Digunakan UI untuk render status "Belum Dibaca".']
+  
+  joined_at timestamp [not null]
+
+  Indexes {
+    (conversation_id, account_id) [unique]
+    account_id [note: 'Penting untuk query: Tampilkan semua chat milik User A']
+  }
+  Note: 'MEMBERS: Siapa saja yang ada di dalam sebuah room.'
+}
+
+// ==========================================
+// MEDIA & ASSET MANAGEMENT (MinIO Integration)
+// ==========================================
+Table media_attachments {
+  id bigint [primary key, increment]
+  account_id bigint [not null, note: 'Pemilik/Pengunggah aset']
+  
+  attached_type varchar [not null, note: 'Polymorphic Type. Contoh: "Service", "ScyllaPost", "ScyllaMessage"']
+  attached_id varchar [note: 'Polymorphic ID. Pakai varchar agar bisa simpan TimeUUID dari ScyllaDB']
+  
+  file_name varchar [not null]
+  content_type varchar [not null, note: 'Mimetype: image/jpeg, application/zip, dll']
+  file_size bigint [not null]
+  blurhash varchar [note: 'String pendek untuk render skeleton loading visual di React sebelum gambar asli terload']
+  
+  bucket_name varchar [not null, default: 'public-assets', note: 'Pemisahan level bucket di MinIO']
+  object_key varchar [not null, note: 'Path file asli. Contoh: services/srv_12/thumbnail.jpg']
+  is_private boolean [default: false, note: 'Jika TRUE, NestJS harus generate Presigned URL. Jika FALSE, gabungkan object_key dengan CDN_BASE_URL.']
+  
+  created_at timestamp [not null, default: `now()`]
+  
+  Indexes {
+    account_id
+    (attached_type, attached_id) [note: 'Composite index vital agar pencarian lampiran untuk suatu post/service sangat cepat']
+    object_key [unique]
+  }
+  Note: 'ASSET MANAGER: Satu-satunya tabel yang berkomunikasi dengan MinIO. Membersihkan DB dari hardcoded URL.'
+}
+
+// ==========================================
+// MASTER DATA & CATEGORIZATION
+// ==========================================
+
+Table tags {
+  id bigint [primary key, increment]
+  name varchar [not null, unique, note: 'Contoh: Frontend, Audio_Visual, Akuntansi_Dasar']
+  is_usable boolean [default: true, note: 'Bisa dimatikan oleh admin jika tag sudah tidak relevan']
+  created_at timestamp
+  
+  Indexes {
+    name [unique]
+  }
+}
+
+// Tabel Relasi Polymorphic (Satu tag bisa menempel di Jasa, atau di Postingan)
+Table tagged_objects {
+  id bigint [primary key, increment]
+  tag_id bigint [not null, note: 'Merujuk ke tabel tags']
+  object_id varchar [not null, note: 'Bisa merujuk ke ID PostgreSQL (Service) atau ScyllaDB (Post)']
+  object_type varchar [not null, note: 'Contoh: "Service" atau "ScyllaPost"']
+  
+  Indexes {
+    (object_type, object_id, tag_id) [unique, note: 'Mencegah duplikasi tag di post yang sama']
+    tag_id [note: 'Untuk query: Cari semua post/service dengan tag Frontend']
+  }
+}
+
+Table schools {
+  id bigint [primary key, increment]
+  npsn varchar [not null, unique, note: 'Nomor Pokok Sekolah Nasional - validasi data resmi']
+  name varchar [not null, note: 'Contoh: SMK Negeri 1 Denpasar']
+  domain varchar [unique, note: 'Domain sekolah (.sch.id) untuk automasi verifikasi email']
+  city varchar [note: 'Berguna untuk filter pencarian jasa lokal terdekat']
+  is_verified boolean [default: false]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+  
+  Indexes {
+    npsn [unique]
+  }
+}
+
+Table notifications {
+  id bigint [primary key, increment]
+  account_id bigint [not null, note: 'Penerima notifikasi']
+  from_account_id bigint [note: 'Siapa yang memicu (Opsional, misal user yang mem-follow)']
+  
+  type notification_type [not null]
+  
+  // Polymorphic Target (Menunjuk ke entitas apa notif ini?)
+  target_type varchar [note: 'Contoh: "Order", "Conversation", "ScyllaPost"']
+  target_id varchar [note: 'ID dari target tersebut']
+  
+  is_read boolean [default: false, note: 'Untuk indikator badge merah/belum dibaca di UI']
+  created_at timestamp [not null, default: `now()`]
+  
+  Indexes {
+    account_id
+    (account_id, is_read) [note: 'Sangat cepat untuk query: hitung unread notifications']
+  }
+}
+
+Enum offer_status {
+  pending
+  accepted
+  rejected
+  withdrawn // Ditarik kembali oleh penjual sebelum disetujui
+}
+
+Table custom_offers {
+  id bigint [primary key, increment]
+  conversation_id bigint [not null, note: 'Tautkan ke ruang obrolan tempat penawaran ini dibuat']
+  seller_account_id bigint [not null]
+  buyer_account_id bigint [not null]
+  listing_id bigint [note: 'Opsional, jika penawaran ini berangkat dari modifikasi listing yang sudah ada']
+  
+  description text [not null, note: 'Deskripsi kesepakatan: "Bikin 3 halaman web, revisi max 2x"']
+  proposed_price decimal [not null, note: 'Inilah yang akan menjadi agreed_price di tabel orders']
+  delivery_time_days int [not null]
+  
+  status offer_status [default: 'pending']
+  expires_at timestamp [note: 'Penawaran hangus jika tidak direspons dalam X hari']
+  
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  
+  Indexes {
+    conversation_id
+    buyer_account_id
+  }
+}
+
+// ==========================================
+// RELATIONS & FOREIGN KEYS
+// ==========================================
+Ref: media_attachments.account_id > accounts.id [delete: cascade]
+
+Ref: users.account_id - accounts.id [delete: cascade]
+Ref: listings.account_id > accounts.id [delete: cascade]
+Ref: orders.buyer_account_id > accounts.id
+Ref: orders.seller_account_id > accounts.id
+Ref: orders.service_id > listings.id [delete: restrict]
+
+Ref: reviews.order_id - orders.id
+Ref: reviews.reviewer_account_id > accounts.id
+Ref: reviews.target_account_id > accounts.id
+
+Ref: follows.account_id > accounts.id [delete: cascade]
+Ref: follows.target_account_id > accounts.id [delete: cascade]
+
+Ref: conversations.order_id - orders.id [delete: cascade]
+Ref: conversation_participants.conversation_id > conversations.id [delete: cascade]
+Ref: conversation_participants.account_id > accounts.id [delete: cascade]
+
+Ref: tagged_objects.tag_id > tags.id [delete: cascade]
+
+Ref: accounts.school_id > schools.id [delete: restrict]
+
+Ref: notifications.account_id > accounts.id [delete: cascade]
+Ref: notifications.from_account_id > accounts.id [delete: cascade]
+
+Ref: custom_offers.conversation_id > conversations.id [delete: cascade]
+Ref: custom_offers.seller_account_id > accounts.id
+Ref: custom_offers.buyer_account_id > accounts.id
+Ref: custom_offers.listing_id > listings.id

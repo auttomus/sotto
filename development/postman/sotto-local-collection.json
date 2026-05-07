@@ -1,0 +1,185 @@
+{
+  "info": {
+    "name": "Sotto Platform API",
+    "description": "Koleksi API Sotto. Dilengkapi dengan test cases untuk setiap state (Success & Error).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. IAM (Identity & Access)",
+      "item": [
+        {
+          "name": "Register [201] Success",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"arya.pranata@smkn1denpasar.sch.id\",\n  \"password\": \"RplSotto2026!\",\n  \"username\": \"arya_pranata_dev\",\n  \"displayName\": \"Kadek Agus Arya P.\",\n  \"schoolId\": 1,\n  \"major\": \"Rekayasa Perangkat Lunak\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/iam/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "iam",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Register [400] Error: Email Invalid",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"arya.pranatasmkn1denpasar\",\n  \"password\": \"RplSotto2026!\",\n  \"username\": \"arya_error_email\",\n  \"displayName\": \"Kadek Agus\",\n  \"schoolId\": 1,\n  \"major\": \"RPL\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/iam/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "iam",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Register [400] Error: Password Lemah",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test.lemah@smkn1denpasar.sch.id\",\n  \"password\": \"lemah\",\n  \"username\": \"test_lemah\",\n  \"displayName\": \"Test Lemah\",\n  \"schoolId\": 1,\n  \"major\": \"RPL\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/iam/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "iam",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Register [409] Error: Duplikasi (Jalankan setelah Success)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"arya.pranata@smkn1denpasar.sch.id\",\n  \"password\": \"RplSotto2026!\",\n  \"username\": \"arya_pranata_dev\",\n  \"displayName\": \"Kadek Agus Arya P.\",\n  \"schoolId\": 1,\n  \"major\": \"Rekayasa Perangkat Lunak\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/iam/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "iam",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login [200] Success (Auto-Set Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"jwt_token\", jsonData.accessToken);",
+                  "    console.log(\"Token JWT berhasil ditangkap dan disimpan ke environment!\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"arya.pranata@smkn1denpasar.sch.id\",\n  \"password\": \"RplSotto2026!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/iam/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "iam",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login [401] Error: Kredensial Salah",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"arya.pranata@smkn1denpasar.sch.id\",\n  \"password\": \"SandiSalah123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/iam/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "iam",
+                "login"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
