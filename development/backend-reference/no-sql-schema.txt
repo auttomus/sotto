@@ -1,0 +1,47 @@
+Table posts {
+  post_id timeuuid [primary key, note: 'PARTITION KEY. Otomatis mengandung timestamp.']
+  author_id bigint [note: 'Merujuk ke PostgreSQL: accounts.id']
+  in_reply_to_post_id timeuuid [note: 'Jika ada isinya, berarti post ini adalah komentar dari post lain']
+  content text [not null]
+  linked_service_id bigint [note: 'Merujuk ke PostgreSQL: services.id (Tombol Beli Jasa di Feed)']
+  created_at timestamp
+  
+  Note: 'KARYA & SHOWCASE: Menyimpan teks utama postingan. Gambar/Media dicari di tabel media_attachments PostgreSQL.'
+}
+
+Table messages {
+  conversation_id bigint [note: 'PARTITION KEY. Merujuk ke PostgreSQL: conversations.id']
+  message_id timeuuid [note: 'CLUSTERING KEY (DESC). Menentukan urutan pesan agar yang terbaru selalu di atas.']
+  sender_id bigint [not null, note: 'Merujuk ke PostgreSQL: accounts.id']
+  content text
+  created_at timestamp
+  
+  Indexes {
+    (conversation_id, message_id) [pk]
+  }
+  Note: 'DM & CHAT PAYLOAD: Dirancang untuk menelan ribuan chat per detik. Di-query berdasarkan conversation_id.'
+}
+
+Table user_feeds {
+  user_id bigint [note: 'PARTITION KEY. Pemilik timeline ini.']
+  post_id timeuuid [note: 'CLUSTERING KEY (DESC). Urutan waktu postingan di timeline.']
+  author_id bigint [note: 'Denormalisasi: Siapa yang bikin post ini (agar frontend bisa fetch avatar tanpa query 2x)']
+  created_at timestamp
+  
+  Indexes {
+    (user_id, post_id) [pk]
+  }
+  Note: 'FAN-OUT TIMELINE: Diisi otomatis oleh backend NestJS+Redis saat seseorang yang di-follow membuat post baru.'
+}
+
+Table interaction_logs {
+  user_id bigint [note: 'PARTITION KEY.']
+  interaction_time timestamp [note: 'CLUSTERING KEY (DESC). Waktu kejadian.']
+  action_type varchar [note: 'Contoh: "view_post", "click_service", "like_post"']
+  target_id varchar [note: 'ID target. Bisa UUID (Scylla) atau BigInt (Postgres). Disimpan sebagai string.']
+  
+  Indexes {
+    (user_id, interaction_time) [pk]
+  }
+  Note: 'ANALYTICS & MACHINE LEARNING: Data mentah untuk diolah menjadi bobot algoritma rekomendasi.'
+}

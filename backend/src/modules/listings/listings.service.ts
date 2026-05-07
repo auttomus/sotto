@@ -1,28 +1,30 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { CreateListingDto } from './dto/create-listing.dto';
+import { CreateListingInput } from './dto/create-listing.input';
 
 @Injectable()
 export class ListingsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(accountId: string, dto: CreateListingDto) {
+  async create(accountId: string, input: CreateListingInput) {
     try {
       const listing = await this.prisma.listing.create({
         data: {
-          title: dto.title,
-          description: dto.description,
-          price: dto.basePrice,
+          title: input.title,
+          description: input.description,
+          price: input.basePrice,
           accountId: BigInt(accountId),
         },
       });
 
+      // Konversi manual agar GraphQL tidak crash saat membaca BigInt & Decimal
       return {
-        message: 'Listing berhasil dipublikasikan.',
-        listing,
+        ...listing,
+        id: listing.id.toString(),
+        accountId: listing.accountId.toString(),
+        price: listing.price.toNumber(),
       };
     } catch (error) {
-      // Menggunakan variabel error agar tidak memicu linter no-unused-vars
       console.error('Error DB saat membuat listing:', error);
       throw new InternalServerErrorException('Gagal membuat listing baru.');
     }
@@ -31,7 +33,6 @@ export class ListingsService {
   async findAll() {
     const listings = await this.prisma.listing.findMany({
       include: {
-        // Menggunakan nama relasi yang benar sesuai schema ('account')
         account: {
           select: {
             displayName: true,
@@ -44,6 +45,19 @@ export class ListingsService {
         createdAt: 'desc',
       },
     });
-    return listings;
+
+    // Petakan semua hasil dan konversi tipe datanya
+    return listings.map((listing) => ({
+      ...listing,
+      id: listing.id.toString(),
+      accountId: listing.accountId.toString(),
+      price: listing.price.toNumber(),
+      account: listing.account
+        ? {
+            ...listing.account,
+            trustScore: listing.account.trustScore.toNumber(),
+          }
+        : null,
+    }));
   }
 }
