@@ -1,0 +1,32 @@
+import { Injectable, Logger } from '@nestjs/common';
+
+/**
+ * Escrow Service — Mengelola penahanan dan pelepasan dana.
+ * Placeholder untuk integrasi payment gateway nyata.
+ */
+@Injectable()
+export class EscrowService {
+  private readonly logger = new Logger(EscrowService.name);
+
+  /** Tahan dana saat order dibuat (setelah pembayaran berhasil) */
+  async holdFunds(orderId: bigint, amount: number): Promise<void> {
+    this.logger.log(`Escrow HOLD: Order ${orderId}, Rp ${amount}`);
+    // TODO: Integrasi dengan payment gateway / internal ledger
+  }
+
+  /** Lepaskan dana ke seller setelah order completed */
+  async releaseFunds(orderId: bigint, sellerAccountId: bigint): Promise<void> {
+    this.logger.log(
+      `Escrow RELEASE: Order ${orderId} → Seller ${sellerAccountId}`,
+    );
+    // TODO: Transfer dana dari escrow ke wallet seller
+  }
+
+  /** Refund ke buyer jika order dibatalkan */
+  async refundFunds(orderId: bigint, buyerAccountId: bigint): Promise<void> {
+    this.logger.log(
+      `Escrow REFUND: Order ${orderId} → Buyer ${buyerAccountId}`,
+    );
+    // TODO: Refund ke payment method buyer
+  }
+}

@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 
 // 1. Mendaftarkan fungsi toJSON ke dalam antarmuka global BigInt milik TypeScript
 declare global {
@@ -26,10 +27,14 @@ async function bootstrap() {
     }),
   );
 
+  // Global Exception Filters
+  app.useGlobalFilters(new PrismaExceptionFilter());
+
   // Mengaktifkan CORS (Cross-Origin Resource Sharing)
-  // Penting agar frontend (Vite) bisa berkomunikasi dengan backend ini
+  // PERBAIKAN: origin wildcard '*' + credentials: true = browser reject.
+  // Gunakan URL eksplisit dari .env
   app.enableCors({
-    origin: '*',
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
