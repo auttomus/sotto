@@ -5,11 +5,14 @@ import {
   PresignedUploadResult,
 } from './models/media-attachment.model';
 import { RequestUploadInput } from './dto/request-upload.input';
-import { CurrentUser, CurrentUserPayload } from '../../common/decorators/current-user.decorator';
+import {
+  CurrentUser,
+  type CurrentUserPayload,
+} from '../../common/decorators/current-user.decorator';
 
 @Resolver(() => MediaAttachmentModel)
 export class MediaResolver {
-  constructor(private readonly mediaService: MediaService) { }
+  constructor(private readonly mediaService: MediaService) {}
 
   @Mutation(() => PresignedUploadResult)
   async requestUploadUrl(
@@ -30,7 +33,11 @@ export class MediaResolver {
       objectKey,
       input,
     );
-    return { ...media, id: media.id.toString(), fileSize: media.fileSize.toString() };
+    return {
+      ...media,
+      id: media.id.toString(),
+      fileSize: media.fileSize.toString(),
+    };
   }
 
   @Query(() => [MediaAttachmentModel], { name: 'mediaForObject' })

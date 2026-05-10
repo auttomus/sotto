@@ -12,16 +12,16 @@ export class AccountModel {
   displayName: string;
 
   @Field({ nullable: true })
-  major?: string;
+  major?: string | null;
 
   @Field({ nullable: true })
-  note?: string;
+  note?: string | null;
 
   @Field({ nullable: true })
-  avatarObjectKey?: string;
+  avatarObjectKey?: string | null;
 
   @Field({ nullable: true })
-  avatarUrl?: string; // Resolved: presigned/public URL
+  avatarUrl?: string | null; // Resolved: presigned/public URL
 
   @Field()
   followersCount: string; // BigInt as string
@@ -33,12 +33,12 @@ export class AccountModel {
   trustScore: number;
 
   @Field({ nullable: true })
-  schoolName?: string; // Resolved from relation
+  schoolName?: string | null; // Resolved from relation
 
   @Field()
   createdAt: Date;
 
   // Resolved field: apakah current user mengikuti akun ini
   @Field({ nullable: true })
-  isFollowing?: boolean;
+  isFollowing?: boolean | null;
 }

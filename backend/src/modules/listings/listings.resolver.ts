@@ -1,8 +1,11 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { ListingsService } from './listings.service';
 import { ListingModel } from './models/listing.model';
-import { CreateListingInput } from './dto/create-listing.input'; 
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { CreateListingInput } from './dto/create-listing.input';
+import {
+  CurrentUser,
+  type CurrentUserPayload,
+} from '../../common/decorators/current-user.decorator';
 
 @Resolver(() => ListingModel)
 export class ListingsResolver {
@@ -11,7 +14,7 @@ export class ListingsResolver {
   // Setara dengan POST /listings
   @Mutation(() => ListingModel)
   async createListing(
-    @CurrentUser() user: { userId: string; accountId: string },
+    @CurrentUser() user: CurrentUserPayload,
     @Args('input') input: CreateListingInput,
   ) {
     return this.listingsService.create(user.accountId, input);

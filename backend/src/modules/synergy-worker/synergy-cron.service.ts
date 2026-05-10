@@ -44,7 +44,7 @@ export class SynergyCronService {
         if (logs.length === 0) continue;
 
         // Aggregate: hitung frekuensi interaksi per kategori tag
-        const categoryCounts = new Array(VECTOR_DIMENSIONS).fill(0);
+        const categoryCounts = new Array<number>(VECTOR_DIMENSIONS).fill(0);
         let totalCategorized = 0;
 
         for (const log of logs) {
@@ -66,7 +66,7 @@ export class SynergyCronService {
         const demandVector =
           totalCategorized > 0
             ? categoryCounts.map((c) => c / totalCategorized)
-            : new Array(VECTOR_DIMENSIONS).fill(0);
+            : new Array<number>(VECTOR_DIMENSIONS).fill(0);
 
         await this.vectorService.setDemandVector(
           account.id.toString(),

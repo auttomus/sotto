@@ -3,7 +3,10 @@ import { OrdersService } from './orders.service';
 import { ReviewsService } from './reviews.service';
 import { OrderModel, ReviewModel } from './models/order.model';
 import { CreateOrderInput } from './dto/create-order.input';
-import { CurrentUser, CurrentUserPayload } from '../../common/decorators/current-user.decorator';
+import {
+  CurrentUser,
+  type CurrentUserPayload,
+} from '../../common/decorators/current-user.decorator';
 import { OrderStatus } from '@prisma/client';
 
 @Resolver(() => OrderModel)
@@ -13,7 +16,7 @@ export class OrdersResolver {
     private readonly reviewsService: ReviewsService,
   ) {}
 
-  private serializeOrder(order: any): OrderModel {
+  private serializeOrder(order: import('@prisma/client').Order): OrderModel {
     return {
       id: order.id.toString(),
       buyerAccountId: order.buyerAccountId.toString(),

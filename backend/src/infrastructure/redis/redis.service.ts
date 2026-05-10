@@ -21,12 +21,11 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       retryStrategy: (times) => Math.min(times * 200, 2000),
     });
 
-    this.client.on('connect', () =>
-      this.logger.log('Terhubung ke Redis'),
-    );
+    this.client.on('connect', () => this.logger.log('Terhubung ke Redis'));
     this.client.on('error', (err) =>
       this.logger.error('Redis error:', err.message),
     );
+    await Promise.resolve();
   }
 
   async onModuleDestroy() {

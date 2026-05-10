@@ -3,7 +3,10 @@ import { AccountsService } from './accounts.service';
 import { FollowsService } from './follows.service';
 import { AccountModel } from './models/account.model';
 import { UpdateProfileInput } from './dto/update-profile.input';
-import { CurrentUser, CurrentUserPayload } from '../../common/decorators/current-user.decorator';
+import {
+  CurrentUser,
+  type CurrentUserPayload,
+} from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
 
 @Resolver(() => AccountModel)
@@ -13,7 +16,22 @@ export class AccountsResolver {
     private readonly followsService: FollowsService,
   ) {}
 
-  private serializeAccount(account: any, extra: Record<string, unknown> = {}): AccountModel {
+  private serializeAccount(
+    account: {
+      id: bigint;
+      username: string;
+      displayName: string;
+      major: string | null;
+      note: string | null;
+      avatarObjectKey: string | null;
+      followersCount: number | bigint;
+      followingCount: number | bigint;
+      trustScore: import('@prisma/client').Prisma.Decimal | number;
+      createdAt: Date;
+      school?: { name?: string | null } | null;
+    },
+    extra: Record<string, unknown> = {},
+  ): AccountModel {
     return {
       id: account.id.toString(),
       username: account.username,
@@ -27,12 +45,14 @@ export class AccountsResolver {
       schoolName: account.school?.name,
       createdAt: account.createdAt,
       ...extra,
-    } as AccountModel;
+    };
   }
 
   @Query(() => AccountModel, { name: 'myProfile' })
   async getMyProfile(@CurrentUser() user: CurrentUserPayload) {
-    const account = await this.accountsService.getProfileById(BigInt(user.accountId));
+    const account = await this.accountsService.getProfileById(
+      BigInt(user.accountId),
+    );
     return this.serializeAccount(account);
   }
 

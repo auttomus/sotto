@@ -10,9 +10,12 @@ export const CurrentUser = createParamDecorator(
   (data: unknown, ctx: ExecutionContext): CurrentUserPayload => {
     // GraphQL context: req lives inside GqlExecutionContext
     const gqlCtx = GqlExecutionContext.create(ctx);
-    const gqlReq = gqlCtx.getContext()?.req;
+    const context = gqlCtx.getContext<{
+      req?: { user?: CurrentUserPayload };
+    }>();
+    const gqlReq = context?.req;
     if (gqlReq?.user) {
-      return gqlReq.user as CurrentUserPayload;
+      return gqlReq.user;
     }
 
     // REST context: req lives on the HTTP layer

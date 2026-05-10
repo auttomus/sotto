@@ -62,7 +62,10 @@ export class FollowsService {
   }
 
   /** Cek apakah accountId mengikuti targetAccountId */
-  async isFollowing(accountId: bigint, targetAccountId: bigint): Promise<boolean> {
+  async isFollowing(
+    accountId: bigint,
+    targetAccountId: bigint,
+  ): Promise<boolean> {
     const follow = await this.prisma.follow.findUnique({
       where: {
         accountId_targetAccountId: { accountId, targetAccountId },
@@ -88,7 +91,10 @@ export class FollowsService {
    * Hitung jarak graf heuristik untuk Synergy Engine.
    * 0 = diri sendiri, 1 = mutual, 2 = follow sepihak, 3 = strangers.
    */
-  async computeGraphDistance(accountIdA: bigint, accountIdB: bigint): Promise<number> {
+  async computeGraphDistance(
+    accountIdA: bigint,
+    accountIdB: bigint,
+  ): Promise<number> {
     if (accountIdA === accountIdB) return 0;
     const follows = await this.prisma.follow.findMany({
       where: {

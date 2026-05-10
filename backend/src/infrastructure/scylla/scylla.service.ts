@@ -5,7 +5,7 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Client, types, mapping } from 'cassandra-driver';
+import { Client } from 'cassandra-driver';
 
 @Injectable()
 export class ScyllaService implements OnModuleInit, OnModuleDestroy {
@@ -76,9 +76,7 @@ export class ScyllaService implements OnModuleInit, OnModuleDestroy {
   }
 
   /** Eksekusi batch queries */
-  async batch(
-    queries: Array<{ query: string; params?: unknown[] }>,
-  ) {
+  async batch(queries: Array<{ query: string; params?: unknown[] }>) {
     return this.client.batch(queries, { prepare: true });
   }
 

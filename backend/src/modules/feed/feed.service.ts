@@ -7,7 +7,11 @@ export class FeedService {
   constructor(private readonly scylla: ScyllaService) {}
 
   /** Buat postingan baru di ScyllaDB */
-  async createPost(authorId: bigint, content: string, linkedServiceId?: bigint) {
+  async createPost(
+    authorId: bigint,
+    content: string,
+    linkedServiceId?: bigint,
+  ) {
     const postId = types.TimeUuid.now();
     const now = new Date();
 
@@ -34,7 +38,13 @@ export class FeedService {
     await this.scylla.execute(
       `INSERT INTO posts (post_id, author_id, in_reply_to_post_id, content, created_at)
        VALUES (?, ?, ?, ?, ?)`,
-      [commentId, authorId, types.TimeUuid.fromString(parentPostId), content, now],
+      [
+        commentId,
+        authorId,
+        types.TimeUuid.fromString(parentPostId),
+        content,
+        now,
+      ],
     );
 
     return {
@@ -81,11 +91,18 @@ export class FeedService {
        WHERE user_id = ? ORDER BY post_id DESC LIMIT ?`,
       [userId, limit],
     );
-    return result.rows.map((row) => ({
-      postId: row['post_id'].toString(),
-      authorId: row['author_id'].toString(),
-      createdAt: row['created_at'],
-    }));
+    return result.rows.map((row) => {
+      const r = row as unknown as {
+        post_id: { toString(): string };
+        author_id: { toString(): string };
+        created_at: Date;
+      };
+      return {
+        postId: r.post_id.toString(),
+        authorId: r.author_id.toString(),
+        createdAt: r.created_at,
+      };
+    });
   }
 
   /** Ambil detail post berdasarkan ID */
@@ -95,14 +112,21 @@ export class FeedService {
       [types.TimeUuid.fromString(postId)],
     );
     if (result.rows.length === 0) return null;
-    const row = result.rows[0];
+    const row = result.rows[0] as unknown as {
+      post_id: { toString(): string };
+      author_id: { toString(): string };
+      in_reply_to_post_id?: { toString(): string } | null;
+      content: string;
+      linked_service_id?: { toString(): string } | null;
+      created_at: Date;
+    };
     return {
-      postId: row['post_id'].toString(),
-      authorId: row['author_id'].toString(),
-      inReplyToPostId: row['in_reply_to_post_id']?.toString() ?? null,
-      content: row['content'],
-      linkedServiceId: row['linked_service_id']?.toString() ?? null,
-      createdAt: row['created_at'],
+      postId: row.post_id.toString(),
+      authorId: row.author_id.toString(),
+      inReplyToPostId: row.in_reply_to_post_id?.toString() ?? null,
+      content: row.content,
+      linkedServiceId: row.linked_service_id?.toString() ?? null,
+      createdAt: row.created_at,
     };
   }
 
@@ -114,13 +138,23 @@ export class FeedService {
       `SELECT * FROM posts WHERE post_id IN ?`,
       [timeUuids],
     );
-    return result.rows.map((row) => ({
-      postId: row['post_id'].toString(),
-      authorId: row['author_id'].toString(),
-      inReplyToPostId: row['in_reply_to_post_id']?.toString() ?? null,
-      content: row['content'],
-      linkedServiceId: row['linked_service_id']?.toString() ?? null,
-      createdAt: row['created_at'],
-    }));
+    return result.rows.map((row) => {
+      const r = row as unknown as {
+        post_id: { toString(): string };
+        author_id: { toString(): string };
+        in_reply_to_post_id?: { toString(): string } | null;
+        content: string;
+        linked_service_id?: { toString(): string } | null;
+        created_at: Date;
+      };
+      return {
+        postId: r.post_id.toString(),
+        authorId: r.author_id.toString(),
+        inReplyToPostId: r.in_reply_to_post_id?.toString() ?? null,
+        content: r.content,
+        linkedServiceId: r.linked_service_id?.toString() ?? null,
+        createdAt: r.created_at,
+      };
+    });
   }
 }

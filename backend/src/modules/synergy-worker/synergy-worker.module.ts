@@ -6,7 +6,12 @@ import { SynergyModule } from '../synergy/synergy.module';
 import { TagsModule } from '../tags/tags.module';
 
 @Module({
-  imports: [ScheduleModule.forRoot(), AnalyticsModule, SynergyModule, TagsModule],
+  imports: [
+    ScheduleModule.forRoot(),
+    AnalyticsModule,
+    SynergyModule,
+    TagsModule,
+  ],
   providers: [SynergyCronService],
 })
 export class SynergyWorkerModule {}

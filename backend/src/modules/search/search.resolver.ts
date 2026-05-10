@@ -43,7 +43,8 @@ export class SearchResolver {
       followersCount: a.followersCount.toString(),
       followingCount: a.followingCount.toString(),
       trustScore: Number(a.trustScore),
-      schoolName: (a as any).school?.name,
+      schoolName: (a as { school?: { name?: string | null } | null }).school
+        ?.name,
       createdAt: a.createdAt,
     }));
   }

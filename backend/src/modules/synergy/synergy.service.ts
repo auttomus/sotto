@@ -99,10 +99,7 @@ export class SynergyService {
    * C(u_i, p_j) = d_i^T · M · s_j / (||d_i|| · ||M·s_j||)
    * Modified cosine similarity melalui matriks komplementaritas.
    */
-  private computeComplementarity(
-    demand: number[],
-    supply: number[],
-  ): number {
+  private computeComplementarity(demand: number[], supply: number[]): number {
     const M = COMPLEMENTARITY_MATRIX;
 
     // M·s_j (matrix-vector multiplication)

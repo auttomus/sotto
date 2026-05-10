@@ -6,11 +6,7 @@ export class AnalyticsService {
   constructor(private readonly scylla: ScyllaService) {}
 
   /** Catat interaksi user. Fire-and-forget. */
-  async trackEvent(
-    userId: bigint,
-    actionType: string,
-    targetId: string,
-  ) {
+  async trackEvent(userId: bigint, actionType: string, targetId: string) {
     await this.scylla.execute(
       `INSERT INTO interaction_logs (user_id, interaction_time, action_type, target_id)
        VALUES (?, ?, ?, ?)`,

@@ -21,8 +21,8 @@ export class PrismaExceptionFilter implements ExceptionFilter {
     const { status, message } = this.mapPrismaError(exception);
 
     // Deteksi konteks: GraphQL atau HTTP
-    const hostType = host.getType() as string;
-    if (hostType === 'graphql') {
+    const hostType = host.getType();
+    if ((hostType as string) === 'graphql') {
       // Lempar HttpException agar NestJS GraphQL layer menanganinya
       throw new HttpException(message, status);
     }

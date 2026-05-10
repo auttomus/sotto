@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { TagsService } from './tags.service';
 import { TagModel } from './models/tag.model';
 import { Public } from '../../common/decorators/public.decorator';

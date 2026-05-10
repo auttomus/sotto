@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  Logger,
-  OnModuleInit,
-} from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as Minio from 'minio';
 
@@ -81,9 +77,9 @@ export class MinioService implements OnModuleInit {
    * Contoh: avatar, thumbnail listing.
    */
   getPublicUrl(objectKey: string): string {
-    const endpoint = this.config.get('MINIO_ENDPOINT', 'localhost');
-    const port = this.config.get('MINIO_PORT', '9000');
-    const ssl = this.config.get('MINIO_USE_SSL', 'false') === 'true';
+    const endpoint = this.config.get<string>('MINIO_ENDPOINT', 'localhost');
+    const port = this.config.get<string>('MINIO_PORT', '9000');
+    const ssl = this.config.get<string>('MINIO_USE_SSL', 'false') === 'true';
     const protocol = ssl ? 'https' : 'http';
     return `${protocol}://${endpoint}:${port}/${this.bucketPublic}/${objectKey}`;
   }

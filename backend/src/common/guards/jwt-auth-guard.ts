@@ -14,13 +14,14 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
    * Override getRequest agar Passport bisa mengekstrak JWT
    * dari request baik di konteks REST maupun GraphQL.
    */
-  getRequest(context: ExecutionContext) {
-    const ctxType = context.getType() as string;
-    if (ctxType === 'graphql') {
+  getRequest(context: ExecutionContext): Request {
+    const ctxType = context.getType();
+    if ((ctxType as string) === 'graphql') {
       const gqlCtx = GqlExecutionContext.create(context);
-      return gqlCtx.getContext().req;
+      const ctx = gqlCtx.getContext<{ req: Request }>();
+      return ctx.req;
     }
-    return context.switchToHttp().getRequest();
+    return context.switchToHttp().getRequest<Request>();
   }
 
   canActivate(context: ExecutionContext) {

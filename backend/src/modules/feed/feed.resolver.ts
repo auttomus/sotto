@@ -2,7 +2,10 @@ import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { FeedService } from './feed.service';
 import { PostModel } from './models/post.model';
 import { CreatePostInput } from './dto/create-post.input';
-import { CurrentUser, CurrentUserPayload } from '../../common/decorators/current-user.decorator';
+import {
+  CurrentUser,
+  type CurrentUserPayload,
+} from '../../common/decorators/current-user.decorator';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TagsService } from '../tags/tags.service';
 
@@ -53,7 +56,7 @@ export class FeedResolver {
   async getFeed(
     @CurrentUser() user: CurrentUserPayload,
     @Args('limit', { type: () => Int, defaultValue: 20 }) limit: number,
-  ) {
+  ): Promise<PostModel[]> {
     const feedItems = await this.feedService.getUserFeed(
       BigInt(user.accountId),
       Math.min(limit, 50),

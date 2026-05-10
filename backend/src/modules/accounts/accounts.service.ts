@@ -31,10 +31,14 @@ export class AccountsService {
     return this.prisma.account.update({
       where: { id: accountId },
       data: {
-        ...(input.displayName !== undefined && { displayName: input.displayName }),
+        ...(input.displayName !== undefined && {
+          displayName: input.displayName,
+        }),
         ...(input.note !== undefined && { note: input.note }),
         ...(input.major !== undefined && { major: input.major }),
-        ...(input.avatarObjectKey !== undefined && { avatarObjectKey: input.avatarObjectKey }),
+        ...(input.avatarObjectKey !== undefined && {
+          avatarObjectKey: input.avatarObjectKey,
+        }),
       },
       include: { school: { select: { name: true } } },
     });

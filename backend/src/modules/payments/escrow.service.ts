@@ -12,6 +12,7 @@ export class EscrowService {
   async holdFunds(orderId: bigint, amount: number): Promise<void> {
     this.logger.log(`Escrow HOLD: Order ${orderId}, Rp ${amount}`);
     // TODO: Integrasi dengan payment gateway / internal ledger
+    await Promise.resolve();
   }
 
   /** Lepaskan dana ke seller setelah order completed */
@@ -20,6 +21,7 @@ export class EscrowService {
       `Escrow RELEASE: Order ${orderId} → Seller ${sellerAccountId}`,
     );
     // TODO: Transfer dana dari escrow ke wallet seller
+    await Promise.resolve();
   }
 
   /** Refund ke buyer jika order dibatalkan */
@@ -28,5 +30,6 @@ export class EscrowService {
       `Escrow REFUND: Order ${orderId} → Buyer ${buyerAccountId}`,
     );
     // TODO: Refund ke payment method buyer
+    await Promise.resolve();
   }
 }

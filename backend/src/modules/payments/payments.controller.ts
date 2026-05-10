@@ -17,6 +17,7 @@ export class PaymentsController {
     // TODO: Implementasi validasi signature Midtrans
     // TODO: Update status order berdasarkan transaction_status
     // TODO: Trigger escrow release / instant transfer for digital products
+    await Promise.resolve();
 
     return { received: true };
   }

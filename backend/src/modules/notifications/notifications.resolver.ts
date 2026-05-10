@@ -1,7 +1,10 @@
 import { Resolver, Query, Mutation, Args, ID, Int } from '@nestjs/graphql';
 import { NotificationsService } from './notifications.service';
 import { NotificationModel } from './models/notification.model';
-import { CurrentUser, CurrentUserPayload } from '../../common/decorators/current-user.decorator';
+import {
+  CurrentUser,
+  type CurrentUserPayload,
+} from '../../common/decorators/current-user.decorator';
 
 @Resolver(() => NotificationModel)
 export class NotificationsResolver {
@@ -11,7 +14,8 @@ export class NotificationsResolver {
   async getNotifications(
     @CurrentUser() user: CurrentUserPayload,
     @Args('cursor', { nullable: true }) cursor?: string,
-    @Args('take', { type: () => Int, defaultValue: 20, nullable: true }) take?: number,
+    @Args('take', { type: () => Int, defaultValue: 20, nullable: true })
+    take?: number,
   ) {
     const results = await this.notificationsService.getNotifications(
       BigInt(user.accountId),
@@ -22,7 +26,9 @@ export class NotificationsResolver {
       ...n,
       id: n.id.toString(),
       fromAccountId: n.fromAccountId?.toString(),
-      fromDisplayName: (n as any).fromAccount?.displayName,
+      fromDisplayName: (
+        n as { fromAccount?: { displayName?: string | null } | null }
+      ).fromAccount?.displayName,
     }));
   }
 

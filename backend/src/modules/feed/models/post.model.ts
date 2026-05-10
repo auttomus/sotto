@@ -9,27 +9,27 @@ export class PostModel {
   authorId: string;
 
   @Field({ nullable: true })
-  inReplyToPostId?: string;
+  inReplyToPostId?: string | null;
 
   @Field()
   content: string;
 
   @Field({ nullable: true })
-  linkedServiceId?: string;
+  linkedServiceId?: string | null;
 
   @Field()
   createdAt: Date;
 
   // Resolved fields from PostgreSQL
   @Field({ nullable: true })
-  authorDisplayName?: string;
+  authorDisplayName?: string | null;
 
   @Field({ nullable: true })
-  authorUsername?: string;
+  authorUsername?: string | null;
 
   @Field({ nullable: true })
-  authorAvatarObjectKey?: string;
+  authorAvatarObjectKey?: string | null;
 
   @Field({ nullable: true })
-  authorSchoolName?: string;
+  authorSchoolName?: string | null;
 }

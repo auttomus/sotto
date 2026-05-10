@@ -1,12 +1,17 @@
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
 import { AnalyticsService } from './analytics.service';
-import { CurrentUser, CurrentUserPayload } from '../../common/decorators/current-user.decorator';
+import {
+  CurrentUser,
+  type CurrentUserPayload,
+} from '../../common/decorators/current-user.decorator';
 
 @Resolver()
 export class AnalyticsResolver {
   constructor(private readonly analyticsService: AnalyticsService) {}
 
-  @Mutation(() => Boolean, { description: 'Catat interaksi user (view, click, like)' })
+  @Mutation(() => Boolean, {
+    description: 'Catat interaksi user (view, click, like)',
+  })
   async trackEvent(
     @CurrentUser() user: CurrentUserPayload,
     @Args('actionType') actionType: string,

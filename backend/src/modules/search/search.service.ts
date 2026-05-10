@@ -3,7 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class SearchService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   /** Pencarian listing berdasarkan query teks dan filter opsional */
   async searchListings(query: string, tagIds?: bigint[]) {
@@ -19,20 +19,20 @@ export class SearchService {
           },
           ...(tagIds?.length
             ? [
-              {
-                id: {
-                  in: (
-                    await this.prisma.taggedObject.findMany({
-                      where: {
-                        tagId: { in: tagIds },
-                        objectType: 'Listing',
-                      },
-                      select: { objectId: true },
-                    })
-                  ).map((to) => BigInt(to.objectId)),
+                {
+                  id: {
+                    in: (
+                      await this.prisma.taggedObject.findMany({
+                        where: {
+                          tagId: { in: tagIds },
+                          objectType: 'Listing',
+                        },
+                        select: { objectId: true },
+                      })
+                    ).map((to) => BigInt(to.objectId)),
+                  },
                 },
-              },
-            ]
+              ]
             : []),
         ],
       },

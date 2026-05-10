@@ -97,7 +97,9 @@ export class OrdersService {
       throw new ForbiddenException('Akses ditolak.');
     }
     if (order.status === OrderStatus.COMPLETED) {
-      throw new BadRequestException('Order yang sudah selesai tidak bisa dibatalkan.');
+      throw new BadRequestException(
+        'Order yang sudah selesai tidak bisa dibatalkan.',
+      );
     }
 
     return this.prisma.order.update({

@@ -19,7 +19,7 @@ export class VectorService {
    */
   async buildSupplyVector(postId: string): Promise<number[]> {
     const tags = await this.tagsService.getTagsForObject(postId, 'ScyllaPost');
-    const vector = new Array(VECTOR_DIMENSIONS).fill(0);
+    const vector = new Array<number>(VECTOR_DIMENSIONS).fill(0);
 
     let matchCount = 0;
     for (const tag of tags) {
@@ -49,7 +49,7 @@ export class VectorService {
       `user:${accountId}:demand`,
     );
     // Default: vektor nol (user baru tanpa riwayat interaksi)
-    return cached ?? new Array(VECTOR_DIMENSIONS).fill(0);
+    return cached ?? new Array<number>(VECTOR_DIMENSIONS).fill(0);
   }
 
   /** Simpan vektor demand ke Redis cache */
