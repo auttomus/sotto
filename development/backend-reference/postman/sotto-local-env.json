@@ -9,9 +9,39 @@
       "enabled": true
     },
     {
+      "key": "gql_url",
+      "value": "http://localhost:3000/graphql",
+      "type": "default",
+      "enabled": true
+    },
+    {
       "key": "jwt_token",
       "value": "",
       "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "account_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "listing_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "order_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "conversation_id",
+      "value": "",
+      "type": "default",
       "enabled": true
     }
   ]

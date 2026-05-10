@@ -23,8 +23,9 @@ export class AccountModel {
   @Field({ nullable: true })
   avatarUrl?: string | null; // Resolved: presigned/public URL
 
+  /** BigInt serialized to string */
   @Field()
-  followersCount: string; // BigInt as string
+  followersCount: string;
 
   @Field()
   followingCount: string;
@@ -37,6 +38,9 @@ export class AccountModel {
 
   @Field()
   createdAt: Date;
+
+  @Field()
+  updatedAt: Date;
 
   // Resolved field: apakah current user mengikuti akun ini
   @Field({ nullable: true })

@@ -105,6 +105,7 @@ export class OrdersResolver {
       orderId: review.orderId.toString(),
       reviewerAccountId: review.reviewerAccountId.toString(),
       targetAccountId: review.targetAccountId.toString(),
+      comment: review.comment ?? undefined,
     };
   }
 }

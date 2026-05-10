@@ -12,11 +12,17 @@ export class SchoolModel {
   name: string;
 
   @Field({ nullable: true })
-  domain?: string;
+  domain?: string | null;
 
   @Field({ nullable: true })
-  city?: string;
+  city?: string | null;
 
   @Field()
   isVerified: boolean;
+
+  @Field()
+  createdAt: Date;
+
+  @Field()
+  updatedAt: Date;
 }

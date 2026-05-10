@@ -3,6 +3,7 @@ import {
   Field,
   ID,
   Float,
+  Int,
   registerEnumType,
 } from '@nestjs/graphql';
 import { OrderStatus } from '@prisma/client';
@@ -24,7 +25,7 @@ export class OrderModel {
   listingId: string;
 
   @Field({ nullable: true })
-  customOfferId?: string;
+  customOfferId?: string | null;
 
   @Field(() => Float)
   agreedPrice: number;
@@ -53,12 +54,15 @@ export class ReviewModel {
   @Field()
   targetAccountId: string;
 
-  @Field()
+  @Field(() => Int)
   rating: number;
 
   @Field({ nullable: true })
-  comment?: string;
+  comment?: string | null;
 
   @Field()
   createdAt: Date;
+
+  @Field()
+  updatedAt: Date;
 }

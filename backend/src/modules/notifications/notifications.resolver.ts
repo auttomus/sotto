@@ -25,10 +25,11 @@ export class NotificationsResolver {
     return results.map((n) => ({
       ...n,
       id: n.id.toString(),
-      fromAccountId: n.fromAccountId?.toString(),
-      fromDisplayName: (
-        n as { fromAccount?: { displayName?: string | null } | null }
-      ).fromAccount?.displayName,
+      accountId: n.accountId.toString(),
+      fromAccountId: n.fromAccountId?.toString() ?? null,
+      fromDisplayName:
+        (n as { fromAccount?: { displayName?: string | null } | null })
+          .fromAccount?.displayName ?? null,
     }));
   }
 

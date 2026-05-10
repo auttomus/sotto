@@ -28,6 +28,7 @@ export class AccountsResolver {
       followingCount: number | bigint;
       trustScore: import('@prisma/client').Prisma.Decimal | number;
       createdAt: Date;
+      updatedAt: Date;
       school?: { name?: string | null } | null;
     },
     extra: Record<string, unknown> = {},
@@ -44,6 +45,7 @@ export class AccountsResolver {
       trustScore: Number(account.trustScore),
       schoolName: account.school?.name,
       createdAt: account.createdAt,
+      updatedAt: account.updatedAt,
       ...extra,
     };
   }

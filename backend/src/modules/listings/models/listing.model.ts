@@ -1,23 +1,37 @@
-import { ObjectType, Field, ID, Float } from '@nestjs/graphql';
+import {
+  ObjectType,
+  Field,
+  ID,
+  Float,
+  Int,
+  registerEnumType,
+} from '@nestjs/graphql';
+import { ListingType, ListingStatus } from '@prisma/client';
 
-// Model untuk Relasi Profil Penjual
+registerEnumType(ListingType, { name: 'ListingType' });
+registerEnumType(ListingStatus, { name: 'ListingStatus' });
+
+// Model untuk Relasi Profil Penjual (ringkas)
 @ObjectType()
 export class AccountPartial {
   @Field()
   displayName: string;
 
   @Field({ nullable: true })
-  major?: string;
+  major?: string | null;
 
   @Field(() => Float)
   trustScore: number;
+
+  @Field({ nullable: true })
+  username?: string | null;
 }
 
 // Model Utama Listing
 @ObjectType()
 export class ListingModel {
   @Field(() => ID)
-  id: string; // BigInt dari Prisma akan dilempar ke mari sebagai String
+  id: string;
 
   @Field()
   title: string;
@@ -26,14 +40,32 @@ export class ListingModel {
   description: string;
 
   @Field(() => Float)
-  price: number; // Decimal dari Prisma akan diubah jadi angka biasa (Float)
+  price: number;
+
+  @Field(() => ListingType)
+  type: ListingType;
+
+  @Field(() => ListingStatus)
+  status: ListingStatus;
+
+  @Field(() => Int, { nullable: true })
+  deliveryTimeDays?: number | null;
+
+  @Field(() => Int, { nullable: true })
+  maxActiveOrders?: number | null;
+
+  @Field()
+  isUnlimited: boolean;
 
   @Field(() => ID)
   accountId: string;
 
   @Field(() => AccountPartial, { nullable: true })
-  account?: AccountPartial;
+  account?: AccountPartial | null;
 
   @Field()
   createdAt: Date;
+
+  @Field()
+  updatedAt: Date;
 }

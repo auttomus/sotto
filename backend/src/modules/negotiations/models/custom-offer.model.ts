@@ -3,6 +3,7 @@ import {
   Field,
   ID,
   Float,
+  Int,
   registerEnumType,
 } from '@nestjs/graphql';
 import { OfferStatus } from '@prisma/client';
@@ -23,8 +24,9 @@ export class CustomOfferModel {
   @Field()
   buyerAccountId: string;
 
+  /** Optional: which listing this offer is based on */
   @Field({ nullable: true })
-  listingId?: string;
+  listingId?: string | null;
 
   @Field()
   description: string;
@@ -32,15 +34,18 @@ export class CustomOfferModel {
   @Field(() => Float)
   proposedPrice: number;
 
-  @Field()
+  @Field(() => Int)
   deliveryTimeDays: number;
 
   @Field(() => OfferStatus)
   status: OfferStatus;
 
   @Field({ nullable: true })
-  expiresAt?: Date;
+  expiresAt?: Date | null;
 
   @Field()
   createdAt: Date;
+
+  @Field()
+  updatedAt: Date;
 }

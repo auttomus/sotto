@@ -8,14 +8,20 @@ export class NotificationModel {
   @Field(() => ID)
   id: string;
 
+  /** ID of the user who receives this notification */
+  @Field(() => ID)
+  accountId: string;
+
   @Field(() => NotificationType)
   type: NotificationType;
 
+  /** Polymorphic target type: "ScyllaPost", "Order", "Listing", etc. */
   @Field({ nullable: true })
-  targetType?: string;
+  targetType?: string | null;
 
+  /** Polymorphic target ID */
   @Field({ nullable: true })
-  targetId?: string;
+  targetId?: string | null;
 
   @Field()
   isRead: boolean;
@@ -23,10 +29,11 @@ export class NotificationModel {
   @Field()
   createdAt: Date;
 
+  /** ID of the account that triggered this notification (optional) */
   @Field({ nullable: true })
-  fromAccountId?: string;
+  fromAccountId?: string | null;
 
-  // Resolved field: display name dari pengirim
+  /** Resolved: display name of the triggering account */
   @Field({ nullable: true })
-  fromDisplayName?: string;
+  fromDisplayName?: string | null;
 }
