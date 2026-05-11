@@ -11,16 +11,16 @@ export class AccountModel {
   @Field()
   displayName: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   major?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   note?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   avatarObjectKey?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   avatarUrl?: string | null; // Resolved: presigned/public URL
 
   /** BigInt serialized to string */
@@ -33,7 +33,7 @@ export class AccountModel {
   @Field(() => Float)
   trustScore: number;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   schoolName?: string | null; // Resolved from relation
 
   @Field()
@@ -43,6 +43,6 @@ export class AccountModel {
   updatedAt: Date;
 
   // Resolved field: apakah current user mengikuti akun ini
-  @Field({ nullable: true })
+  @Field(() => Boolean, { nullable: true })
   isFollowing?: boolean | null;
 }

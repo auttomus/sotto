@@ -18,7 +18,7 @@ export class RequestUploadInput {
   @IsNotEmpty()
   attachedType: string; // "Listing", "ScyllaPost", "ScyllaMessage", "Avatar"
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
   attachedId?: string;

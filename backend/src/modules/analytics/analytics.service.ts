@@ -10,7 +10,7 @@ export class AnalyticsService {
     await this.scylla.execute(
       `INSERT INTO interaction_logs (user_id, interaction_time, action_type, target_id)
        VALUES (?, ?, ?, ?)`,
-      [userId, new Date(), actionType, targetId],
+      [userId.toString(), new Date(), actionType, targetId],
     );
   }
 
@@ -20,7 +20,7 @@ export class AnalyticsService {
     const result = await this.scylla.execute(
       `SELECT action_type, target_id, interaction_time FROM interaction_logs
        WHERE user_id = ? AND interaction_time >= ? ORDER BY interaction_time DESC`,
-      [userId, since],
+      [userId.toString(), since],
     );
     return result.rows.map((row) => ({
       actionType: row['action_type'] as string,

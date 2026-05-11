@@ -11,10 +11,10 @@ export class SchoolModel {
   @Field()
   name: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   domain?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   city?: string | null;
 
   @Field()

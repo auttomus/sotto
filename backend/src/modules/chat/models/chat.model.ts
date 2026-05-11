@@ -22,10 +22,10 @@ export class ConversationModel {
   participants?: ConversationParticipant[];
 
   // Resolved: pesan terakhir untuk preview
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   lastMessageContent?: string;
 
-  @Field({ nullable: true })
+  @Field(() => Date, { nullable: true })
   lastMessageAt?: Date;
 }
 
@@ -37,7 +37,7 @@ export class ConversationParticipant {
   @Field()
   displayName: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   avatarObjectKey?: string;
 }
 
@@ -59,9 +59,9 @@ export class MessageModel {
   createdAt: Date;
 
   // Resolved from PostgreSQL
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   senderDisplayName?: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   senderAvatarObjectKey?: string;
 }

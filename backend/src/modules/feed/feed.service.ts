@@ -18,7 +18,13 @@ export class FeedService {
     await this.scylla.execute(
       `INSERT INTO posts (post_id, author_id, content, linked_service_id, created_at)
        VALUES (?, ?, ?, ?, ?)`,
-      [postId, authorId, content, linkedServiceId ?? null, now],
+      [
+        postId,
+        authorId.toString(),
+        content,
+        linkedServiceId ? linkedServiceId.toString() : null,
+        now,
+      ],
     );
 
     return {
@@ -40,7 +46,7 @@ export class FeedService {
        VALUES (?, ?, ?, ?, ?)`,
       [
         commentId,
-        authorId,
+        authorId.toString(),
         types.TimeUuid.fromString(parentPostId),
         content,
         now,
@@ -67,13 +73,13 @@ export class FeedService {
 
     const queries = followerIds.map((followerId) => ({
       query: `INSERT INTO user_feeds (user_id, post_id, author_id, created_at) VALUES (?, ?, ?, ?)`,
-      params: [followerId, timeUuid, authorId, now],
+      params: [followerId.toString(), timeUuid, authorId.toString(), now],
     }));
 
     // Juga masukkan ke timeline author sendiri
     queries.push({
       query: `INSERT INTO user_feeds (user_id, post_id, author_id, created_at) VALUES (?, ?, ?, ?)`,
-      params: [authorId, timeUuid, authorId, now],
+      params: [authorId.toString(), timeUuid, authorId.toString(), now],
     });
 
     if (queries.length > 0) {
@@ -89,7 +95,7 @@ export class FeedService {
     const result = await this.scylla.execute(
       `SELECT post_id, author_id, created_at FROM user_feeds
        WHERE user_id = ? ORDER BY post_id DESC LIMIT ?`,
-      [userId, limit],
+      [userId.toString(), limit],
     );
     return result.rows.map((row) => {
       const r = row as unknown as {

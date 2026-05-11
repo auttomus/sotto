@@ -116,7 +116,13 @@ export class ChatService {
     await this.scylla.execute(
       `INSERT INTO messages (conversation_id, message_id, sender_id, content, created_at)
        VALUES (?, ?, ?, ?, ?)`,
-      [conversationId, messageId, senderAccountId, content, now],
+      [
+        conversationId.toString(),
+        messageId,
+        senderAccountId.toString(),
+        content,
+        now,
+      ],
     );
 
     // Update timestamp conversation di PostgreSQL
@@ -143,7 +149,7 @@ export class ChatService {
       `SELECT message_id, sender_id, content, created_at
        FROM messages WHERE conversation_id = ?
        ORDER BY message_id DESC LIMIT ?`,
-      [conversationId, limit],
+      [conversationId.toString(), limit],
     );
 
     return result.rows.map((row) => ({

@@ -16,11 +16,11 @@ export class NotificationModel {
   type: NotificationType;
 
   /** Polymorphic target type: "ScyllaPost", "Order", "Listing", etc. */
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   targetType?: string | null;
 
   /** Polymorphic target ID */
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   targetId?: string | null;
 
   @Field()
@@ -30,10 +30,10 @@ export class NotificationModel {
   createdAt: Date;
 
   /** ID of the account that triggered this notification (optional) */
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   fromAccountId?: string | null;
 
   /** Resolved: display name of the triggering account */
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   fromDisplayName?: string | null;
 }

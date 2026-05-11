@@ -23,7 +23,7 @@ export class MediaAttachmentModel {
   @Field()
   fileSize: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   blurhash?: string | null;
 
   @Field()
@@ -36,7 +36,7 @@ export class MediaAttachmentModel {
   isPrivate: boolean;
 
   /** Resolved at query time: presigned URL (private) or public CDN URL */
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   url?: string | null;
 
   @Field()

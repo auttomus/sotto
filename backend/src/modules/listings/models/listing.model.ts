@@ -17,13 +17,13 @@ export class AccountPartial {
   @Field()
   displayName: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   major?: string | null;
 
   @Field(() => Float)
   trustScore: number;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   username?: string | null;
 }
 

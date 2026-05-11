@@ -25,7 +25,7 @@ export class CustomOfferModel {
   buyerAccountId: string;
 
   /** Optional: which listing this offer is based on */
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   listingId?: string | null;
 
   @Field()
@@ -40,7 +40,7 @@ export class CustomOfferModel {
   @Field(() => OfferStatus)
   status: OfferStatus;
 
-  @Field({ nullable: true })
+  @Field(() => Date, { nullable: true })
   expiresAt?: Date | null;
 
   @Field()

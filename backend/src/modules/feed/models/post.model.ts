@@ -8,28 +8,28 @@ export class PostModel {
   @Field()
   authorId: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   inReplyToPostId?: string | null;
 
   @Field()
   content: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   linkedServiceId?: string | null;
 
   @Field()
   createdAt: Date;
 
   // Resolved fields from PostgreSQL
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   authorDisplayName?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   authorUsername?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   authorAvatarObjectKey?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   authorSchoolName?: string | null;
 }

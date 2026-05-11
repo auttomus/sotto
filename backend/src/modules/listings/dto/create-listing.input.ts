@@ -45,7 +45,7 @@ export class CreateListingInput {
   @Min(1)
   maxActiveOrders?: number;
 
-  @Field({ nullable: true, defaultValue: false })
+  @Field(() => Boolean, { nullable: true, defaultValue: false })
   @IsOptional()
   @IsBoolean()
   isUnlimited?: boolean;

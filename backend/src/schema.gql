@@ -1,0 +1,327 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type AccountModel {
+  avatarObjectKey: String
+  avatarUrl: String
+  createdAt: DateTime!
+  displayName: String!
+  followersCount: String!
+  followingCount: String!
+  id: ID!
+  isFollowing: Boolean
+  major: String
+  note: String
+  schoolName: String
+  trustScore: Float!
+  updatedAt: DateTime!
+  username: String!
+}
+
+type AccountPartial {
+  displayName: String!
+  major: String
+  trustScore: Float!
+  username: String
+}
+
+type ConversationModel {
+  createdAt: DateTime!
+  id: ID!
+  lastMessageAt: DateTime
+  lastMessageContent: String
+  participants: [ConversationParticipant!]
+  type: ConversationType!
+  updatedAt: DateTime!
+}
+
+type ConversationParticipant {
+  accountId: ID!
+  avatarObjectKey: String
+  displayName: String!
+}
+
+enum ConversationType {
+  DIRECT
+  GROUP
+  ORDER
+}
+
+input CreateConversationInput {
+  participantIds: [ID!]!
+  type: String! = "DIRECT"
+}
+
+input CreateListingInput {
+  basePrice: Float!
+  deliveryTimeDays: Int
+  description: String!
+  isUnlimited: Boolean = false
+  maxActiveOrders: Int
+  tagIds: [ID!]
+  title: String!
+  type: String! = "SERVICE"
+}
+
+input CreateOfferInput {
+  buyerAccountId: ID!
+  conversationId: ID!
+  deliveryTimeDays: Int!
+  description: String!
+  listingId: ID
+  proposedPrice: Float!
+}
+
+input CreateOrderInput {
+  agreedPrice: Float!
+  customOfferId: ID
+  listingId: ID!
+}
+
+input CreatePostInput {
+  content: String!
+  linkedServiceId: ID
+  tagIds: [ID!]
+}
+
+type CustomOfferModel {
+  buyerAccountId: String!
+  conversationId: String!
+  createdAt: DateTime!
+  deliveryTimeDays: Int!
+  description: String!
+  expiresAt: DateTime
+  id: ID!
+  listingId: String
+  proposedPrice: Float!
+  sellerAccountId: String!
+  status: OfferStatus!
+  updatedAt: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type ListingModel {
+  account: AccountPartial
+  accountId: ID!
+  createdAt: DateTime!
+  deliveryTimeDays: Int
+  description: String!
+  id: ID!
+  isUnlimited: Boolean!
+  maxActiveOrders: Int
+  price: Float!
+  status: ListingStatus!
+  title: String!
+  type: ListingType!
+  updatedAt: DateTime!
+}
+
+enum ListingStatus {
+  ACTIVE
+  ARCHIVED
+  DRAFT
+  PAUSED
+}
+
+enum ListingType {
+  DIGITAL_PRODUCT
+  SERVICE
+}
+
+type MediaAttachmentModel {
+  attachedId: String!
+  attachedType: String!
+  blurhash: String
+  bucketName: String!
+  contentType: String!
+  createdAt: DateTime!
+  fileName: String!
+  fileSize: String!
+  id: ID!
+  isPrivate: Boolean!
+  objectKey: String!
+  url: String
+}
+
+type MessageModel {
+  content: String!
+  conversationId: String!
+  createdAt: DateTime!
+  messageId: String!
+  senderAvatarObjectKey: String
+  senderDisplayName: String
+  senderId: String!
+}
+
+type Mutation {
+  acceptOffer(offerId: ID!): CustomOfferModel!
+  advanceOrderStatus(orderId: ID!): OrderModel!
+  cancelOrder(orderId: ID!): OrderModel!
+  confirmUpload(input: RequestUploadInput!, objectKey: String!): MediaAttachmentModel!
+  createConversation(input: CreateConversationInput!): ConversationModel!
+  createListing(input: CreateListingInput!): ListingModel!
+  createOffer(input: CreateOfferInput!): CustomOfferModel!
+  createOrder(input: CreateOrderInput!): OrderModel!
+  createPost(input: CreatePostInput!): PostModel!
+  createReview(comment: String, orderId: ID!, rating: Float!): ReviewModel!
+  createTag(name: String!): TagModel!
+  deleteListing(id: ID!): Boolean!
+  deleteMedia(id: ID!): Boolean!
+  follow(targetAccountId: ID!): Boolean!
+  markAllNotificationsAsRead: Boolean!
+  markNotificationAsRead(id: ID!): Boolean!
+  rejectOffer(offerId: ID!): CustomOfferModel!
+  requestUploadUrl(input: RequestUploadInput!): PresignedUploadResult!
+
+  """Catat interaksi user (view, click, like)"""
+  trackEvent(actionType: String!, targetId: String!): Boolean!
+  unfollow(targetAccountId: ID!): Boolean!
+  updateListing(id: ID!, input: UpdateListingInput!): ListingModel!
+  updateProfile(input: UpdateProfileInput!): AccountModel!
+  withdrawOffer(offerId: ID!): CustomOfferModel!
+}
+
+type NotificationModel {
+  accountId: ID!
+  createdAt: DateTime!
+  fromAccountId: String
+  fromDisplayName: String
+  id: ID!
+  isRead: Boolean!
+  targetId: String
+  targetType: String
+  type: NotificationType!
+}
+
+enum NotificationType {
+  FOLLOW
+  MENTION
+  NEW_MESSAGE
+  ORDER_UPDATE
+}
+
+enum OfferStatus {
+  ACCEPTED
+  PENDING
+  REJECTED
+  WITHDRAWN
+}
+
+type OrderModel {
+  agreedPrice: Float!
+  buyerAccountId: String!
+  createdAt: DateTime!
+  customOfferId: String
+  id: ID!
+  listingId: String!
+  sellerAccountId: String!
+  status: OrderStatus!
+  updatedAt: DateTime!
+}
+
+enum OrderStatus {
+  CANCELLED
+  COMPLETED
+  IN_PROGRESS
+  PENDING_PAYMENT
+}
+
+type PostModel {
+  authorAvatarObjectKey: String
+  authorDisplayName: String
+  authorId: String!
+  authorSchoolName: String
+  authorUsername: String
+  content: String!
+  createdAt: DateTime!
+  inReplyToPostId: String
+  linkedServiceId: String
+  postId: ID!
+}
+
+type PresignedUploadResult {
+  objectKey: String!
+  uploadUrl: String!
+}
+
+type Query {
+  conversations: [ConversationModel!]!
+  feed(limit: Int! = 20): [PostModel!]!
+  listing(id: ID!): ListingModel
+  listings: [ListingModel!]!
+  listingsByAccount(accountId: ID!): [ListingModel!]!
+  mediaForObject(attachedId: String!, attachedType: String!): [MediaAttachmentModel!]!
+  messages(conversationId: ID!, limit: Int! = 50): [MessageModel!]!
+  myOrders(role: String!, status: String): [OrderModel!]!
+  myProfile: AccountModel!
+  notifications(cursor: String, take: Int = 20): [NotificationModel!]!
+  offersForConversation(conversationId: ID!): [CustomOfferModel!]!
+  order(id: ID!): OrderModel
+  profile(username: String!): AccountModel
+  school(id: ID!): SchoolModel
+  schools: [SchoolModel!]!
+  searchAccounts(query: String!): [AccountModel!]!
+  searchListings(query: String!, tagIds: [ID!]): [ListingModel!]!
+  searchSchools(query: String!): [SchoolModel!]!
+  searchTags(query: String!): [TagModel!]!
+  tags: [TagModel!]!
+  unreadNotificationCount: Int!
+}
+
+input RequestUploadInput {
+  attachedId: String
+  attachedType: String!
+  contentType: String!
+  fileName: String!
+  isPrivate: Boolean! = false
+}
+
+type ReviewModel {
+  comment: String
+  createdAt: DateTime!
+  id: ID!
+  orderId: String!
+  rating: Int!
+  reviewerAccountId: String!
+  targetAccountId: String!
+  updatedAt: DateTime!
+}
+
+type SchoolModel {
+  city: String
+  createdAt: DateTime!
+  domain: String
+  id: ID!
+  isVerified: Boolean!
+  name: String!
+  npsn: String!
+  updatedAt: DateTime!
+}
+
+type TagModel {
+  id: ID!
+  isUsable: Boolean!
+  name: String!
+}
+
+input UpdateListingInput {
+  basePrice: Float
+  deliveryTimeDays: Int
+  description: String
+  isUnlimited: Boolean
+  maxActiveOrders: Int
+  tagIds: [ID!]
+  title: String
+}
+
+input UpdateProfileInput {
+  avatarObjectKey: String
+  displayName: String
+  major: String
+  note: String
+}

@@ -11,13 +11,13 @@ import {
 
 @InputType()
 export class UpdateListingInput {
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
   @MaxLength(100)
   title?: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
   description?: string;
@@ -40,7 +40,7 @@ export class UpdateListingInput {
   @Min(1)
   maxActiveOrders?: number;
 
-  @Field({ nullable: true })
+  @Field(() => Boolean, { nullable: true })
   @IsOptional()
   @IsBoolean()
   isUnlimited?: boolean;

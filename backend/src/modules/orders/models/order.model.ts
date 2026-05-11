@@ -24,7 +24,7 @@ export class OrderModel {
   @Field()
   listingId: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   customOfferId?: string | null;
 
   @Field(() => Float)
@@ -57,7 +57,7 @@ export class ReviewModel {
   @Field(() => Int)
   rating: number;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   comment?: string | null;
 
   @Field()
