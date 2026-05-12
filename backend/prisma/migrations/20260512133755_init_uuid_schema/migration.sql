@@ -18,8 +18,8 @@ CREATE TYPE "OfferStatus" AS ENUM ('PENDING', 'ACCEPTED', 'REJECTED', 'WITHDRAWN
 
 -- CreateTable
 CREATE TABLE "users" (
-    "id" BIGSERIAL NOT NULL,
-    "account_id" BIGINT NOT NULL,
+    "id" UUID NOT NULL,
+    "account_id" UUID NOT NULL,
     "email" TEXT NOT NULL,
     "encrypted_password" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -30,10 +30,10 @@ CREATE TABLE "users" (
 
 -- CreateTable
 CREATE TABLE "accounts" (
-    "id" BIGSERIAL NOT NULL,
+    "id" UUID NOT NULL,
     "username" TEXT NOT NULL,
     "display_name" TEXT NOT NULL,
-    "school_id" BIGINT,
+    "school_id" UUID,
     "major" TEXT,
     "note" TEXT,
     "avatar_object_key" TEXT,
@@ -48,8 +48,8 @@ CREATE TABLE "accounts" (
 
 -- CreateTable
 CREATE TABLE "listings" (
-    "id" BIGSERIAL NOT NULL,
-    "account_id" BIGINT NOT NULL,
+    "id" UUID NOT NULL,
+    "account_id" UUID NOT NULL,
     "type" "ListingType" NOT NULL DEFAULT 'SERVICE',
     "title" TEXT NOT NULL,
     "description" TEXT NOT NULL,
@@ -67,11 +67,11 @@ CREATE TABLE "listings" (
 
 -- CreateTable
 CREATE TABLE "orders" (
-    "id" BIGSERIAL NOT NULL,
-    "buyer_account_id" BIGINT NOT NULL,
-    "seller_account_id" BIGINT NOT NULL,
-    "listing_id" BIGINT NOT NULL,
-    "custom_offer_id" BIGINT,
+    "id" UUID NOT NULL,
+    "buyer_account_id" UUID NOT NULL,
+    "seller_account_id" UUID NOT NULL,
+    "listing_id" UUID NOT NULL,
+    "custom_offer_id" UUID,
     "agreed_price" DECIMAL(12,2) NOT NULL,
     "status" "OrderStatus" NOT NULL DEFAULT 'PENDING_PAYMENT',
     "lock_version" INTEGER NOT NULL DEFAULT 0,
@@ -83,10 +83,10 @@ CREATE TABLE "orders" (
 
 -- CreateTable
 CREATE TABLE "reviews" (
-    "id" BIGSERIAL NOT NULL,
-    "order_id" BIGINT NOT NULL,
-    "reviewer_account_id" BIGINT NOT NULL,
-    "target_account_id" BIGINT NOT NULL,
+    "id" UUID NOT NULL,
+    "order_id" UUID NOT NULL,
+    "reviewer_account_id" UUID NOT NULL,
+    "target_account_id" UUID NOT NULL,
     "rating" SMALLINT NOT NULL,
     "comment" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -97,9 +97,9 @@ CREATE TABLE "reviews" (
 
 -- CreateTable
 CREATE TABLE "follows" (
-    "id" BIGSERIAL NOT NULL,
-    "account_id" BIGINT NOT NULL,
-    "target_account_id" BIGINT NOT NULL,
+    "id" UUID NOT NULL,
+    "account_id" UUID NOT NULL,
+    "target_account_id" UUID NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "follows_pkey" PRIMARY KEY ("id")
@@ -107,9 +107,9 @@ CREATE TABLE "follows" (
 
 -- CreateTable
 CREATE TABLE "conversations" (
-    "id" BIGSERIAL NOT NULL,
+    "id" UUID NOT NULL,
     "type" "ConversationType" NOT NULL DEFAULT 'DIRECT',
-    "order_id" BIGINT,
+    "order_id" UUID,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -118,9 +118,9 @@ CREATE TABLE "conversations" (
 
 -- CreateTable
 CREATE TABLE "conversation_participants" (
-    "id" BIGSERIAL NOT NULL,
-    "conversation_id" BIGINT NOT NULL,
-    "account_id" BIGINT NOT NULL,
+    "id" UUID NOT NULL,
+    "conversation_id" UUID NOT NULL,
+    "account_id" UUID NOT NULL,
     "last_read_message_id" VARCHAR,
     "joined_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -129,8 +129,8 @@ CREATE TABLE "conversation_participants" (
 
 -- CreateTable
 CREATE TABLE "media_attachments" (
-    "id" BIGSERIAL NOT NULL,
-    "account_id" BIGINT NOT NULL,
+    "id" UUID NOT NULL,
+    "account_id" UUID NOT NULL,
     "attached_type" TEXT NOT NULL,
     "attached_id" TEXT NOT NULL,
     "file_name" TEXT NOT NULL,
@@ -147,7 +147,7 @@ CREATE TABLE "media_attachments" (
 
 -- CreateTable
 CREATE TABLE "tags" (
-    "id" BIGSERIAL NOT NULL,
+    "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
     "is_usable" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -157,8 +157,8 @@ CREATE TABLE "tags" (
 
 -- CreateTable
 CREATE TABLE "tagged_objects" (
-    "id" BIGSERIAL NOT NULL,
-    "tag_id" BIGINT NOT NULL,
+    "id" UUID NOT NULL,
+    "tag_id" UUID NOT NULL,
     "object_id" TEXT NOT NULL,
     "object_type" TEXT NOT NULL,
 
@@ -167,9 +167,9 @@ CREATE TABLE "tagged_objects" (
 
 -- CreateTable
 CREATE TABLE "notifications" (
-    "id" BIGSERIAL NOT NULL,
-    "account_id" BIGINT NOT NULL,
-    "from_account_id" BIGINT,
+    "id" UUID NOT NULL,
+    "account_id" UUID NOT NULL,
+    "from_account_id" UUID,
     "type" "NotificationType" NOT NULL,
     "target_type" TEXT,
     "target_id" TEXT,
@@ -181,7 +181,7 @@ CREATE TABLE "notifications" (
 
 -- CreateTable
 CREATE TABLE "schools" (
-    "id" BIGSERIAL NOT NULL,
+    "id" UUID NOT NULL,
     "npsn" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "domain" TEXT,
@@ -195,11 +195,11 @@ CREATE TABLE "schools" (
 
 -- CreateTable
 CREATE TABLE "custom_offers" (
-    "id" BIGSERIAL NOT NULL,
-    "conversation_id" BIGINT NOT NULL,
-    "seller_account_id" BIGINT NOT NULL,
-    "buyer_account_id" BIGINT NOT NULL,
-    "listing_id" BIGINT,
+    "id" UUID NOT NULL,
+    "conversation_id" UUID NOT NULL,
+    "seller_account_id" UUID NOT NULL,
+    "buyer_account_id" UUID NOT NULL,
+    "listing_id" UUID,
     "description" TEXT NOT NULL,
     "proposed_price" DECIMAL(12,2) NOT NULL,
     "delivery_time_days" INTEGER NOT NULL,
