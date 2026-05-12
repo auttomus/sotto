@@ -20,6 +20,8 @@ Sistem sosial media ini dibangun menggunakan pendekatan arsitektur _microservice
 
   #(Belum digunakan biar ga repot, tapi bisa dipakai sewaktu-waktu)
 
+- **BullMQ:** Bawaan dari Redis
+
 **4. Lapisan Persistensi Data (Storage & Polyglot Database Layer)**
 
 - **PostgreSQL:** Bertindak sebagai basis data relasional (RDBMS) utama untuk menangani data terstruktur yang membutuhkan kepatuhan integritas ACID (Atomicity, Consistency, Isolation, Durability). PostgreSQL secara eksklusif mengelola entitas kritikal seperti kredensial autentikasi, profil pengguna, relasi pertemanan inti, dan data transaksional.

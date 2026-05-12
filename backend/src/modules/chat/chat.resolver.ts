@@ -10,7 +10,7 @@ import {
 // Explicit type for participant from Prisma include shape
 type ParticipantRow = {
   account: {
-    id: bigint;
+    id: string;
     displayName: string;
     avatarObjectKey: string | null;
   };
@@ -26,16 +26,16 @@ export class ChatResolver {
     @Args('input') input: CreateConversationInput,
   ): Promise<ConversationModel> {
     const convo = await this.chatService.createConversation(
-      BigInt(user.accountId),
+      user.accountId,
       input,
     );
     return {
-      id: convo.id.toString(),
+      id: convo.id,
       type: convo.type,
       createdAt: convo.createdAt,
       updatedAt: convo.updatedAt,
       participants: (convo.participants as ParticipantRow[]).map((p) => ({
-        accountId: p.account.id.toString(),
+        accountId: p.account.id,
         displayName: p.account.displayName,
         avatarObjectKey: p.account.avatarObjectKey ?? undefined,
       })),
@@ -46,16 +46,14 @@ export class ChatResolver {
   async getConversations(
     @CurrentUser() user: CurrentUserPayload,
   ): Promise<ConversationModel[]> {
-    const convos = await this.chatService.getConversations(
-      BigInt(user.accountId),
-    );
+    const convos = await this.chatService.getConversations(user.accountId);
     return convos.map((c) => ({
-      id: c.id.toString(),
+      id: c.id,
       type: c.type,
       createdAt: c.createdAt,
       updatedAt: c.updatedAt,
       participants: (c.participants as ParticipantRow[]).map((p) => ({
-        accountId: p.account.id.toString(),
+        accountId: p.account.id,
         displayName: p.account.displayName,
         avatarObjectKey: p.account.avatarObjectKey ?? undefined,
       })),
@@ -69,10 +67,7 @@ export class ChatResolver {
     @Args('limit', { type: () => Int, defaultValue: 50 }) limit: number,
   ): Promise<SerializedMessage[]> {
     // Validasi bahwa user adalah peserta
-    await this.chatService.validateParticipant(
-      BigInt(conversationId),
-      BigInt(user.accountId),
-    );
-    return this.chatService.getMessages(BigInt(conversationId), limit);
+    await this.chatService.validateParticipant(conversationId, user.accountId);
+    return this.chatService.getMessages(conversationId, limit);
   }
 }

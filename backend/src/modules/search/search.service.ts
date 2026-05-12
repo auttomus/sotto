@@ -6,7 +6,7 @@ export class SearchService {
   constructor(private readonly prisma: PrismaService) {}
 
   /** Pencarian listing berdasarkan query teks dan filter opsional */
-  async searchListings(query: string, tagIds?: bigint[]) {
+  async searchListings(query: string, tagIds?: string[]) {
     return this.prisma.listing.findMany({
       where: {
         status: 'ACTIVE',
@@ -29,7 +29,7 @@ export class SearchService {
                         },
                         select: { objectId: true },
                       })
-                    ).map((to) => BigInt(to.objectId)),
+                    ).map((to) => to.objectId),
                   },
                 },
               ]

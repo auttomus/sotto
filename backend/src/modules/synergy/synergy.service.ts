@@ -63,14 +63,14 @@ export class SynergyService {
 
         // G(u_i, u_k): Kedekatan graf
         const proximity = await this.graphProximity.computeProximity(
-          BigInt(accountId),
-          BigInt(post.authorId),
+          accountId,
+          post.authorId,
           this.lambdaG,
         );
 
         // R(u_k): Reputasi & kualitas
         const rep = await this.reputation.computeReputation(
-          BigInt(post.authorId),
+          post.authorId,
           post.postId,
         );
 

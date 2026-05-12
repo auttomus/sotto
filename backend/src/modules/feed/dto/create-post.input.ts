@@ -16,4 +16,8 @@ export class CreatePostInput {
   @Field(() => ID, { nullable: true })
   @IsOptional()
   linkedServiceId?: string;
+
+  @Field(() => [ID], { nullable: true })
+  @IsOptional()
+  mediaIds?: string[];
 }

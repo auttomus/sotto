@@ -32,8 +32,8 @@ Enum notification_type {
 // 1. IDENTITY & PUBLIC PERSONA (MVP)
 // ==========================================
 Table users {
-  id bigint [primary key, increment]
-  account_id bigint [not null, unique, note: 'Tautan absolut ke tabel accounts (Public Profile)']
+  id uuid [primary key, ]
+  account_id uuid [not null, unique, note: 'Tautan absolut ke tabel accounts (Public Profile)']
   email varchar [not null, unique, note: 'Gunakan email sekolah (.sch.id) jika memungkinkan untuk validasi organik']
   encrypted_password varchar [not null]
   created_at timestamp [not null]
@@ -42,12 +42,12 @@ Table users {
 }
 
 Table accounts {
-  id bigint [primary key, increment]
+  id uuid [primary key, ]
   username varchar [not null, unique, note: 'Handle user, misal: @arya_pranata']
   display_name varchar [not null]
   
   // Biodata Minimalis
-  school_id bigint [note: 'TBD: Nanti butuh tabel master schools. Untuk MVP bisa diganti varchar (nama sekolah) jika mau cepat.']
+  school_id uuid [note: 'TBD: Nanti butuh tabel master schools. Untuk MVP bisa diganti varchar (nama sekolah) jika mau cepat.']
   major varchar [note: 'Jurusan siswa, misal: RPL, DKV, Akuntansi. Krusial untuk algoritma feed ScyllaDB nanti.']
   
   // Profil Visual Minimalis
@@ -55,8 +55,8 @@ Table accounts {
   avatar_object_key varchar [note: 'KOREKSI: Jangan pakai URL. Simpan MinIO object key-nya di sini sebagai cache (Denormalisasi) agar tidak perlu JOIN ke tabel media terus menerus saat meload feed.']
   
   // Aggregates (Denormalisasi untuk kecepatan read)
-  followers_count bigint [default: 0, note: 'Di-update via background job / Redis queue setiap ada yang follow']
-  following_count bigint [default: 0]
+  followers_count int [default: 0, note: 'Di-update via background job / Redis queue setiap ada yang follow']
+  following_count int [default: 0]
   trust_score decimal [default: 0.0, note: 'Agregat otomatis dari rata-rata tabel reviews']
   
   created_at timestamp [not null]
@@ -68,8 +68,8 @@ Table accounts {
 // 2. THE GIG ECONOMY (MVP)
 // ==========================================
 Table listings {
-  id bigint [primary key, increment]
-  account_id bigint [not null]
+  id uuid [primary key, ]
+  account_id uuid [not null]
   
   type listing_type [default: 'service', note: 'Menentukan behaviour dari listing ini']
   
@@ -93,11 +93,11 @@ Table listings {
 // Catatan: Ingat untuk mengubah semua Foreign Key di tabel 'orders' 
 // dari 'service_id' menjadi 'listing_id'
 Table orders {
-  id bigint [primary key, increment]
-  buyer_account_id bigint [not null, note: 'Siswa pembeli jasa']
-  seller_account_id bigint [not null, note: 'Siswa penjual jasa']
-  service_id bigint [not null]
-  custom_offer_id bigint [note: 'Null jika beli langsung dari etalase. Terisi jika via negosiasi chat.']
+  id uuid [primary key, ]
+  buyer_account_id uuid [not null, note: 'Siswa pembeli jasa']
+  seller_account_id uuid [not null, note: 'Siswa penjual jasa']
+  service_id uuid [not null]
+  custom_offer_id uuid [note: 'Null jika beli langsung dari etalase. Terisi jika via negosiasi chat.']
   
   agreed_price decimal [not null]
   status order_status [default: 'pending_payment']
@@ -110,10 +110,10 @@ Table orders {
 }
 
 Table reviews {
-  id bigint [primary key, increment]
-  order_id bigint [not null, unique, note: '1 Order = 1 Review']
-  reviewer_account_id bigint [not null, note: 'Biasanya si Buyer']
-  target_account_id bigint [not null, note: 'Biasanya si Seller']
+  id uuid [primary key, ]
+  order_id uuid [not null, unique, note: '1 Order = 1 Review']
+  reviewer_account_id uuid [not null, note: 'Biasanya si Buyer']
+  target_account_id uuid [not null, note: 'Biasanya si Seller']
   rating int [not null, note: 'Rating 1-5']
   comment text
   
@@ -125,9 +125,9 @@ Table reviews {
 // 3. SOCIAL GRAPH (MVP)
 // ==========================================
 Table follows {
-  id bigint [primary key, increment]
-  account_id bigint [not null, note: 'User yang menekan tombol follow']
-  target_account_id bigint [not null, note: 'User yang di-follow']
+  id uuid [primary key, ]
+  account_id uuid [not null, note: 'User yang menekan tombol follow']
+  target_account_id uuid [not null, note: 'User yang di-follow']
   created_at timestamp [not null]
   
   Indexes {
@@ -140,10 +140,10 @@ Table follows {
 // 4. CHAT SYSTEM METADATA (PostgreSQL)
 // ==========================================
 Table conversations {
-  id bigint [primary key, increment]
+  id uuid [primary key, ]
   type conversation_type [default: 'direct']
   
-  order_id bigint [note: 'Tautkan chat langsung ke order jika sedang ada proyek. Memudahkan moderator jika ada sengketa nanti.']
+  order_id uuid [note: 'Tautkan chat langsung ke order jika sedang ada proyek. Memudahkan moderator jika ada sengketa nanti.']
   
   created_at timestamp [not null]
   updated_at timestamp [not null]
@@ -151,9 +151,9 @@ Table conversations {
 }
 
 Table conversation_participants {
-  id bigint [primary key, increment]
-  conversation_id bigint [not null]
-  account_id bigint [not null]
+  id uuid [primary key, ]
+  conversation_id uuid [not null]
+  account_id uuid [not null]
   
   last_read_message_id varchar [note: 'Menyimpan UUID pesan terakhir dari ScyllaDB. Digunakan UI untuk render status "Belum Dibaca".']
   
@@ -170,15 +170,15 @@ Table conversation_participants {
 // MEDIA & ASSET MANAGEMENT (MinIO Integration)
 // ==========================================
 Table media_attachments {
-  id bigint [primary key, increment]
-  account_id bigint [not null, note: 'Pemilik/Pengunggah aset']
+  id uuid [primary key, ]
+  account_id uuid [not null, note: 'Pemilik/Pengunggah aset']
   
   attached_type varchar [not null, note: 'Polymorphic Type. Contoh: "Service", "ScyllaPost", "ScyllaMessage"']
   attached_id varchar [note: 'Polymorphic ID. Pakai varchar agar bisa simpan TimeUUID dari ScyllaDB']
   
   file_name varchar [not null]
   content_type varchar [not null, note: 'Mimetype: image/jpeg, application/zip, dll']
-  file_size bigint [not null]
+  file_size int [not null]
   blurhash varchar [note: 'String pendek untuk render skeleton loading visual di React sebelum gambar asli terload']
   
   bucket_name varchar [not null, default: 'public-assets', note: 'Pemisahan level bucket di MinIO']
@@ -200,7 +200,7 @@ Table media_attachments {
 // ==========================================
 
 Table tags {
-  id bigint [primary key, increment]
+  id uuid [primary key, ]
   name varchar [not null, unique, note: 'Contoh: Frontend, Audio_Visual, Akuntansi_Dasar']
   is_usable boolean [default: true, note: 'Bisa dimatikan oleh admin jika tag sudah tidak relevan']
   created_at timestamp
@@ -212,8 +212,8 @@ Table tags {
 
 // Tabel Relasi Polymorphic (Satu tag bisa menempel di Jasa, atau di Postingan)
 Table tagged_objects {
-  id bigint [primary key, increment]
-  tag_id bigint [not null, note: 'Merujuk ke tabel tags']
+  id uuid [primary key, ]
+  tag_id uuid [not null, note: 'Merujuk ke tabel tags']
   object_id varchar [not null, note: 'Bisa merujuk ke ID PostgreSQL (Service) atau ScyllaDB (Post)']
   object_type varchar [not null, note: 'Contoh: "Service" atau "ScyllaPost"']
   
@@ -224,7 +224,7 @@ Table tagged_objects {
 }
 
 Table schools {
-  id bigint [primary key, increment]
+  id uuid [primary key, ]
   npsn varchar [not null, unique, note: 'Nomor Pokok Sekolah Nasional - validasi data resmi']
   name varchar [not null, note: 'Contoh: SMK Negeri 1 Denpasar']
   domain varchar [unique, note: 'Domain sekolah (.sch.id) untuk automasi verifikasi email']
@@ -239,9 +239,9 @@ Table schools {
 }
 
 Table notifications {
-  id bigint [primary key, increment]
-  account_id bigint [not null, note: 'Penerima notifikasi']
-  from_account_id bigint [note: 'Siapa yang memicu (Opsional, misal user yang mem-follow)']
+  id uuid [primary key, ]
+  account_id uuid [not null, note: 'Penerima notifikasi']
+  from_account_id uuid [note: 'Siapa yang memicu (Opsional, misal user yang mem-follow)']
   
   type notification_type [not null]
   
@@ -266,11 +266,11 @@ Enum offer_status {
 }
 
 Table custom_offers {
-  id bigint [primary key, increment]
-  conversation_id bigint [not null, note: 'Tautkan ke ruang obrolan tempat penawaran ini dibuat']
-  seller_account_id bigint [not null]
-  buyer_account_id bigint [not null]
-  listing_id bigint [note: 'Opsional, jika penawaran ini berangkat dari modifikasi listing yang sudah ada']
+  id uuid [primary key, ]
+  conversation_id uuid [not null, note: 'Tautkan ke ruang obrolan tempat penawaran ini dibuat']
+  seller_account_id uuid [not null]
+  buyer_account_id uuid [not null]
+  listing_id uuid [note: 'Opsional, jika penawaran ini berangkat dari modifikasi listing yang sudah ada']
   
   description text [not null, note: 'Deskripsi kesepakatan: "Bikin 3 halaman web, revisi max 2x"']
   proposed_price decimal [not null, note: 'Inilah yang akan menjadi agreed_price di tabel orders']

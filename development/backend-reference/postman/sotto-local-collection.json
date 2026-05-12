@@ -6,7 +6,13 @@
   },
   "auth": {
     "type": "bearer",
-    "bearer": [{ "key": "token", "value": "{{jwt_token}}", "type": "string" }]
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
   },
   "item": [
     {
@@ -15,32 +21,99 @@
         {
           "name": "Register [201]",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"email\": \"arya.pranata@smkn1denpasar.sch.id\",\n  \"password\": \"RplSotto2026!\",\n  \"username\": \"arya_pranata_dev\",\n  \"displayName\": \"Kadek Agus Arya P.\",\n  \"schoolId\": 1,\n  \"major\": \"Rekayasa Perangkat Lunak\"\n}" },
-            "url": { "raw": "{{base_url}}/iam/register", "host": ["{{base_url}}"], "path": ["iam", "register"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"arya.pranata@smkn1denpasar.sch.id\",\n  \"password\": \"RplSotto2026!\",\n  \"username\": \"arya_pranata_dev\",\n  \"displayName\": \"Kadek Agus Arya P.\",\n  \"schoolId\": 1,\n  \"major\": \"Rekayasa Perangkat Lunak\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/iam/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "iam",
+                "register"
+              ]
+            }
           }
         },
         {
           "name": "Login [200] Auto-Set Token",
-          "event": [{ "listen": "test", "script": { "exec": ["if(pm.response.code===200){var d=pm.response.json();pm.environment.set('jwt_token',d.accessToken);pm.environment.set('account_id',d.accountId||'');console.log('Token saved!');}"], "type": "text/javascript" } }],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if(pm.response.code===200){var d=pm.response.json();pm.environment.set('jwt_token',d.accessToken);pm.environment.set('account_id',d.accountId||'');console.log('Token saved!');}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"email\": \"arya.pranata@smkn1denpasar.sch.id\",\n  \"password\": \"RplSotto2026!\"\n}" },
-            "url": { "raw": "{{base_url}}/iam/login", "host": ["{{base_url}}"], "path": ["iam", "login"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"arya.pranata@smkn1denpasar.sch.id\",\n  \"password\": \"RplSotto2026!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/iam/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "iam",
+                "login"
+              ]
+            }
           }
         },
         {
           "name": "Login [401] Wrong Password",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"email\": \"arya.pranata@smkn1denpasar.sch.id\",\n  \"password\": \"WrongPass!\"\n}" },
-            "url": { "raw": "{{base_url}}/iam/login", "host": ["{{base_url}}"], "path": ["iam", "login"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"arya.pranata@smkn1denpasar.sch.id\",\n  \"password\": \"WrongPass!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/iam/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "iam",
+                "login"
+              ]
+            }
           }
         }
       ]
@@ -51,21 +124,51 @@
         {
           "name": "Search Schools",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"query { searchSchools(query: \\\"SMK\\\") { id npsn name city isVerified } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"query { searchSchools(query: \\\"SMK\\\") { id npsn name city isVerified } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         },
         {
           "name": "Get All Schools",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"query { schools { id npsn name domain city isVerified createdAt updatedAt } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"query { schools { id npsn name domain city isVerified createdAt updatedAt } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         }
       ]
@@ -76,30 +179,73 @@
         {
           "name": "Search Tags (Public)",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"query { searchTags(query: \\\"Front\\\") { id name isUsable } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"query { searchTags(query: \\\"Front\\\") { id name isUsable } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         },
         {
           "name": "Get All Tags (Public)",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"query { tags { id name isUsable } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"query { tags { id name isUsable } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         },
         {
           "name": "Create Tag",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"mutation { createTag(name: \\\"Mobile Dev\\\") { id name isUsable } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation { createTag(name: \\\"Mobile Dev\\\") { id name isUsable } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         }
       ]
@@ -111,46 +257,113 @@
           "name": "My Profile",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"query { myProfile { id username displayName major note avatarObjectKey followersCount followingCount trustScore schoolName createdAt updatedAt } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"query { myProfile { id username displayName major note avatarObjectKey followersCount followingCount trustScore schoolName createdAt updatedAt } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         },
         {
           "name": "Get Profile by Username (Public)",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"query { profile(username: \\\"arya_pranata\\\") { id username displayName major note followersCount followingCount trustScore schoolName createdAt updatedAt isFollowing } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"query { profile(username: \\\"arya_pranata\\\") { id username displayName major note followersCount followingCount trustScore schoolName createdAt updatedAt isFollowing } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         },
         {
           "name": "Update Profile",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"mutation { updateProfile(input: { displayName: \\\"Arya Updated\\\", note: \\\"Bio baru\\\" }) { id displayName note } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation { updateProfile(input: { displayName: \\\"Arya Updated\\\", note: \\\"Bio baru\\\" }) { id displayName note } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         },
         {
           "name": "Follow User",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"mutation { follow(targetAccountId: \\\"2\\\") }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation { follow(targetAccountId: \\\"2\\\") }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         },
         {
           "name": "Unfollow User",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"mutation { unfollow(targetAccountId: \\\"2\\\") }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation { unfollow(targetAccountId: \\\"2\\\") }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         }
       ]
@@ -160,60 +373,154 @@
       "item": [
         {
           "name": "Create Listing",
-          "event": [{ "listen": "test", "script": { "exec": ["var d=pm.response.json();if(d.data&&d.data.createListing){pm.environment.set('listing_id',d.data.createListing.id);console.log('listing_id saved: '+d.data.createListing.id);}"], "type": "text/javascript" } }],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var d=pm.response.json();if(d.data&&d.data.createListing){pm.environment.set('listing_id',d.data.createListing.id);console.log('listing_id saved: '+d.data.createListing.id);}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"mutation { createListing(input: { title: \\\"Jasa Website Landing Page\\\", description: \\\"Bikin landing page responsive dengan React. Revisi 2x.\\\", basePrice: 150000, deliveryTimeDays: 3, tagIds: [\\\"1\\\", \\\"2\\\"] }) { id title description price type status deliveryTimeDays isUnlimited accountId createdAt } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation { createListing(input: { title: \\\"Jasa Website Landing Page\\\", description: \\\"Bikin landing page responsive dengan React. Revisi 2x.\\\", basePrice: 150000, deliveryTimeDays: 3, tagIds: [\\\"550e8400-e29b-41d4-a716-446655440000\\\"], mediaIds: [\\\"{{last_media_id}}\\\"] }) { id title price media { url } } }\"\n}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         },
         {
           "name": "Update Listing",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"mutation { updateListing(id: \\\"{{listing_id}}\\\", input: { title: \\\"Jasa Website Premium\\\", basePrice: 200000 }) { id title price updatedAt } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation { updateListing(id: \\\"{{listing_id}}\\\", input: { title: \\\"Jasa Website Premium\\\", basePrice: 200000 }) { id title price updatedAt } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         },
         {
           "name": "Get Listing by ID (Public)",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"query { listing(id: \\\"{{listing_id}}\\\") { id title description price type status deliveryTimeDays maxActiveOrders isUnlimited accountId account { displayName major trustScore username } createdAt updatedAt } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"query { listing(id: \\\"{{listing_id}}\\\") { id title description price type status deliveryTimeDays maxActiveOrders isUnlimited accountId account { displayName major trustScore username } createdAt updatedAt } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         },
         {
           "name": "Get All Listings (Public)",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"query { listings { id title price type status account { displayName trustScore } createdAt } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"query { listings { id title price type status account { displayName trustScore } createdAt } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         },
         {
           "name": "Get Listings by Account (Public)",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"query { listingsByAccount(accountId: \\\"1\\\") { id title price status } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"query { listingsByAccount(accountId: \\\"1\\\") { id title price status } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         },
         {
           "name": "Delete Listing",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"mutation { deleteListing(id: \\\"{{listing_id}}\\\") }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation { deleteListing(id: \\\"{{listing_id}}\\\") }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         }
       ]
@@ -223,57 +530,145 @@
       "item": [
         {
           "name": "Create Order",
-          "event": [{ "listen": "test", "script": { "exec": ["var d=pm.response.json();if(d.data&&d.data.createOrder){pm.environment.set('order_id',d.data.createOrder.id);console.log('order_id saved: '+d.data.createOrder.id);}"], "type": "text/javascript" } }],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var d=pm.response.json();if(d.data&&d.data.createOrder){pm.environment.set('order_id',d.data.createOrder.id);console.log('order_id saved: '+d.data.createOrder.id);}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"mutation { createOrder(input: { listingId: \\\"{{listing_id}}\\\", agreedPrice: 150000 }) { id buyerAccountId sellerAccountId listingId agreedPrice status createdAt } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation { createOrder(input: { listingId: \\\"{{listing_id}}\\\", agreedPrice: 150000 }) { id buyerAccountId sellerAccountId listingId agreedPrice status createdAt } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         },
         {
           "name": "Advance Order Status",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"mutation { advanceOrderStatus(orderId: \\\"{{order_id}}\\\") { id status updatedAt } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation { advanceOrderStatus(orderId: \\\"{{order_id}}\\\") { id status updatedAt } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         },
         {
           "name": "Cancel Order",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"mutation { cancelOrder(orderId: \\\"{{order_id}}\\\") { id status updatedAt } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation { cancelOrder(orderId: \\\"{{order_id}}\\\") { id status updatedAt } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         },
         {
           "name": "Get Order by ID",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"query { order(id: \\\"{{order_id}}\\\") { id buyerAccountId sellerAccountId listingId agreedPrice status createdAt updatedAt } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"query { order(id: \\\"{{order_id}}\\\") { id buyerAccountId sellerAccountId listingId agreedPrice status createdAt updatedAt } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         },
         {
           "name": "My Orders (as Buyer)",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"query { myOrders(role: \\\"buyer\\\") { id listingId agreedPrice status createdAt } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"query { myOrders(role: \\\"buyer\\\") { id listingId agreedPrice status createdAt } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         },
         {
           "name": "Create Review",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"mutation { createReview(orderId: \\\"{{order_id}}\\\", rating: 5, comment: \\\"Kerjaan cepat dan rapi!\\\") { id orderId rating comment createdAt } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation { createReview(orderId: \\\"{{order_id}}\\\", rating: 5, comment: \\\"Kerjaan cepat dan rapi!\\\") { id orderId rating comment createdAt } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         }
       ]
@@ -284,11 +679,30 @@
         {
           "name": "Simulate Midtrans Webhook",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"transaction_status\": \"settlement\",\n  \"order_id\": \"ORDER-001\",\n  \"gross_amount\": \"150000.00\"\n}" },
-            "url": { "raw": "{{base_url}}/payments/webhook", "host": ["{{base_url}}"], "path": ["payments", "webhook"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transaction_status\": \"settlement\",\n  \"order_id\": \"ORDER-001\",\n  \"gross_amount\": \"150000.00\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/payments/webhook",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "payments",
+                "webhook"
+              ]
+            }
           }
         }
       ]
@@ -298,30 +712,156 @@
       "item": [
         {
           "name": "Create Conversation",
-          "event": [{ "listen": "test", "script": { "exec": ["var d=pm.response.json();if(d.data&&d.data.createConversation){pm.environment.set('conversation_id',d.data.createConversation.id);console.log('conversation_id saved');}"], "type": "text/javascript" } }],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var d=pm.response.json();if(d.data&&d.data.createConversation){pm.environment.set('conversation_id',d.data.createConversation.id);console.log('conversation_id saved');}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"mutation { createConversation(input: { participantIds: [\\\"2\\\"], type: \\\"DIRECT\\\" }) { id type createdAt participants { accountId displayName } } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation { createConversation(input: { participantIds: [\\\"2\\\"], type: \\\"DIRECT\\\" }) { id type createdAt participants { accountId displayName } } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         },
         {
           "name": "Get My Conversations",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"query { conversations { id type updatedAt participants { accountId displayName avatarObjectKey } } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"query { conversations { id type updatedAt participants { accountId displayName avatarObjectKey } } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         },
         {
           "name": "Get Messages",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"query { messages(conversationId: \\\"{{conversation_id}}\\\", limit: 20) { messageId senderId content createdAt } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"query { messages(conversationId: \\\"{{conversation_id}}\\\", limit: 20) { messageId senderId content createdAt } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Send Message (Standard)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var d=pm.response.json();if(d.data&&d.data.sendMessage){pm.environment.set('message_id',d.data.sendMessage.messageId);console.log('message_id saved');}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation { sendMessage(input: { conversationId: \\\"{{conversation_id}}\\\", content: \\\"Halo, proyek bisa mulai kapan?\\\" }) { messageId senderId content createdAt } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Send Message with Attachment (JSON payload)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation { sendMessage(input: { conversationId: \\\"{{conversation_id}}\\\", content: \\\"{\\\\\\\"text\\\\\\\":\\\\\\\"Ini desain yang kemarin kita bahas\\\\\\\",\\\\\\\"type\\\\\\\":\\\\\\\"image\\\\\\\",\\\\\\\"mediaId\\\\\\\":\\\\\\\"uuid-gambar-dari-media-service\\\\\\\"}\\\" }) { messageId senderId content createdAt } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Send Message linked to Listing",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation { sendMessage(input: { conversationId: \\\"{{conversation_id}}\\\", content: \\\"{\\\\\\\"text\\\\\\\":\\\\\\\"Saya tertarik dengan jasa ini\\\\\\\",\\\\\\\"type\\\\\\\":\\\\\\\"listing_share\\\\\\\",\\\\\\\"listingId\\\\\\\":\\\\\\\"{{listing_id}}\\\\\\\"}\\\" }) { messageId senderId content createdAt } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         }
       ]
@@ -333,18 +873,44 @@
           "name": "Create Custom Offer",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"mutation { createOffer(input: { conversationId: \\\"{{conversation_id}}\\\", buyerAccountId: \\\"2\\\", description: \\\"Bikin website custom sesuai brief\\\", proposedPrice: 250000, deliveryTimeDays: 5 }) { id conversationId proposedPrice deliveryTimeDays status expiresAt createdAt } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation { createOffer(input: { conversationId: \\\"{{conversation_id}}\\\", buyerAccountId: \\\"2\\\", description: \\\"Bikin website custom sesuai brief\\\", proposedPrice: 250000, deliveryTimeDays: 5 }) { id conversationId proposedPrice deliveryTimeDays status expiresAt createdAt } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         },
         {
           "name": "Get Offers for Conversation",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"query { offersForConversation(conversationId: \\\"{{conversation_id}}\\\") { id description proposedPrice deliveryTimeDays status expiresAt createdAt updatedAt } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"query { offersForConversation(conversationId: \\\"{{conversation_id}}\\\") { id description proposedPrice deliveryTimeDays status expiresAt createdAt updatedAt } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         }
       ]
@@ -356,18 +922,59 @@
           "name": "Create Post",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"mutation { createPost(input: { content: \\\"Baru selesai project landing page, cek portfolio saya!\\\", tagIds: [\\\"1\\\"] }) { postId authorId content createdAt } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
-          }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation { createPost(input: { content: \\\"Baru selesai project landing page, cek portfolio saya!\\\", tagIds: [\\\"550e8400-e29b-41d4-a716-446655440000\\\"], mediaIds: [\\\"{{last_media_id}}\\\"] }) { postId content } }\"\n}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var d=pm.response.json();",
+                  "if(d.data && d.data.createPost){",
+                  "  pm.environment.set('last_post_id', d.data.createPost.postId);",
+                  "  console.log('last_post_id saved');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Feed",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"query { feed(limit: 10) { postId authorId content createdAt authorDisplayName authorUsername authorSchoolName } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"query { feed(limit: 10) { postId authorId content createdAt authorDisplayName authorUsername authorSchoolName } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         }
       ]
@@ -378,21 +985,51 @@
         {
           "name": "Search Listings",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"query { searchListings(query: \\\"website\\\") { id title price type status account { displayName trustScore } } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"query { searchListings(query: \\\"website\\\") { id title price type status account { displayName trustScore } } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         },
         {
           "name": "Search Accounts",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"query { searchAccounts(query: \\\"arya\\\") { id username displayName major trustScore schoolName } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"query { searchAccounts(query: \\\"arya\\\") { id username displayName major trustScore schoolName } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         }
       ]
@@ -404,9 +1041,22 @@
           "name": "Track Event",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"mutation { trackEvent(actionType: \\\"view\\\", targetId: \\\"post-uuid-1\\\") }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation { trackEvent(actionType: \\\"view\\\", targetId: \\\"post-uuid-1\\\") }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         }
       ]
@@ -418,27 +1068,66 @@
           "name": "Get Notifications",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"query { notifications(take: 10) { id accountId type targetType targetId isRead createdAt fromAccountId fromDisplayName } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"query { notifications(take: 10) { id accountId type targetType targetId isRead createdAt fromAccountId fromDisplayName } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         },
         {
           "name": "Unread Count",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"query { unreadNotificationCount }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"query { unreadNotificationCount }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         },
         {
           "name": "Mark All As Read",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"mutation { markAllNotificationsAsRead }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation { markAllNotificationsAsRead }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         }
       ]
@@ -450,27 +1139,147 @@
           "name": "Request Upload URL",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"mutation { requestUploadUrl(input: { fileName: \\\"portfolio.png\\\", contentType: \\\"image/png\\\", attachedType: \\\"ScyllaPost\\\" }) { uploadUrl objectKey } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation { requestUploadUrl(input: { fileName: \\\"portfolio.png\\\", contentType: \\\"image/png\\\", attachedType: \\\"ScyllaPost\\\" }) { uploadUrl objectKey } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         },
         {
           "name": "Confirm Upload",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"mutation { confirmUpload(objectKey: \\\"scyllapost/test.png\\\", input: { fileName: \\\"portfolio.png\\\", contentType: \\\"image/png\\\", attachedType: \\\"ScyllaPost\\\" }) { id fileName objectKey isPrivate createdAt } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
-          }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation { confirmUpload(objectKey: \\\"scyllapost/test.png\\\", input: { fileName: \\\"portfolio.png\\\", contentType: \\\"image/png\\\", attachedType: \\\"ScyllaPost\\\" }) { id fileName objectKey isPrivate createdAt } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var d=pm.response.json();",
+                  "if(d.data && d.data.confirmUpload){",
+                  "  pm.environment.set('last_media_id', d.data.confirmUpload.id);",
+                  "  console.log('last_media_id saved: ' + d.data.confirmUpload.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Media for Object",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"query\":\"query { mediaForObject(attachedType: \\\"ScyllaPost\\\", attachedId: \\\"test-post-id\\\") { id fileName contentType objectKey url isPrivate createdAt } }\"}" },
-            "url": { "raw": "{{gql_url}}", "host": ["{{gql_url}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"query { mediaForObject(attachedType: \\\"ScyllaPost\\\", attachedId: \\\"test-post-id\\\") { id fileName contentType objectKey url isPrivate createdAt } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload Media for ScyllaMessage (Image)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation { requestUploadUrl(input: { fileName: \\\"chat_image.png\\\", contentType: \\\"image/png\\\", attachedType: \\\"ScyllaMessage\\\", attachedId: \\\"{{message_id}}\\\" }) { uploadUrl objectKey } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload Media for Listing (Thumbnail)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation { requestUploadUrl(input: { fileName: \\\"listing_thumb.jpg\\\", contentType: \\\"image/jpeg\\\", attachedType: \\\"Listing\\\", attachedId: \\\"{{listing_id}}\\\" }) { uploadUrl objectKey } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload Media for ScyllaPost (Image)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation { requestUploadUrl(input: { fileName: \\\"post_image.png\\\", contentType: \\\"image/png\\\", attachedType: \\\"ScyllaPost\\\", attachedId: \\\"{{last_post_id}}\\\" }) { uploadUrl objectKey } }\"}"
+            },
+            "url": {
+              "raw": "{{gql_url}}",
+              "host": [
+                "{{gql_url}}"
+              ]
+            }
           }
         }
       ]

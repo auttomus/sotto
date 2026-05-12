@@ -40,12 +40,12 @@ export class MediaService {
   ) {
     return this.prisma.mediaAttachment.create({
       data: {
-        accountId: BigInt(accountId),
+        accountId: accountId,
         attachedType: input.attachedType,
         attachedId: input.attachedId ?? '',
         fileName: input.fileName,
         contentType: input.contentType,
-        fileSize: BigInt(0), // Akan diisi nanti jika perlu
+        fileSize: 0, // Akan diisi nanti jika perlu
         objectKey,
         isPrivate: input.isPrivate ?? false,
         bucketName: input.isPrivate ? 'private-assets' : 'public-assets',
@@ -64,7 +64,7 @@ export class MediaService {
     return Promise.all(
       media.map(async (m) => ({
         ...m,
-        id: m.id.toString(),
+        id: m.id,
         fileSize: m.fileSize.toString(),
         url: m.isPrivate
           ? await this.minio.getPresignedDownloadUrl(m.objectKey, true)
@@ -74,13 +74,36 @@ export class MediaService {
   }
 
   /** Hapus media attachment (dari DB + MinIO) */
-  async deleteMedia(mediaId: bigint, accountId: string) {
+  async deleteMedia(mediaId: string, accountId: string) {
     const media = await this.prisma.mediaAttachment.findFirst({
-      where: { id: mediaId, accountId: BigInt(accountId) },
+      where: { id: mediaId, accountId: accountId },
     });
     if (!media) throw new NotFoundException('Media tidak ditemukan');
 
     await this.minio.deleteObject(media.objectKey, media.isPrivate);
     await this.prisma.mediaAttachment.delete({ where: { id: mediaId } });
+  }
+
+  /** Hapus media yang tidak bertuan (orphaned) > 24 jam */
+  async cleanupOrphanedMedia() {
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const orphans = await this.prisma.mediaAttachment.findMany({
+      where: {
+        attachedId: '',
+        createdAt: { lt: oneDayAgo },
+      },
+    });
+
+    if (orphans.length === 0) return 0;
+
+    for (const m of orphans) {
+      try {
+        await this.minio.deleteObject(m.objectKey, m.isPrivate);
+        await this.prisma.mediaAttachment.delete({ where: { id: m.id } });
+      } catch {
+        // Continue even if one fails
+      }
+    }
+    return orphans.length;
   }
 }

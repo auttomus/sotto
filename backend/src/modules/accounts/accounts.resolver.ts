@@ -18,7 +18,7 @@ export class AccountsResolver {
 
   private serializeAccount(
     account: {
-      id: bigint;
+      id: string;
       username: string;
       displayName: string;
       major: string | null;
@@ -34,7 +34,7 @@ export class AccountsResolver {
     extra: Record<string, unknown> = {},
   ): AccountModel {
     return {
-      id: account.id.toString(),
+      id: account.id,
       username: account.username,
       displayName: account.displayName,
       major: account.major,
@@ -52,9 +52,7 @@ export class AccountsResolver {
 
   @Query(() => AccountModel, { name: 'myProfile' })
   async getMyProfile(@CurrentUser() user: CurrentUserPayload) {
-    const account = await this.accountsService.getProfileById(
-      BigInt(user.accountId),
-    );
+    const account = await this.accountsService.getProfileById(user.accountId);
     return this.serializeAccount(account);
   }
 
@@ -68,7 +66,7 @@ export class AccountsResolver {
     let isFollowing: boolean | undefined;
     if (user) {
       isFollowing = await this.followsService.isFollowing(
-        BigInt(user.accountId),
+        user.accountId,
         account.id,
       );
     }
@@ -81,7 +79,7 @@ export class AccountsResolver {
     @Args('input') input: UpdateProfileInput,
   ) {
     const account = await this.accountsService.updateProfile(
-      BigInt(user.accountId),
+      user.accountId,
       input,
     );
     return this.serializeAccount(account);
@@ -92,10 +90,7 @@ export class AccountsResolver {
     @CurrentUser() user: CurrentUserPayload,
     @Args('targetAccountId', { type: () => ID }) targetAccountId: string,
   ) {
-    return this.followsService.follow(
-      BigInt(user.accountId),
-      BigInt(targetAccountId),
-    );
+    return this.followsService.follow(user.accountId, targetAccountId);
   }
 
   @Mutation(() => Boolean)
@@ -103,9 +98,6 @@ export class AccountsResolver {
     @CurrentUser() user: CurrentUserPayload,
     @Args('targetAccountId', { type: () => ID }) targetAccountId: string,
   ) {
-    return this.followsService.unfollow(
-      BigInt(user.accountId),
-      BigInt(targetAccountId),
-    );
+    return this.followsService.unfollow(user.accountId, targetAccountId);
   }
 }

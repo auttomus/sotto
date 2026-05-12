@@ -16,12 +16,12 @@ export class SearchResolver {
   ) {
     const listings = await this.searchService.searchListings(
       query,
-      tagIds?.map((id) => BigInt(id)),
+      tagIds?.map((id) => id),
     );
     return listings.map((l) => ({
       ...l,
-      id: l.id.toString(),
-      accountId: l.accountId.toString(),
+      id: l.id,
+      accountId: l.accountId,
       price: Number(l.price),
       account: l.account
         ? { ...l.account, trustScore: Number(l.account.trustScore) }
@@ -34,7 +34,7 @@ export class SearchResolver {
   async searchAccounts(@Args('query') query: string) {
     const accounts = await this.searchService.searchAccounts(query);
     return accounts.map((a) => ({
-      id: a.id.toString(),
+      id: a.id,
       username: a.username,
       displayName: a.displayName,
       major: a.major,

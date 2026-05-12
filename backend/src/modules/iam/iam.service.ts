@@ -50,7 +50,7 @@ export class IamService {
         data: {
           username: dto.username,
           displayName: dto.displayName,
-          schoolId: BigInt(dto.schoolId),
+          schoolId: dto.schoolId,
           major: dto.major,
         },
       });
@@ -86,8 +86,8 @@ export class IamService {
       throw new UnauthorizedException('Email atau kata sandi salah.');
 
     const payload = {
-      sub: user.id.toString(),
-      accountId: user.accountId.toString(),
+      sub: user.id,
+      accountId: user.accountId,
     };
 
     return {

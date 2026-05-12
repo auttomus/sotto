@@ -12,13 +12,13 @@ export class NegotiationsService {
   constructor(private readonly prisma: PrismaService) {}
 
   /** Buat penawaran khusus (oleh seller di dalam chat) */
-  async createOffer(sellerAccountId: bigint, input: CreateOfferInput) {
+  async createOffer(sellerAccountId: string, input: CreateOfferInput) {
     return this.prisma.customOffer.create({
       data: {
-        conversationId: BigInt(input.conversationId),
+        conversationId: input.conversationId,
         sellerAccountId,
-        buyerAccountId: BigInt(input.buyerAccountId),
-        listingId: input.listingId ? BigInt(input.listingId) : undefined,
+        buyerAccountId: input.buyerAccountId,
+        listingId: input.listingId ? input.listingId : undefined,
         description: input.description,
         proposedPrice: input.proposedPrice,
         deliveryTimeDays: input.deliveryTimeDays,
@@ -29,7 +29,7 @@ export class NegotiationsService {
   }
 
   /** Terima penawaran → nanti trigger order creation */
-  async acceptOffer(offerId: bigint, buyerAccountId: bigint) {
+  async acceptOffer(offerId: string, buyerAccountId: string) {
     const offer = await this.prisma.customOffer.findUnique({
       where: { id: offerId },
     });
@@ -48,7 +48,7 @@ export class NegotiationsService {
   }
 
   /** Tolak penawaran */
-  async rejectOffer(offerId: bigint, buyerAccountId: bigint) {
+  async rejectOffer(offerId: string, buyerAccountId: string) {
     const offer = await this.prisma.customOffer.findUnique({
       where: { id: offerId },
     });
@@ -64,7 +64,7 @@ export class NegotiationsService {
   }
 
   /** Tarik kembali penawaran (oleh seller) */
-  async withdrawOffer(offerId: bigint, sellerAccountId: bigint) {
+  async withdrawOffer(offerId: string, sellerAccountId: string) {
     const offer = await this.prisma.customOffer.findUnique({
       where: { id: offerId },
     });
@@ -80,7 +80,7 @@ export class NegotiationsService {
   }
 
   /** Ambil semua penawaran di sebuah conversation */
-  async getOffersForConversation(conversationId: bigint) {
+  async getOffersForConversation(conversationId: string) {
     return this.prisma.customOffer.findMany({
       where: { conversationId },
       orderBy: { createdAt: 'desc' },

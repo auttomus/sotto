@@ -87,19 +87,19 @@ export class ScyllaService implements OnModuleInit, OnModuleDestroy {
       // Tabel posts (Karya & Showcase)
       `CREATE TABLE IF NOT EXISTS posts (
         post_id timeuuid,
-        author_id bigint,
+        author_id uuid,
         in_reply_to_post_id timeuuid,
         content text,
-        linked_service_id bigint,
+        linked_service_id uuid,
         created_at timestamp,
         PRIMARY KEY (post_id)
       )`,
 
       // Tabel messages (Chat payload)
       `CREATE TABLE IF NOT EXISTS messages (
-        conversation_id bigint,
+        conversation_id uuid,
         message_id timeuuid,
-        sender_id bigint,
+        sender_id uuid,
         content text,
         created_at timestamp,
         PRIMARY KEY (conversation_id, message_id)
@@ -107,16 +107,16 @@ export class ScyllaService implements OnModuleInit, OnModuleDestroy {
 
       // Tabel user_feeds (Fan-out timeline)
       `CREATE TABLE IF NOT EXISTS user_feeds (
-        user_id bigint,
+        user_id uuid,
         post_id timeuuid,
-        author_id bigint,
+        author_id uuid,
         created_at timestamp,
         PRIMARY KEY (user_id, post_id)
       ) WITH CLUSTERING ORDER BY (post_id DESC)`,
 
       // Tabel interaction_logs (Bahan baku Synergy Engine)
       `CREATE TABLE IF NOT EXISTS interaction_logs (
-        user_id bigint,
+        user_id uuid,
         interaction_time timestamp,
         action_type text,
         target_id text,

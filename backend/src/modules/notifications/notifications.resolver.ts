@@ -18,15 +18,15 @@ export class NotificationsResolver {
     take?: number,
   ) {
     const results = await this.notificationsService.getNotifications(
-      BigInt(user.accountId),
+      user.accountId,
       cursor,
       take,
     );
     return results.map((n) => ({
       ...n,
-      id: n.id.toString(),
-      accountId: n.accountId.toString(),
-      fromAccountId: n.fromAccountId?.toString() ?? null,
+      id: n.id,
+      accountId: n.accountId,
+      fromAccountId: n.fromAccountId ?? null,
       fromDisplayName:
         (n as { fromAccount?: { displayName?: string | null } | null })
           .fromAccount?.displayName ?? null,
@@ -35,7 +35,7 @@ export class NotificationsResolver {
 
   @Query(() => Int, { name: 'unreadNotificationCount' })
   async getUnreadCount(@CurrentUser() user: CurrentUserPayload) {
-    return this.notificationsService.getUnreadCount(BigInt(user.accountId));
+    return this.notificationsService.getUnreadCount(user.accountId);
   }
 
   @Mutation(() => Boolean)
@@ -43,16 +43,13 @@ export class NotificationsResolver {
     @CurrentUser() user: CurrentUserPayload,
     @Args('id', { type: () => ID }) id: string,
   ) {
-    await this.notificationsService.markAsRead(
-      BigInt(id),
-      BigInt(user.accountId),
-    );
+    await this.notificationsService.markAsRead(id, user.accountId);
     return true;
   }
 
   @Mutation(() => Boolean)
   async markAllNotificationsAsRead(@CurrentUser() user: CurrentUserPayload) {
-    await this.notificationsService.markAllAsRead(BigInt(user.accountId));
+    await this.notificationsService.markAllAsRead(user.accountId);
     return true;
   }
 }

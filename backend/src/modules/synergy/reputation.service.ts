@@ -14,7 +14,7 @@ export class ReputationService {
    * T_k = trust_score, E_j = engagement count
    */
   async computeReputation(
-    authorAccountId: bigint,
+    authorAccountId: string,
     postId: string,
   ): Promise<number> {
     // Trust score dari PostgreSQL

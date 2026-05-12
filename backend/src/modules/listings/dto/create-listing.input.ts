@@ -54,4 +54,9 @@ export class CreateListingInput {
   @IsOptional()
   @IsArray()
   tagIds?: string[];
+
+  @Field(() => [ID], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  mediaIds?: string[];
 }

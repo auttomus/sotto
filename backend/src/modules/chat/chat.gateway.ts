@@ -58,8 +58,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
   ) {
     const message = await this.chatService.sendMessage(
-      BigInt(data.conversationId),
-      BigInt(data.senderAccountId),
+      data.conversationId,
+      data.senderAccountId,
       data.content,
     );
 

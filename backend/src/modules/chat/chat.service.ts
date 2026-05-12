@@ -37,11 +37,11 @@ export class ChatService {
 
   /** Buat conversation baru beserta participants */
   async createConversation(
-    creatorAccountId: bigint,
+    creatorAccountId: string,
     input: CreateConversationInput,
   ): Promise<ConversationWithParticipants> {
     const allParticipants = [
-      ...new Set([creatorAccountId.toString(), ...input.participantIds]),
+      ...new Set([creatorAccountId, ...input.participantIds]),
     ];
 
     return this.prisma.conversation.create({
@@ -52,7 +52,7 @@ export class ChatService {
         // or by passing listingId as a message attachment in the future.
         participants: {
           create: allParticipants.map((id) => ({
-            accountId: BigInt(id),
+            accountId: id,
           })),
         },
       },
@@ -70,7 +70,7 @@ export class ChatService {
 
   /** Ambil semua conversation milik user */
   async getConversations(
-    accountId: bigint,
+    accountId: string,
   ): Promise<ConversationWithParticipants[]> {
     return this.prisma.conversation.findMany({
       where: {
@@ -91,8 +91,8 @@ export class ChatService {
 
   /** Validasi bahwa user adalah peserta conversation */
   async validateParticipant(
-    conversationId: bigint,
-    accountId: bigint,
+    conversationId: string,
+    accountId: string,
   ): Promise<void> {
     const participant = await this.prisma.conversationParticipant.findFirst({
       where: { conversationId, accountId },
@@ -106,8 +106,8 @@ export class ChatService {
 
   /** Kirim pesan — tulis ke ScyllaDB + update timestamp conversation */
   async sendMessage(
-    conversationId: bigint,
-    senderAccountId: bigint,
+    conversationId: string,
+    senderAccountId: string,
     content: string,
   ): Promise<SerializedMessage> {
     const messageId = types.TimeUuid.now();
@@ -116,13 +116,7 @@ export class ChatService {
     await this.scylla.execute(
       `INSERT INTO messages (conversation_id, message_id, sender_id, content, created_at)
        VALUES (?, ?, ?, ?, ?)`,
-      [
-        conversationId.toString(),
-        messageId,
-        senderAccountId.toString(),
-        content,
-        now,
-      ],
+      [conversationId, messageId, senderAccountId, content, now],
     );
 
     // Update timestamp conversation di PostgreSQL
@@ -133,8 +127,8 @@ export class ChatService {
 
     return {
       messageId: messageId.toString(),
-      conversationId: conversationId.toString(),
-      senderId: senderAccountId.toString(),
+      conversationId: conversationId,
+      senderId: senderAccountId,
       content,
       createdAt: now,
     };
@@ -142,19 +136,19 @@ export class ChatService {
 
   /** Ambil riwayat pesan untuk sebuah conversation */
   async getMessages(
-    conversationId: bigint,
+    conversationId: string,
     limit = 50,
   ): Promise<SerializedMessage[]> {
     const result = await this.scylla.execute(
       `SELECT message_id, sender_id, content, created_at
        FROM messages WHERE conversation_id = ?
        ORDER BY message_id DESC LIMIT ?`,
-      [conversationId.toString(), limit],
+      [conversationId, limit],
     );
 
     return result.rows.map((row) => ({
       messageId: String(row['message_id'] as unknown),
-      conversationId: conversationId.toString(),
+      conversationId: conversationId,
       senderId: String(row['sender_id'] as unknown),
       content: String(row['content'] as unknown),
       createdAt: row['created_at'] as Date,

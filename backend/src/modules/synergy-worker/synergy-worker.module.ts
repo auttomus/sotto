@@ -4,6 +4,7 @@ import { SynergyCronService } from './synergy-cron.service';
 import { AnalyticsModule } from '../analytics/analytics.module';
 import { SynergyModule } from '../synergy/synergy.module';
 import { TagsModule } from '../tags/tags.module';
+import { MediaModule } from '../media/media.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { TagsModule } from '../tags/tags.module';
     AnalyticsModule,
     SynergyModule,
     TagsModule,
+    MediaModule,
   ],
   providers: [SynergyCronService],
 })

@@ -13,9 +13,9 @@ export class OrdersService {
   constructor(private readonly prisma: PrismaService) {}
 
   /** Buat order baru (status: PENDING_PAYMENT) */
-  async createOrder(buyerAccountId: bigint, input: CreateOrderInput) {
+  async createOrder(buyerAccountId: string, input: CreateOrderInput) {
     const listing = await this.prisma.listing.findUnique({
-      where: { id: BigInt(input.listingId) },
+      where: { id: input.listingId },
     });
     if (!listing) throw new NotFoundException('Listing tidak ditemukan.');
 
@@ -28,9 +28,7 @@ export class OrdersService {
         buyerAccountId,
         sellerAccountId: listing.accountId,
         listingId: listing.id,
-        customOfferId: input.customOfferId
-          ? BigInt(input.customOfferId)
-          : undefined,
+        customOfferId: input.customOfferId ? input.customOfferId : undefined,
         agreedPrice: input.agreedPrice,
         status: OrderStatus.PENDING_PAYMENT,
       },
@@ -38,7 +36,7 @@ export class OrdersService {
   }
 
   /** Advance order status: state machine transitions */
-  async advanceStatus(orderId: bigint, accountId: bigint) {
+  async advanceStatus(orderId: string, accountId: string) {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
     });
@@ -85,7 +83,7 @@ export class OrdersService {
   }
 
   /** Cancel order */
-  async cancelOrder(orderId: bigint, accountId: bigint) {
+  async cancelOrder(orderId: string, accountId: string) {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
     });
@@ -109,7 +107,7 @@ export class OrdersService {
   }
 
   /** Ambil order berdasarkan ID */
-  async getOrder(orderId: bigint) {
+  async getOrder(orderId: string) {
     return this.prisma.order.findUnique({
       where: { id: orderId },
       include: { listing: true, buyer: true, seller: true },
@@ -118,7 +116,7 @@ export class OrdersService {
 
   /** Ambil daftar order milik user */
   async getMyOrders(
-    accountId: bigint,
+    accountId: string,
     role: 'buyer' | 'seller',
     status?: OrderStatus,
   ) {

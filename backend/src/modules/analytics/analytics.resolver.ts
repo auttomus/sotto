@@ -18,7 +18,7 @@ export class AnalyticsResolver {
     @Args('targetId') targetId: string,
   ) {
     await this.analyticsService.trackEvent(
-      BigInt(user.accountId),
+      user.accountId,
       actionType,
       targetId,
     );

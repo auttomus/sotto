@@ -22,20 +22,31 @@ export class FeedResolver {
     @CurrentUser() user: CurrentUserPayload,
     @Args('input') input: CreatePostInput,
   ) {
-    const accountId = BigInt(user.accountId);
+    const accountId = user.accountId;
     const post = await this.feedService.createPost(
       accountId,
       input.content,
-      input.linkedServiceId ? BigInt(input.linkedServiceId) : undefined,
+      input.linkedServiceId ? input.linkedServiceId : undefined,
     );
 
     // Tag association (polymorphic)
     if (input.tagIds?.length) {
       await this.tagsService.setTagsForObject(
-        input.tagIds.map((id) => BigInt(id)),
-        post.postId,
+        input.tagIds.map((id) => id),
+        post.postId.toString(),
         'ScyllaPost',
       );
+    }
+
+    // Media association
+    if (input.mediaIds?.length) {
+      await this.prisma.mediaAttachment.updateMany({
+        where: { id: { in: input.mediaIds }, accountId },
+        data: {
+          attachedId: post.postId.toString(),
+          attachedType: 'ScyllaPost',
+        },
+      });
     }
 
     // Fan-out ke followers
@@ -45,7 +56,7 @@ export class FeedResolver {
     });
     await this.feedService.fanOutToFollowers(
       accountId,
-      post.postId,
+      post.postId.toString(),
       followers.map((f) => f.accountId),
     );
 
@@ -58,7 +69,7 @@ export class FeedResolver {
     @Args('limit', { type: () => Int, defaultValue: 20 }) limit: number,
   ): Promise<PostModel[]> {
     const feedItems = await this.feedService.getUserFeed(
-      BigInt(user.accountId),
+      user.accountId,
       Math.min(limit, 50),
     );
 
@@ -69,7 +80,7 @@ export class FeedResolver {
     const posts = await this.feedService.getPostsByIds(postIds);
 
     // Enrich dengan info author dari PostgreSQL
-    const authorIds = [...new Set(posts.map((p) => BigInt(p.authorId)))];
+    const authorIds = [...new Set(posts.map((p) => p.authorId))];
     const authors = await this.prisma.account.findMany({
       where: { id: { in: authorIds } },
       select: {
@@ -80,7 +91,7 @@ export class FeedResolver {
         school: { select: { name: true } },
       },
     });
-    const authorMap = new Map(authors.map((a) => [a.id.toString(), a]));
+    const authorMap = new Map(authors.map((a) => [a.id, a]));
 
     return posts.map((post) => {
       const author = authorMap.get(post.authorId);

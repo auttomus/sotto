@@ -10,8 +10,8 @@ export class GraphProximityService {
    * d: 0=self, 1=mutual, 2=one-way, 3=strangers
    */
   async computeProximity(
-    accountIdA: bigint,
-    accountIdB: bigint,
+    accountIdA: string,
+    accountIdB: string,
     lambdaG: number,
   ): Promise<number> {
     const distance = await this.followsService.computeGraphDistance(

@@ -17,7 +17,7 @@ export class AccountsService {
   }
 
   /** Ambil profil berdasarkan ID */
-  async getProfileById(accountId: bigint) {
+  async getProfileById(accountId: string) {
     const account = await this.prisma.account.findUnique({
       where: { id: accountId },
       include: { school: { select: { name: true } } },
@@ -27,7 +27,7 @@ export class AccountsService {
   }
 
   /** Update profil sendiri */
-  async updateProfile(accountId: bigint, input: UpdateProfileInput) {
+  async updateProfile(accountId: string, input: UpdateProfileInput) {
     return this.prisma.account.update({
       where: { id: accountId },
       data: {
@@ -45,12 +45,12 @@ export class AccountsService {
   }
 
   /** Ambil daftar followers */
-  async getFollowers(accountId: bigint, cursor?: string, take = 20) {
+  async getFollowers(accountId: string, cursor?: string, take = 20) {
     const follows = await this.prisma.follow.findMany({
       where: { targetAccountId: accountId },
       orderBy: { createdAt: 'desc' },
       take: take + 1,
-      ...(cursor ? { cursor: { id: BigInt(cursor) }, skip: 1 } : {}),
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
       include: {
         follower: {
           select: {
@@ -67,12 +67,12 @@ export class AccountsService {
   }
 
   /** Ambil daftar following */
-  async getFollowing(accountId: bigint, cursor?: string, take = 20) {
+  async getFollowing(accountId: string, cursor?: string, take = 20) {
     const follows = await this.prisma.follow.findMany({
       where: { accountId },
       orderBy: { createdAt: 'desc' },
       take: take + 1,
-      ...(cursor ? { cursor: { id: BigInt(cursor) }, skip: 1 } : {}),
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
       include: {
         following: {
           select: {

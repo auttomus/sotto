@@ -4,6 +4,7 @@ import { AnalyticsService } from '../analytics/analytics.service';
 import { VectorService } from '../synergy/vector.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TagsService } from '../tags/tags.service';
+import { MediaService } from '../media/media.service';
 import {
   CATEGORY_INDEX_MAP,
   VECTOR_DIMENSIONS,
@@ -18,6 +19,7 @@ export class SynergyCronService {
     private readonly vectorService: VectorService,
     private readonly prisma: PrismaService,
     private readonly tagsService: TagsService,
+    private readonly mediaService: MediaService,
   ) {}
 
   /**
@@ -68,10 +70,7 @@ export class SynergyCronService {
             ? categoryCounts.map((c) => c / totalCategorized)
             : new Array<number>(VECTOR_DIMENSIONS).fill(0);
 
-        await this.vectorService.setDemandVector(
-          account.id.toString(),
-          demandVector,
-        );
+        await this.vectorService.setDemandVector(account.id, demandVector);
         processed++;
       } catch (err) {
         this.logger.error(
@@ -81,5 +80,20 @@ export class SynergyCronService {
     }
 
     this.logger.log(`Selesai: ${processed}/${accounts.length} vektor diupdate`);
+  }
+
+  /**
+   * Setiap tengah malam: Bersihkan media "Yatim Piatu" (Orphaned).
+   * Menghapus file di MinIO dan record di DB yang tidak pernah ditempelkan ke entitas apapun.
+   */
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async handleMediaCleanup() {
+    this.logger.log('Memulai pembersihan media orphaned...');
+    const deletedCount = await this.mediaService.cleanupOrphanedMedia();
+    if (deletedCount > 0) {
+      this.logger.log(`Pembersihan selesai: ${deletedCount} file dihapus.`);
+    } else {
+      this.logger.log('Pembersihan selesai: Tidak ada file orphaned.');
+    }
   }
 }

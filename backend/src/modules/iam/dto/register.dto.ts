@@ -36,7 +36,7 @@ export class RegisterDto {
   displayName: string;
 
   @IsNotEmpty({ message: 'ID Sekolah wajib dipilih.' })
-  schoolId: number;
+  schoolId: string;
 
   @IsString()
   @IsNotEmpty({

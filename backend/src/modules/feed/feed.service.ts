@@ -8,9 +8,9 @@ export class FeedService {
 
   /** Buat postingan baru di ScyllaDB */
   async createPost(
-    authorId: bigint,
+    authorId: string,
     content: string,
-    linkedServiceId?: bigint,
+    linkedServiceId?: string,
   ) {
     const postId = types.TimeUuid.now();
     const now = new Date();
@@ -20,24 +20,24 @@ export class FeedService {
        VALUES (?, ?, ?, ?, ?)`,
       [
         postId,
-        authorId.toString(),
+        authorId,
         content,
-        linkedServiceId ? linkedServiceId.toString() : null,
+        linkedServiceId ? linkedServiceId : null,
         now,
       ],
     );
 
     return {
-      postId: postId.toString(),
-      authorId: authorId.toString(),
+      postId: postId,
+      authorId: authorId,
       content,
-      linkedServiceId: linkedServiceId?.toString() ?? null,
+      linkedServiceId: linkedServiceId ?? null,
       createdAt: now,
     };
   }
 
   /** Tulis komentar (post dengan in_reply_to_post_id) */
-  async createComment(authorId: bigint, parentPostId: string, content: string) {
+  async createComment(authorId: string, parentPostId: string, content: string) {
     const commentId = types.TimeUuid.now();
     const now = new Date();
 
@@ -46,7 +46,7 @@ export class FeedService {
        VALUES (?, ?, ?, ?, ?)`,
       [
         commentId,
-        authorId.toString(),
+        authorId,
         types.TimeUuid.fromString(parentPostId),
         content,
         now,
@@ -54,8 +54,8 @@ export class FeedService {
     );
 
     return {
-      postId: commentId.toString(),
-      authorId: authorId.toString(),
+      postId: commentId,
+      authorId: authorId,
       inReplyToPostId: parentPostId,
       content,
       createdAt: now,
@@ -64,22 +64,22 @@ export class FeedService {
 
   /** Fan-out: distribusikan post ke timeline semua followers */
   async fanOutToFollowers(
-    authorId: bigint,
+    authorId: string,
     postId: string,
-    followerIds: bigint[],
+    followerIds: string[],
   ) {
     const now = new Date();
     const timeUuid = types.TimeUuid.fromString(postId);
 
     const queries = followerIds.map((followerId) => ({
       query: `INSERT INTO user_feeds (user_id, post_id, author_id, created_at) VALUES (?, ?, ?, ?)`,
-      params: [followerId.toString(), timeUuid, authorId.toString(), now],
+      params: [followerId, timeUuid, authorId, now],
     }));
 
     // Juga masukkan ke timeline author sendiri
     queries.push({
       query: `INSERT INTO user_feeds (user_id, post_id, author_id, created_at) VALUES (?, ?, ?, ?)`,
-      params: [authorId.toString(), timeUuid, authorId.toString(), now],
+      params: [authorId, timeUuid, authorId, now],
     });
 
     if (queries.length > 0) {
@@ -91,11 +91,11 @@ export class FeedService {
   }
 
   /** Ambil feed timeline untuk user (candidate posts sebelum ranking) */
-  async getUserFeed(userId: bigint, limit = 200) {
+  async getUserFeed(userId: string, limit = 200) {
     const result = await this.scylla.execute(
       `SELECT post_id, author_id, created_at FROM user_feeds
        WHERE user_id = ? ORDER BY post_id DESC LIMIT ?`,
-      [userId.toString(), limit],
+      [userId, limit],
     );
     return result.rows.map((row) => {
       const r = row as unknown as {

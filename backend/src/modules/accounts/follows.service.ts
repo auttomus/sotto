@@ -6,7 +6,7 @@ export class FollowsService {
   constructor(private readonly prisma: PrismaService) {}
 
   /** Follow seseorang. Update counter secara atomic. */
-  async follow(accountId: bigint, targetAccountId: bigint) {
+  async follow(accountId: string, targetAccountId: string) {
     if (accountId === targetAccountId) {
       throw new ConflictException('Tidak bisa follow diri sendiri.');
     }
@@ -37,7 +37,7 @@ export class FollowsService {
   }
 
   /** Unfollow seseorang. Update counter secara atomic. */
-  async unfollow(accountId: bigint, targetAccountId: bigint) {
+  async unfollow(accountId: string, targetAccountId: string) {
     const existing = await this.prisma.follow.findUnique({
       where: {
         accountId_targetAccountId: { accountId, targetAccountId },
@@ -63,8 +63,8 @@ export class FollowsService {
 
   /** Cek apakah accountId mengikuti targetAccountId */
   async isFollowing(
-    accountId: bigint,
-    targetAccountId: bigint,
+    accountId: string,
+    targetAccountId: string,
   ): Promise<boolean> {
     const follow = await this.prisma.follow.findUnique({
       where: {
@@ -75,7 +75,7 @@ export class FollowsService {
   }
 
   /** Cek apakah saling follow (mutual) */
-  async isMutual(accountIdA: bigint, accountIdB: bigint): Promise<boolean> {
+  async isMutual(accountIdA: string, accountIdB: string): Promise<boolean> {
     const count = await this.prisma.follow.count({
       where: {
         OR: [
@@ -92,8 +92,8 @@ export class FollowsService {
    * 0 = diri sendiri, 1 = mutual, 2 = follow sepihak, 3 = strangers.
    */
   async computeGraphDistance(
-    accountIdA: bigint,
-    accountIdB: bigint,
+    accountIdA: string,
+    accountIdB: string,
   ): Promise<number> {
     if (accountIdA === accountIdB) return 0;
     const follows = await this.prisma.follow.findMany({

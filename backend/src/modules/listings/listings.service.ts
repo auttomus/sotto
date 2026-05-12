@@ -50,7 +50,7 @@ export class ListingsService {
 
   private serializeListing(listing: ListingWithAccount): SerializedListing {
     return {
-      id: listing.id.toString(),
+      id: listing.id,
       title: listing.title,
       description: listing.description,
       price: Number(listing.price),
@@ -59,7 +59,7 @@ export class ListingsService {
       deliveryTimeDays: listing.deliveryTimeDays,
       maxActiveOrders: listing.maxActiveOrders,
       isUnlimited: listing.isUnlimited,
-      accountId: listing.accountId.toString(),
+      accountId: listing.accountId,
       createdAt: listing.createdAt,
       updatedAt: listing.updatedAt,
       account: listing.account
@@ -88,7 +88,7 @@ export class ListingsService {
         deliveryTimeDays: input.deliveryTimeDays,
         maxActiveOrders: input.maxActiveOrders,
         isUnlimited: input.isUnlimited ?? false,
-        accountId: BigInt(accountId),
+        accountId: accountId,
       },
       include: {
         account: {
@@ -105,10 +105,18 @@ export class ListingsService {
     // Tag association
     if (input.tagIds?.length) {
       await this.tagsService.setTagsForObject(
-        input.tagIds.map((id) => BigInt(id)),
-        listing.id.toString(),
+        input.tagIds.map((id) => id),
+        listing.id,
         'Listing',
       );
+    }
+
+    // Media association
+    if (input.mediaIds?.length) {
+      await this.prisma.mediaAttachment.updateMany({
+        where: { id: { in: input.mediaIds }, accountId },
+        data: { attachedId: listing.id, attachedType: 'Listing' },
+      });
     }
 
     return this.serializeListing(listing);
@@ -120,7 +128,7 @@ export class ListingsService {
     input: UpdateListingInput,
   ): Promise<SerializedListing> {
     const existing = await this.prisma.listing.findFirst({
-      where: { id: BigInt(listingId), accountId: BigInt(accountId) },
+      where: { id: listingId, accountId: accountId },
       include: {
         account: {
           select: {
@@ -135,7 +143,7 @@ export class ListingsService {
     if (!existing) throw new NotFoundException('Listing tidak ditemukan.');
 
     const listing = await this.prisma.listing.update({
-      where: { id: BigInt(listingId), lockVersion: existing.lockVersion },
+      where: { id: listingId, lockVersion: existing.lockVersion },
       data: {
         ...(input.title !== undefined && { title: input.title }),
         ...(input.description !== undefined && {
@@ -167,8 +175,8 @@ export class ListingsService {
 
     if (input.tagIds) {
       await this.tagsService.setTagsForObject(
-        input.tagIds.map((id) => BigInt(id)),
-        listing.id.toString(),
+        input.tagIds.map((id) => id),
+        listing.id,
         'Listing',
       );
     }
@@ -178,16 +186,16 @@ export class ListingsService {
 
   async delete(listingId: string, accountId: string): Promise<boolean> {
     const existing = await this.prisma.listing.findFirst({
-      where: { id: BigInt(listingId), accountId: BigInt(accountId) },
+      where: { id: listingId, accountId: accountId },
     });
     if (!existing) throw new NotFoundException('Listing tidak ditemukan.');
-    await this.prisma.listing.delete({ where: { id: BigInt(listingId) } });
+    await this.prisma.listing.delete({ where: { id: listingId } });
     return true;
   }
 
   async findOne(listingId: string): Promise<SerializedListing> {
     const listing = await this.prisma.listing.findUnique({
-      where: { id: BigInt(listingId) },
+      where: { id: listingId },
       include: {
         account: {
           select: {
@@ -223,7 +231,7 @@ export class ListingsService {
 
   async findByAccount(accountId: string): Promise<SerializedListing[]> {
     const listings = await this.prisma.listing.findMany({
-      where: { accountId: BigInt(accountId) },
+      where: { accountId: accountId },
       include: {
         account: {
           select: {

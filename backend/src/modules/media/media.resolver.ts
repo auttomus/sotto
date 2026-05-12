@@ -35,7 +35,7 @@ export class MediaResolver {
     );
     return {
       ...media,
-      id: media.id.toString(),
+      id: media.id,
       fileSize: media.fileSize.toString(),
     };
   }
@@ -53,7 +53,7 @@ export class MediaResolver {
     @CurrentUser() user: CurrentUserPayload,
     @Args('id', { type: () => ID }) id: string,
   ) {
-    await this.mediaService.deleteMedia(BigInt(id), user.accountId);
+    await this.mediaService.deleteMedia(id, user.accountId);
     return true;
   }
 }

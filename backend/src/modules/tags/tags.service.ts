@@ -33,7 +33,7 @@ export class TagsService {
   }
 
   /** Tautkan tag ke objek (polymorphic: "Listing", "ScyllaPost", dll.) */
-  async tagObject(tagId: bigint, objectId: string, objectType: string) {
+  async tagObject(tagId: string, objectId: string, objectType: string) {
     return this.prisma.taggedObject.upsert({
       where: {
         objectType_objectId_tagId: { objectType, objectId, tagId },
@@ -44,7 +44,7 @@ export class TagsService {
   }
 
   /** Hapus tag dari objek */
-  async untagObject(tagId: bigint, objectId: string, objectType: string) {
+  async untagObject(tagId: string, objectId: string, objectType: string) {
     return this.prisma.taggedObject.deleteMany({
       where: { tagId, objectId, objectType },
     });
@@ -64,7 +64,7 @@ export class TagsService {
 
   /** Tautkan banyak tag sekaligus ke satu objek */
   async setTagsForObject(
-    tagIds: bigint[],
+    tagIds: string[],
     objectId: string,
     objectType: string,
   ) {

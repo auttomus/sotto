@@ -19,7 +19,7 @@ export class SchoolsService {
     });
   }
 
-  async getSchool(id: bigint) {
+  async getSchool(id: string) {
     return this.prisma.school.findUnique({ where: { id } });
   }
 

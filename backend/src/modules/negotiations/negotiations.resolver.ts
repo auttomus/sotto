@@ -16,11 +16,11 @@ export class NegotiationsResolver {
 
   private serializeOffer(offer: OfferRow): CustomOfferModel {
     return {
-      id: offer.id.toString(),
-      conversationId: offer.conversationId.toString(),
-      sellerAccountId: offer.sellerAccountId.toString(),
-      buyerAccountId: offer.buyerAccountId.toString(),
-      listingId: offer.listingId?.toString(),
+      id: offer.id,
+      conversationId: offer.conversationId,
+      sellerAccountId: offer.sellerAccountId,
+      buyerAccountId: offer.buyerAccountId,
+      listingId: offer.listingId,
       description: offer.description,
       proposedPrice: Number(offer.proposedPrice),
       deliveryTimeDays: offer.deliveryTimeDays,
@@ -37,7 +37,7 @@ export class NegotiationsResolver {
     @Args('input') input: CreateOfferInput,
   ): Promise<CustomOfferModel> {
     const offer = await this.negotiationsService.createOffer(
-      BigInt(user.accountId),
+      user.accountId,
       input,
     );
     return this.serializeOffer(offer);
@@ -49,8 +49,8 @@ export class NegotiationsResolver {
     @Args('offerId', { type: () => ID }) offerId: string,
   ): Promise<CustomOfferModel> {
     const offer = await this.negotiationsService.acceptOffer(
-      BigInt(offerId),
-      BigInt(user.accountId),
+      offerId,
+      user.accountId,
     );
     return this.serializeOffer(offer);
   }
@@ -61,8 +61,8 @@ export class NegotiationsResolver {
     @Args('offerId', { type: () => ID }) offerId: string,
   ): Promise<CustomOfferModel> {
     const offer = await this.negotiationsService.rejectOffer(
-      BigInt(offerId),
-      BigInt(user.accountId),
+      offerId,
+      user.accountId,
     );
     return this.serializeOffer(offer);
   }
@@ -73,8 +73,8 @@ export class NegotiationsResolver {
     @Args('offerId', { type: () => ID }) offerId: string,
   ): Promise<CustomOfferModel> {
     const offer = await this.negotiationsService.withdrawOffer(
-      BigInt(offerId),
-      BigInt(user.accountId),
+      offerId,
+      user.accountId,
     );
     return this.serializeOffer(offer);
   }
@@ -83,9 +83,8 @@ export class NegotiationsResolver {
   async getOffersForConversation(
     @Args('conversationId', { type: () => ID }) conversationId: string,
   ): Promise<CustomOfferModel[]> {
-    const offers = await this.negotiationsService.getOffersForConversation(
-      BigInt(conversationId),
-    );
+    const offers =
+      await this.negotiationsService.getOffersForConversation(conversationId);
     return offers.map((o) => this.serializeOffer(o));
   }
 }

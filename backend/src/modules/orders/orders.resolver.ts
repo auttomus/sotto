@@ -18,11 +18,11 @@ export class OrdersResolver {
 
   private serializeOrder(order: import('@prisma/client').Order): OrderModel {
     return {
-      id: order.id.toString(),
-      buyerAccountId: order.buyerAccountId.toString(),
-      sellerAccountId: order.sellerAccountId.toString(),
-      listingId: order.listingId.toString(),
-      customOfferId: order.customOfferId?.toString(),
+      id: order.id,
+      buyerAccountId: order.buyerAccountId,
+      sellerAccountId: order.sellerAccountId,
+      listingId: order.listingId,
+      customOfferId: order.customOfferId,
       agreedPrice: Number(order.agreedPrice),
       status: order.status,
       createdAt: order.createdAt,
@@ -35,10 +35,7 @@ export class OrdersResolver {
     @CurrentUser() user: CurrentUserPayload,
     @Args('input') input: CreateOrderInput,
   ) {
-    const order = await this.ordersService.createOrder(
-      BigInt(user.accountId),
-      input,
-    );
+    const order = await this.ordersService.createOrder(user.accountId, input);
     return this.serializeOrder(order);
   }
 
@@ -48,8 +45,8 @@ export class OrdersResolver {
     @Args('orderId', { type: () => ID }) orderId: string,
   ) {
     const order = await this.ordersService.advanceStatus(
-      BigInt(orderId),
-      BigInt(user.accountId),
+      orderId,
+      user.accountId,
     );
     return this.serializeOrder(order);
   }
@@ -59,16 +56,13 @@ export class OrdersResolver {
     @CurrentUser() user: CurrentUserPayload,
     @Args('orderId', { type: () => ID }) orderId: string,
   ) {
-    const order = await this.ordersService.cancelOrder(
-      BigInt(orderId),
-      BigInt(user.accountId),
-    );
+    const order = await this.ordersService.cancelOrder(orderId, user.accountId);
     return this.serializeOrder(order);
   }
 
   @Query(() => OrderModel, { name: 'order', nullable: true })
   async getOrder(@Args('id', { type: () => ID }) id: string) {
-    const order = await this.ordersService.getOrder(BigInt(id));
+    const order = await this.ordersService.getOrder(id);
     return order ? this.serializeOrder(order) : null;
   }
 
@@ -79,7 +73,7 @@ export class OrdersResolver {
     @Args('status', { nullable: true }) status?: OrderStatus,
   ) {
     const orders = await this.ordersService.getMyOrders(
-      BigInt(user.accountId),
+      user.accountId,
       role as 'buyer' | 'seller',
       status,
     );
@@ -94,17 +88,17 @@ export class OrdersResolver {
     @Args('comment', { nullable: true }) comment?: string,
   ) {
     const review = await this.reviewsService.createReview(
-      BigInt(orderId),
-      BigInt(user.accountId),
+      orderId,
+      user.accountId,
       rating,
       comment,
     );
     return {
       ...review,
-      id: review.id.toString(),
-      orderId: review.orderId.toString(),
-      reviewerAccountId: review.reviewerAccountId.toString(),
-      targetAccountId: review.targetAccountId.toString(),
+      id: review.id,
+      orderId: review.orderId,
+      reviewerAccountId: review.reviewerAccountId,
+      targetAccountId: review.targetAccountId,
       comment: review.comment ?? undefined,
     };
   }

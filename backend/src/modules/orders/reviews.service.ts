@@ -7,8 +7,8 @@ export class ReviewsService {
 
   /** Buat review untuk order yang sudah COMPLETED */
   async createReview(
-    orderId: bigint,
-    reviewerAccountId: bigint,
+    orderId: string,
+    reviewerAccountId: string,
     rating: number,
     comment?: string,
   ) {
