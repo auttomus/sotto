@@ -71,7 +71,7 @@ export default function FeedTimelineRoute() {
       {/* Floating Action Button for Create Post */}
       <Link
         to="/workspace/create"
-        className="fixed bottom-20 right-4 sm:right-auto sm:ml-[26rem] z-40 bg-indigo-600 text-white h-14 w-14 rounded-full flex items-center justify-center shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 hover:scale-105 active:scale-95 transition-all"
+        className="fixed bottom-20 right-4 md:hidden z-40 bg-indigo-600 text-white h-14 w-14 rounded-full flex items-center justify-center shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 hover:scale-105 active:scale-95 transition-all"
         aria-label="Buat Postingan Baru"
       >
         <Plus className="h-6 w-6" />

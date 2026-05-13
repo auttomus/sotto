@@ -7,8 +7,8 @@ export default function BottomNav() {
   const navItems = [
     { icon: Home, label: "Beranda", to: "/" },
     { icon: Search, label: "Eksplor", to: "/explore" },
-    { icon: MessageSquare, label: "Pesan", to: "/workspace/chat", hasBadge: true },
-    { icon: ClipboardList, label: "Order", to: "/workspace/order" },
+    { icon: MessageSquare, label: "Pesan", to: "/chats", hasBadge: true },
+    { icon: ClipboardList, label: "Order", to: "/orders" },
     { icon: User, label: "Profil", to: "/profile" },
   ];
 

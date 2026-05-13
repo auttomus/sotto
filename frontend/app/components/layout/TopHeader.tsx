@@ -1,12 +1,12 @@
 import * as React from "react";
-import { Bell, Search } from "lucide-react";
+import { Bell, Search, Moon, Sun } from "lucide-react";
 import { Link } from "react-router";
 
-export default function TopHeader() {
+export default function TopHeader({ toggleTheme, isDark }: { toggleTheme?: () => void, isDark?: boolean }) {
   return (
     <header className="sticky top-0 z-50 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800">
-      <div className="flex items-center justify-between px-4 h-16 w-full max-w-lg mx-auto">
-        <Link to="/" className="text-xl font-bold tracking-tight text-indigo-600 dark:text-indigo-400">
+      <div className="flex items-center justify-between px-4 h-16 w-full max-w-lg mx-auto md:max-w-none md:px-6">
+        <Link to="/" className="text-xl font-bold tracking-tight text-indigo-600 dark:text-indigo-400 font-serif italic">
           Sotto
         </Link>
         <div className="flex flex-1 items-center justify-end gap-3 ml-4">
@@ -20,6 +20,11 @@ export default function TopHeader() {
               placeholder="Cari karya atau jasa..."
             />
           </div>
+          {toggleTheme && (
+            <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+              {isDark ? <Sun className="h-5 w-5 text-gray-600 dark:text-gray-300" /> : <Moon className="h-5 w-5 text-gray-600 dark:text-gray-300" />}
+            </button>
+          )}
           <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors relative">
             <Bell className="h-5 w-5 text-gray-600 dark:text-gray-300" />
             <span className="absolute top-1.5 right-2 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-900" />
