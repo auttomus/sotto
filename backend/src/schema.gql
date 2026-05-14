@@ -59,6 +59,7 @@ input CreateListingInput {
   description: String!
   isUnlimited: Boolean = false
   maxActiveOrders: Int
+  mediaIds: [ID!]
   tagIds: [ID!]
   title: String!
   type: String! = "SERVICE"
@@ -82,6 +83,7 @@ input CreateOrderInput {
 input CreatePostInput {
   content: String!
   linkedServiceId: ID
+  mediaIds: [ID!]
   tagIds: [ID!]
 }
 
