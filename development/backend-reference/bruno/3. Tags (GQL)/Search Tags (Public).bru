@@ -1,0 +1,21 @@
+meta {
+  name: Search Tags (Public)
+  type: graphql
+  seq: 1
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: none
+}
+
+body:graphql {
+  query {
+    searchTags(query: "Front") {
+      id
+      name
+      isUsable
+    }
+  }
+}

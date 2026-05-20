@@ -1,0 +1,49 @@
+query GetMyProfile {
+  myProfile {
+    id
+    displayName
+    username
+    note
+    avatarObjectKey
+    avatarUrl
+    trustScore
+    schoolName
+    major
+  }
+}
+
+query GetUserProfile($username: String!) {
+  profile(username: $username) {
+    id
+    displayName
+    username
+    note
+    avatarObjectKey
+    avatarUrl
+    trustScore
+    isFollowing
+    followersCount
+    followingCount
+    schoolName
+    major
+  }
+}
+
+mutation UpdateProfile($input: UpdateProfileInput!) {
+  updateProfile(input: $input) {
+    id
+    displayName
+    username
+    note
+    avatarObjectKey
+    major
+  }
+}
+
+mutation FollowUser($targetAccountId: ID!) {
+  follow(targetAccountId: $targetAccountId)
+}
+
+mutation UnfollowUser($targetAccountId: ID!) {
+  unfollow(targetAccountId: $targetAccountId)
+}

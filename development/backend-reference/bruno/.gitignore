@@ -1,0 +1,2 @@
+# Bruno secret environment values are stored locally in dotenv
+.env

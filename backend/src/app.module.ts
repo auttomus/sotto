@@ -55,6 +55,7 @@ import { SchoolsModule } from './modules/schools/schools.module';
       autoSchemaFile: process.env.NODE_ENV === 'production' ? true : join(process.cwd(), 'src/schema.gql'),
       sortSchema: true,
       playground: true,
+      introspection: true,
       // Meneruskan objek request ke konteks GraphQL
       // agar JWT guard dan @CurrentUser() berfungsi di resolver
       context: ({ req }: { req: Request }) => ({ req }),

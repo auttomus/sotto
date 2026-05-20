@@ -1,0 +1,35 @@
+meta {
+  name: Confirm Upload
+  type: graphql
+  seq: 2
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  mutation {
+    confirmUpload(objectKey: "{{last_object_key}}", input: {
+      fileName: "portfolio.png",
+      contentType: "image/png",
+      attachedType: "ScyllaPost"
+    }) {
+      id
+      fileName
+      objectKey
+      isPrivate
+      createdAt
+    }
+  }
+}
+
+script:post-response {
+  const d = res.body;
+  if (d.data && d.data.confirmUpload) {
+    bru.setVar("last_media_id", d.data.confirmUpload.id);
+    console.log("last_media_id saved: " + d.data.confirmUpload.id);
+  }
+}

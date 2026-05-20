@@ -1,0 +1,27 @@
+meta {
+  name: Login [200] Auto-Set Token
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_url}}/iam/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "aryapranata@smkn1denpasar.sch.id",
+    "password": "RplSotto2026!"
+  }
+}
+
+script:post-response {
+  if (res.status === 200) {
+    const d = res.body;
+    bru.setVar("jwt_token", d.accessToken);
+    bru.setVar("account_id", d.accountId || "");
+    console.log("Token saved!");
+  }
+}

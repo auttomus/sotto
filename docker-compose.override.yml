@@ -1,0 +1,30 @@
+# ──────────────────────────────────────────────────
+# DEV-ONLY OVERRIDES
+# This file is auto-loaded by `docker compose up`.
+# It exposes internal service ports to the host for
+# local tooling (Prisma CLI, Bruno, pgAdmin, etc.).
+#
+# NEVER deploy this to production.
+# ──────────────────────────────────────────────────
+
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+
+  redis:
+    ports:
+      - "6379:6379"
+
+  scylladb:
+    ports:
+      - "9042:9042"
+
+  minio:
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # MinIO Console UI
+
+  backend:
+    ports:
+      - "3000:3000"   # Direct backend access (bypasses nginx)

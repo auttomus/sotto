@@ -1,0 +1,26 @@
+query GetFeed($limit: Int) {
+  feed(limit: $limit) {
+    postId
+    content
+    createdAt
+    authorId
+    authorDisplayName
+    authorUsername
+    authorAvatarObjectKey
+    authorSchoolName
+    media {
+      id
+      fileName
+      contentType
+      url
+    }
+  }
+}
+
+mutation CreatePost($input: CreatePostInput!) {
+  createPost(input: $input) {
+    postId
+    content
+    createdAt
+  }
+}

@@ -1,0 +1,17 @@
+meta {
+  name: Track Event
+  type: graphql
+  seq: 1
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  mutation {
+    trackEvent(actionType: "view", targetId: "post-uuid-1")
+  }
+}

@@ -1,0 +1,24 @@
+meta {
+  name: Search Accounts
+  type: graphql
+  seq: 2
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: none
+}
+
+body:graphql {
+  query {
+    searchAccounts(query: "arya") {
+      id
+      username
+      displayName
+      major
+      trustScore
+      schoolName
+    }
+  }
+}

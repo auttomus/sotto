@@ -1,0 +1,33 @@
+meta {
+  name: Upload Media for ScyllaMessage (Image)
+  type: graphql
+  seq: 4
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  mutation {
+    requestUploadUrl(input: {
+      fileName: "chat_image.png",
+      contentType: "image/png",
+      attachedType: "ScyllaMessage",
+      attachedId: "{{message_id}}"
+    }) {
+      uploadUrl
+      objectKey
+    }
+  }
+}
+
+script:post-response {
+  const d = res.body;
+  if (d.data && d.data.requestUploadUrl) {
+    bru.setVar("last_object_key", d.data.requestUploadUrl.objectKey);
+    console.log("last_object_key saved: " + d.data.requestUploadUrl.objectKey);
+  }
+}

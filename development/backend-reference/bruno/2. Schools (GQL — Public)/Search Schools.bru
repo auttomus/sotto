@@ -1,0 +1,23 @@
+meta {
+  name: Search Schools
+  type: graphql
+  seq: 1
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: none
+}
+
+body:graphql {
+  query {
+    searchSchools(query: "SMK") {
+      id
+      npsn
+      name
+      city
+      isVerified
+    }
+  }
+}

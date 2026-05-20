@@ -1,0 +1,17 @@
+meta {
+  name: Send Message linked to Listing
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{base_url}}/
+  body: text
+  auth: none
+}
+
+body:text {
+  Socket.io tidak bisa ditest lewat Bruno HTTP.
+  Gunakan frontend untuk test chat.
+}
+

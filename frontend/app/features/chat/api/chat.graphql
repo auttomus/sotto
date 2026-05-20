@@ -1,0 +1,42 @@
+query GetConversations {
+  conversations {
+    id
+    type
+    createdAt
+    updatedAt
+    participants {
+      accountId
+      displayName
+      avatarObjectKey
+    }
+    activeOrder {
+      id
+      status
+      agreedPrice
+      createdAt
+    }
+  }
+}
+
+query GetMessages($conversationId: ID!, $limit: Int) {
+  messages(conversationId: $conversationId, limit: $limit) {
+    messageId
+    senderId
+    content
+    createdAt
+    media {
+      id
+      fileName
+      contentType
+      url
+    }
+  }
+}
+
+mutation CreateConversation($input: CreateConversationInput!) {
+  createConversation(input: $input) {
+    id
+    type
+    createdAt
+  }
+}

@@ -1,0 +1,17 @@
+meta {
+  name: Delete Listing
+  type: graphql
+  seq: 6
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  mutation {
+    deleteListing(id: "{{listing_id}}")
+  }
+}

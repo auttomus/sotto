@@ -1,0 +1,67 @@
+query GetListings {
+  listings {
+    id
+    title
+    description
+    price
+    status
+    createdAt
+    accountId
+    account {
+      displayName
+      major
+      trustScore
+      username
+    }
+  }
+}
+
+query GetListingDetail($id: ID!) {
+  listing(id: $id) {
+    id
+    title
+    description
+    price
+    status
+    createdAt
+    accountId
+    account {
+      displayName
+      major
+      trustScore
+      username
+    }
+    media {
+      id
+      fileName
+      contentType
+      objectKey
+      url
+      isPrivate
+    }
+  }
+}
+
+mutation CreateListing($input: CreateListingInput!) {
+  createListing(input: $input) {
+    id
+    title
+    description
+    price
+    status
+  }
+}
+
+mutation UpdateListing($id: ID!, $input: UpdateListingInput!) {
+  updateListing(id: $id, input: $input) {
+    id
+    title
+    description
+    price
+    status
+  }
+}
+
+mutation DeleteListing($id: ID!) {
+  deleteListing(id: $id)
+}

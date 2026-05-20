@@ -1,0 +1,36 @@
+meta {
+  name: Create Order
+  type: graphql
+  seq: 1
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  mutation {
+    createOrder(input: {
+      listingId: "{{listing_id}}",
+      agreedPrice: 150000
+    }) {
+      id
+      buyerAccountId
+      sellerAccountId
+      listingId
+      agreedPrice
+      status
+      createdAt
+    }
+  }
+}
+
+script:post-response {
+  const d = res.body;
+  if (d.data && d.data.createOrder) {
+    bru.setVar("order_id", d.data.createOrder.id);
+    console.log("order_id saved: " + d.data.createOrder.id);
+  }
+}

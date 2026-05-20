@@ -1,0 +1,22 @@
+meta {
+  name: Register [201]
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/iam/register
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "aryapranata@smkn1denpasar.sch.id",
+    "password": "RplSotto2026!",
+    "username": "arya_pranata_dev",
+    "displayName": "Kadek Agus Arya P.",
+    "schoolId": "{{school_id}}",
+    "major": "Rekayasa Perangkat Lunak"
+  }
+}
