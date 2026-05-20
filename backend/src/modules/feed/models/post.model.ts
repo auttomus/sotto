@@ -1,4 +1,5 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { MediaAttachmentModel } from '../../media/models/media-attachment.model';
 
 @ObjectType()
 export class PostModel {
@@ -32,4 +33,7 @@ export class PostModel {
 
   @Field(() => String, { nullable: true })
   authorSchoolName?: string | null;
+
+  @Field(() => [MediaAttachmentModel], { nullable: true })
+  media?: MediaAttachmentModel[];
 }

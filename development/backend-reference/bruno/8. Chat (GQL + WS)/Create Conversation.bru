@@ -1,0 +1,36 @@
+meta {
+  name: Create Conversation
+  type: graphql
+  seq: 1
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  mutation {
+    createConversation(input: {
+      participantIds: ["{{target_account_id}}"],
+      type: "DIRECT"
+    }) {
+      id
+      type
+      createdAt
+      participants {
+        accountId
+        displayName
+      }
+    }
+  }
+}
+
+script:post-response {
+  const d = res.body;
+  if (d.data && d.data.createConversation) {
+    bru.setVar("conversation_id", d.data.createConversation.id);
+    console.log("conversation_id saved");
+  }
+}

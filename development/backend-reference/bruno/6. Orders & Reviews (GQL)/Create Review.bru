@@ -1,0 +1,23 @@
+meta {
+  name: Create Review
+  type: graphql
+  seq: 6
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  mutation {
+    createReview(orderId: "{{order_id}}", rating: 5, comment: "Kerjaan cepat dan rapi!") {
+      id
+      orderId
+      rating
+      comment
+      createdAt
+    }
+  }
+}

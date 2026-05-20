@@ -1,0 +1,31 @@
+meta {
+  name: Create Custom Offer
+  type: graphql
+  seq: 1
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  mutation {
+    createOffer(input: {
+      conversationId: "{{conversation_id}}",
+      buyerAccountId: "2",
+      description: "Bikin website custom sesuai brief",
+      proposedPrice: 250000,
+      deliveryTimeDays: 5
+    }) {
+      id
+      conversationId
+      proposedPrice
+      deliveryTimeDays
+      status
+      expiresAt
+      createdAt
+    }
+  }
+}

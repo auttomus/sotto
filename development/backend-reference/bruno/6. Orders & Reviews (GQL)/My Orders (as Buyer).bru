@@ -1,0 +1,23 @@
+meta {
+  name: My Orders (as Buyer)
+  type: graphql
+  seq: 5
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  query {
+    myOrders(role: "buyer") {
+      id
+      listingId
+      agreedPrice
+      status
+      createdAt
+    }
+  }
+}

@@ -143,11 +143,9 @@ Table conversations {
   id uuid [primary key, ]
   type conversation_type [default: 'direct']
   
-  order_id uuid [note: 'Tautkan chat langsung ke order jika sedang ada proyek. Memudahkan moderator jika ada sengketa nanti.']
-  
   created_at timestamp [not null]
   updated_at timestamp [not null]
-  Note: 'ROOM: Metadata ruangan chat. Isi pesannya (payload) tidak ada di sini, melainkan di ScyllaDB.'
+  Note: 'ROOM: Metadata ruangan chat. Relasi ke Order/Listing bersifat DYNAMICAL (Virtual Field) di level API untuk mendukung penggunaan kembali thread chat.'
 }
 
 Table conversation_participants {
@@ -306,7 +304,7 @@ Ref: reviews.target_account_id > accounts.id
 Ref: follows.account_id > accounts.id [delete: cascade]
 Ref: follows.target_account_id > accounts.id [delete: cascade]
 
-Ref: conversations.order_id - orders.id [delete: cascade]
+// Ref: conversations.order_id - orders.id [delete: cascade] (REMOVED: Now dynamic context)
 Ref: conversation_participants.conversation_id > conversations.id [delete: cascade]
 Ref: conversation_participants.account_id > accounts.id [delete: cascade]
 

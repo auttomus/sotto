@@ -1,4 +1,12 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  Int,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql';
 import { FeedService } from './feed.service';
 import { PostModel } from './models/post.model';
 import { CreatePostInput } from './dto/create-post.input';
@@ -8,6 +16,8 @@ import {
 } from '../../common/decorators/current-user.decorator';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TagsService } from '../tags/tags.service';
+import { MediaService } from '../media/media.service';
+import { MediaAttachmentModel } from '../media/models/media-attachment.model';
 
 @Resolver(() => PostModel)
 export class FeedResolver {
@@ -15,6 +25,7 @@ export class FeedResolver {
     private readonly feedService: FeedService,
     private readonly prisma: PrismaService,
     private readonly tagsService: TagsService,
+    private readonly mediaService: MediaService,
   ) {}
 
   @Mutation(() => PostModel)
@@ -103,5 +114,10 @@ export class FeedResolver {
         authorSchoolName: author?.school?.name,
       };
     });
+  }
+
+  @ResolveField(() => [MediaAttachmentModel])
+  async media(@Parent() post: PostModel) {
+    return this.mediaService.getMediaForObject('ScyllaPost', post.postId);
   }
 }

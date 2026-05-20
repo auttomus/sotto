@@ -1,0 +1,19 @@
+meta {
+  name: Simulate Midtrans Webhook
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/payments/webhook
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "transaction_status": "settlement",
+    "order_id": "ORDER-001",
+    "gross_amount": "150000.00"
+  }
+}

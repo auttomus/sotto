@@ -1,0 +1,38 @@
+meta {
+  name: Get Listing by ID (Public)
+  type: graphql
+  seq: 3
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: none
+}
+
+body:graphql {
+  query {
+    listing(id: "{{listing_id}}") {
+      id
+      title
+      description
+      price
+      type
+      status
+      deliveryTimeDays
+      account {
+        displayName
+        major
+        trustScore
+        username
+      }
+      media {
+        id
+        url
+        contentType
+      }
+      createdAt
+      updatedAt
+    }
+  }
+}

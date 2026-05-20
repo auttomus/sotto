@@ -1,4 +1,13 @@
-import { Resolver, Query, Mutation, Args, ID, Int } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  ID,
+  Int,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql';
 import { ChatService, type SerializedMessage } from './chat.service';
 import { ConversationModel, MessageModel } from './models/chat.model';
 import { CreateConversationInput } from './dto/create-conversation.input';
@@ -6,6 +15,12 @@ import {
   CurrentUser,
   type CurrentUserPayload,
 } from '../../common/decorators/current-user.decorator';
+import { MediaService } from '../media/media.service';
+import { MediaAttachmentModel } from '../media/models/media-attachment.model';
+import { OrderModel } from '../orders/models/order.model';
+import { OrdersService } from '../orders/orders.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { OrderStatus } from '@prisma/client';
 
 // Explicit type for participant from Prisma include shape
 type ParticipantRow = {
@@ -16,9 +31,40 @@ type ParticipantRow = {
   };
 };
 
-@Resolver()
-export class ChatResolver {
-  constructor(private readonly chatService: ChatService) {}
+@Resolver(() => MessageModel)
+export class ChatMessageResolver {
+  constructor(
+    private readonly chatService: ChatService,
+    private readonly mediaService: MediaService,
+  ) {}
+
+  @Query(() => [MessageModel], { name: 'messages' })
+  async getMessages(
+    @CurrentUser() user: CurrentUserPayload,
+    @Args('conversationId', { type: () => ID }) conversationId: string,
+    @Args('limit', { type: () => Int, defaultValue: 50 }) limit: number,
+  ): Promise<SerializedMessage[]> {
+    // Validasi bahwa user adalah peserta
+    await this.chatService.validateParticipant(conversationId, user.accountId);
+    return this.chatService.getMessages(conversationId, limit);
+  }
+
+  @ResolveField(() => [MediaAttachmentModel])
+  async media(@Parent() message: MessageModel) {
+    return this.mediaService.getMediaForObject(
+      'ScyllaMessage',
+      message.messageId,
+    );
+  }
+}
+
+@Resolver(() => ConversationModel)
+export class ChatConversationResolver {
+  constructor(
+    private readonly chatService: ChatService,
+    private readonly prisma: PrismaService,
+    private readonly ordersService: OrdersService,
+  ) {}
 
   @Mutation(() => ConversationModel)
   async createConversation(
@@ -60,14 +106,47 @@ export class ChatResolver {
     }));
   }
 
-  @Query(() => [MessageModel], { name: 'messages' })
-  async getMessages(
+  @ResolveField(() => OrderModel, { nullable: true })
+  async activeOrder(
+    @Parent() conversation: ConversationModel,
     @CurrentUser() user: CurrentUserPayload,
-    @Args('conversationId', { type: () => ID }) conversationId: string,
-    @Args('limit', { type: () => Int, defaultValue: 50 }) limit: number,
-  ): Promise<SerializedMessage[]> {
-    // Validasi bahwa user adalah peserta
-    await this.chatService.validateParticipant(conversationId, user.accountId);
-    return this.chatService.getMessages(conversationId, limit);
+  ): Promise<OrderModel | null> {
+    // Cari peserta lain (selain current user)
+    const participants = await this.prisma.conversationParticipant.findMany({
+      where: { conversationId: conversation.id },
+    });
+
+    const otherParticipant = participants.find(
+      (p) => p.accountId !== user.accountId,
+    );
+
+    if (!otherParticipant) return null;
+
+    // Cari order aktif antara dua user ini
+    const activeOrder = await this.prisma.order.findFirst({
+      where: {
+        OR: [
+          {
+            buyerAccountId: user.accountId,
+            sellerAccountId: otherParticipant.accountId,
+          },
+          {
+            buyerAccountId: otherParticipant.accountId,
+            sellerAccountId: user.accountId,
+          },
+        ],
+        status: {
+          notIn: [OrderStatus.COMPLETED, OrderStatus.CANCELLED],
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (!activeOrder) return null;
+
+    return {
+      ...activeOrder,
+      agreedPrice: activeOrder.agreedPrice.toNumber(),
+    };
   }
 }

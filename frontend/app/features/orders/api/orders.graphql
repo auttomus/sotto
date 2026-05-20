@@ -1,0 +1,82 @@
+query GetMyOrders($role: String!, $status: String) {
+  myOrders(role: $role, status: $status) {
+    id
+    status
+    agreedPrice
+    createdAt
+    buyerAccountId
+    sellerAccountId
+    listingId
+  }
+}
+
+query GetOrderDetail($id: ID!) {
+  order(id: $id) {
+    id
+    status
+    agreedPrice
+    createdAt
+    buyerAccountId
+    sellerAccountId
+    listingId
+  }
+}
+
+mutation CreateOrder($input: CreateOrderInput!) {
+  createOrder(input: $input) {
+    id
+    status
+    agreedPrice
+  }
+}
+
+mutation CreateOffer($input: CreateOfferInput!) {
+  createOffer(input: $input) {
+    id
+    status
+    proposedPrice
+  }
+}
+
+mutation WithdrawOffer($offerId: ID!) {
+  withdrawOffer(offerId: $offerId) {
+    id
+    status
+  }
+}
+
+mutation AcceptOffer($offerId: ID!) {
+  acceptOffer(offerId: $offerId) {
+    id
+    status
+  }
+}
+
+mutation RejectOffer($offerId: ID!) {
+  rejectOffer(offerId: $offerId) {
+    id
+    status
+  }
+}
+
+mutation AdvanceOrderStatus($orderId: ID!) {
+  advanceOrderStatus(orderId: $orderId) {
+    id
+    status
+  }
+}
+
+mutation CancelOrder($orderId: ID!) {
+  cancelOrder(orderId: $orderId) {
+    id
+    status
+  }
+}
+
+mutation CreateReview($orderId: ID!, $rating: Float!, $comment: String) {
+  createReview(orderId: $orderId, rating: $rating, comment: $comment) {
+    id
+    rating
+    comment
+  }
+}

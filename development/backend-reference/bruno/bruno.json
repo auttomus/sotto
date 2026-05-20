@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Sotto Platform API — Full",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

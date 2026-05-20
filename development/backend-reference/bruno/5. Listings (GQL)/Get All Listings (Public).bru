@@ -1,0 +1,32 @@
+meta {
+  name: Get All Listings (Public)
+  type: graphql
+  seq: 4
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: none
+}
+
+body:graphql {
+  query {
+    listings {
+      id
+      title
+      price
+      type
+      status
+      account {
+        displayName
+        trustScore
+      }
+      media {
+        id
+        url
+      }
+      createdAt
+    }
+  }
+}

@@ -1,0 +1,26 @@
+meta {
+  name: Get My Conversations
+  type: graphql
+  seq: 2
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  query {
+    conversations {
+      id
+      type
+      updatedAt
+      participants {
+        accountId
+        displayName
+        avatarObjectKey
+      }
+    }
+  }
+}

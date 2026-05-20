@@ -1,0 +1,27 @@
+meta {
+  name: Get Notifications
+  type: graphql
+  seq: 1
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  query {
+    notifications(take: 10) {
+      id
+      accountId
+      type
+      targetType
+      targetId
+      isRead
+      createdAt
+      fromAccountId
+      fromDisplayName
+    }
+  }
+}

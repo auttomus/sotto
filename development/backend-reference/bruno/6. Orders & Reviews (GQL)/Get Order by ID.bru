@@ -1,0 +1,26 @@
+meta {
+  name: Get Order by ID
+  type: graphql
+  seq: 4
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  query {
+    order(id: "{{order_id}}") {
+      id
+      buyerAccountId
+      sellerAccountId
+      listingId
+      agreedPrice
+      status
+      createdAt
+      updatedAt
+    }
+  }
+}

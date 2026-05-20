@@ -147,7 +147,6 @@ model Order {
   listing      Listing       @relation(fields: [listingId], references: [id], onDelete: Restrict)
   customOffer  CustomOffer?  @relation(fields: [customOfferId], references: [id], onDelete: Restrict)
   review       Review?
-  conversation Conversation?
 
   @@map("orders")
 }
@@ -192,14 +191,12 @@ model Follow {
 // ==========================================
 
 model Conversation {
-  id      String           @id @default(uuid(7)) @db.Uuid
-  type    ConversationType @default(DIRECT)
-  orderId String?          @unique @map("order_id") @db.Uuid
+  id   String           @id @default(uuid(7)) @db.Uuid
+  type ConversationType @default(DIRECT)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  order        Order?                    @relation(fields: [orderId], references: [id], onDelete: SetNull)
   participants ConversationParticipant[]
   customOffers CustomOffer[]
 

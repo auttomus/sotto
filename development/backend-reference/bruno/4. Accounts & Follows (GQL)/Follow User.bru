@@ -1,0 +1,17 @@
+meta {
+  name: Follow User
+  type: graphql
+  seq: 4
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  mutation {
+    follow(targetAccountId: "{{target_account_id}}")
+  }
+}

@@ -1,0 +1,21 @@
+meta {
+  name: Update Profile
+  type: graphql
+  seq: 3
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  mutation {
+    updateProfile(input: { displayName: "Arya Updated", note: "Bio baru" }) {
+      id
+      displayName
+      note
+    }
+  }
+}

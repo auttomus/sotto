@@ -1,5 +1,7 @@
 import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
+import { MediaAttachmentModel } from '../../media/models/media-attachment.model';
 import { ConversationType } from '@prisma/client';
+import { OrderModel } from '../../orders/models/order.model';
 
 registerEnumType(ConversationType, { name: 'ConversationType' });
 
@@ -27,6 +29,10 @@ export class ConversationModel {
 
   @Field(() => Date, { nullable: true })
   lastMessageAt?: Date;
+
+  // Virtual Field: Pesanan aktif dalam percakapan ini
+  @Field(() => OrderModel, { nullable: true })
+  activeOrder?: OrderModel;
 }
 
 @ObjectType()
@@ -64,4 +70,7 @@ export class MessageModel {
 
   @Field(() => String, { nullable: true })
   senderAvatarObjectKey?: string;
+
+  @Field(() => [MediaAttachmentModel], { nullable: true })
+  media?: MediaAttachmentModel[];
 }

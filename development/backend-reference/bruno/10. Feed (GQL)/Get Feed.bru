@@ -1,0 +1,30 @@
+meta {
+  name: Get Feed
+  type: graphql
+  seq: 2
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  query {
+    feed(limit: 20) {
+      postId
+      content
+      authorDisplayName
+      authorUsername
+      authorSchoolName
+      authorAvatarObjectKey
+      media {
+        id
+        url
+        contentType
+      }
+      createdAt
+    }
+  }
+}

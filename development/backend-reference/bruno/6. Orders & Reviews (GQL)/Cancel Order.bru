@@ -1,0 +1,21 @@
+meta {
+  name: Cancel Order
+  type: graphql
+  seq: 3
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  mutation {
+    cancelOrder(orderId: "{{order_id}}") {
+      id
+      status
+      updatedAt
+    }
+  }
+}

@@ -1,0 +1,17 @@
+meta {
+  name: Unfollow User
+  type: graphql
+  seq: 5
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  mutation {
+    unfollow(targetAccountId: "{{target_account_id}}")
+  }
+}

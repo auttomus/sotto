@@ -1,0 +1,33 @@
+meta {
+  name: Upload Media for ScyllaPost (Image)
+  type: graphql
+  seq: 6
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  mutation {
+    requestUploadUrl(input: {
+      fileName: "post_image.png",
+      contentType: "image/png",
+      attachedType: "ScyllaPost",
+      attachedId: "{{last_post_id}}"
+    }) {
+      uploadUrl
+      objectKey
+    }
+  }
+}
+
+script:post-response {
+  const d = res.body;
+  if (d.data && d.data.requestUploadUrl) {
+    bru.setVar("last_object_key", d.data.requestUploadUrl.objectKey);
+    console.log("last_object_key saved: " + d.data.requestUploadUrl.objectKey);
+  }
+}

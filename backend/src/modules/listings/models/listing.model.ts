@@ -7,6 +7,7 @@ import {
   registerEnumType,
 } from '@nestjs/graphql';
 import { ListingType, ListingStatus } from '@prisma/client';
+import { MediaAttachmentModel } from '../../media/models/media-attachment.model';
 
 registerEnumType(ListingType, { name: 'ListingType' });
 registerEnumType(ListingStatus, { name: 'ListingStatus' });
@@ -14,6 +15,7 @@ registerEnumType(ListingStatus, { name: 'ListingStatus' });
 // Model untuk Relasi Profil Penjual (ringkas)
 @ObjectType()
 export class AccountPartial {
+  // ... (rest of AccountPartial)
   @Field()
   displayName: string;
 
@@ -62,6 +64,9 @@ export class ListingModel {
 
   @Field(() => AccountPartial, { nullable: true })
   account?: AccountPartial | null;
+
+  @Field(() => [MediaAttachmentModel], { nullable: true })
+  media?: MediaAttachmentModel[];
 
   @Field()
   createdAt: Date;

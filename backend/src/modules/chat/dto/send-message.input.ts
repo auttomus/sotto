@@ -12,4 +12,7 @@ export class SendMessageInput {
   @IsNotEmpty()
   @MaxLength(2000)
   content: string;
+
+  @Field(() => [ID], { nullable: true })
+  mediaIds?: string[];
 }
