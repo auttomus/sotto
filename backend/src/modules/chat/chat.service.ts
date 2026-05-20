@@ -40,16 +40,38 @@ export class ChatService {
     creatorAccountId: string,
     input: CreateConversationInput,
   ): Promise<ConversationWithParticipants> {
+    const type = (input.type as ConversationType) ?? ConversationType.DIRECT;
     const allParticipants = [
       ...new Set([creatorAccountId, ...input.participantIds]),
     ];
 
+    // Logika Pencegahan Duplikasi untuk Chat DIRECT
+    if (type === ConversationType.DIRECT && allParticipants.length === 2) {
+      const existing = await this.prisma.conversation.findFirst({
+        where: {
+          type: ConversationType.DIRECT,
+          AND: [
+            { participants: { some: { accountId: allParticipants[0] } } },
+            { participants: { some: { accountId: allParticipants[1] } } },
+          ],
+        },
+        include: {
+          participants: {
+            include: {
+              account: {
+                select: { id: true, displayName: true, avatarObjectKey: true },
+              },
+            },
+          },
+        },
+      });
+
+      if (existing) return existing;
+    }
+
     return this.prisma.conversation.create({
       data: {
-        type: (input.type as ConversationType) ?? ConversationType.DIRECT,
-        // Note: Conversation.listingId does NOT exist in schema.
-        // Listing context is conveyed via ConversationParticipant metadata
-        // or by passing listingId as a message attachment in the future.
+        type,
         participants: {
           create: allParticipants.map((id) => ({
             accountId: id,
@@ -109,6 +131,7 @@ export class ChatService {
     conversationId: string,
     senderAccountId: string,
     content: string,
+    mediaIds?: string[],
   ): Promise<SerializedMessage> {
     const messageId = types.TimeUuid.now();
     const now = new Date();
@@ -116,7 +139,13 @@ export class ChatService {
     await this.scylla.execute(
       `INSERT INTO messages (conversation_id, message_id, sender_id, content, created_at)
        VALUES (?, ?, ?, ?, ?)`,
-      [conversationId, messageId, senderAccountId, content, now],
+      [
+        types.Uuid.fromString(conversationId),
+        messageId,
+        types.Uuid.fromString(senderAccountId),
+        content,
+        now,
+      ],
     );
 
     // Update timestamp conversation di PostgreSQL
@@ -124,6 +153,17 @@ export class ChatService {
       where: { id: conversationId },
       data: { updatedAt: now },
     });
+
+    // Media association (PostgreSQL)
+    if (mediaIds?.length) {
+      await this.prisma.mediaAttachment.updateMany({
+        where: { id: { in: mediaIds }, accountId: senderAccountId },
+        data: {
+          attachedId: messageId.toString(),
+          attachedType: 'ScyllaMessage',
+        },
+      });
+    }
 
     return {
       messageId: messageId.toString(),
@@ -143,7 +183,7 @@ export class ChatService {
       `SELECT message_id, sender_id, content, created_at
        FROM messages WHERE conversation_id = ?
        ORDER BY message_id DESC LIMIT ?`,
-      [conversationId, limit],
+      [types.Uuid.fromString(conversationId), limit],
     );
 
     return result.rows.map((row) => ({

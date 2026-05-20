@@ -11,6 +11,18 @@
         "key": "token",
         "value": "{{jwt_token}}",
         "type": "string"
+      },
+      {
+        "key": "tag_id",
+        "value": "",
+        "type": "default",
+        "enabled": true
+      },
+      {
+        "key": "last_object_key",
+        "value": "",
+        "type": "default",
+        "enabled": true
       }
     ]
   },
@@ -33,7 +45,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"arya.pranata@smkn1denpasar.sch.id\",\n  \"password\": \"RplSotto2026!\",\n  \"username\": \"arya_pranata_dev\",\n  \"displayName\": \"Kadek Agus Arya P.\",\n  \"schoolId\": 1,\n  \"major\": \"Rekayasa Perangkat Lunak\"\n}"
+              "raw": "{\n  \"email\": \"arya.pranata@smkn1denpasar.sch.id\",\n  \"password\": \"RplSotto2026!\",\n  \"username\": \"arya_pranata_dev\",\n  \"displayName\": \"Kadek Agus Arya P.\",\n  \"schoolId\": \"{{school_id}}\",\n  \"major\": \"Rekayasa Perangkat Lunak\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/iam/register",
@@ -334,7 +346,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"query\":\"mutation { follow(targetAccountId: \\\"2\\\") }\"}"
+              "raw": "{\"query\":\"mutation { follow(targetAccountId: \\\"{{target_account_id}}\\\") }\"}"
             },
             "url": {
               "raw": "{{gql_url}}",
@@ -356,7 +368,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"query\":\"mutation { unfollow(targetAccountId: \\\"2\\\") }\"}"
+              "raw": "{\"query\":\"mutation { unfollow(targetAccountId: \\\"{{target_account_id}}\\\") }\"}"
             },
             "url": {
               "raw": "{{gql_url}}",
@@ -394,7 +406,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"query\": \"mutation { createListing(input: { title: \\\"Jasa Website Landing Page\\\", description: \\\"Bikin landing page responsive dengan React. Revisi 2x.\\\", basePrice: 150000, deliveryTimeDays: 3, tagIds: [\\\"550e8400-e29b-41d4-a716-446655440000\\\"], mediaIds: [\\\"{{last_media_id}}\\\"] }) { id title price media { url } } }\"\n}"
+              "raw": "{\n  \"query\": \"mutation { createListing(input: { title: \\\"Jasa Website Landing Page\\\", description: \\\"Bikin landing page responsive dengan React. Revisi 2x.\\\", basePrice: 150000, deliveryTimeDays: 3, tagIds: [\\\"{{tag_id}}\\\"], mediaIds: [\\\"{{last_media_id}}\\\"] }) { id title price status createdAt } }\"\n}"
             },
             "url": {
               "raw": "{{gql_url}}",
@@ -441,7 +453,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"query\":\"query { listing(id: \\\"{{listing_id}}\\\") { id title description price type status deliveryTimeDays maxActiveOrders isUnlimited accountId account { displayName major trustScore username } createdAt updatedAt } }\"}"
+              "raw": "{\"query\":\"query { listing(id: \\\"{{listing_id}}\\\") { id title description price type status deliveryTimeDays account { displayName major trustScore username } media { id url contentType } createdAt updatedAt } }\"}"
             },
             "url": {
               "raw": "{{gql_url}}",
@@ -466,7 +478,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"query\":\"query { listings { id title price type status account { displayName trustScore } createdAt } }\"}"
+              "raw": "{\"query\":\"query { listings { id title price type status account { displayName trustScore } media { id url } createdAt } }\"}"
             },
             "url": {
               "raw": "{{gql_url}}",
@@ -491,7 +503,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"query\":\"query { listingsByAccount(accountId: \\\"1\\\") { id title price status } }\"}"
+              "raw": "{\"query\":\"query { listingsByAccount(accountId: \\\"{{account_id}}\\\") { id title price status media { id url } } }\"}"
             },
             "url": {
               "raw": "{{gql_url}}",
@@ -733,7 +745,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"query\":\"mutation { createConversation(input: { participantIds: [\\\"2\\\"], type: \\\"DIRECT\\\" }) { id type createdAt participants { accountId displayName } } }\"}"
+              "raw": "{\"query\":\"mutation { createConversation(input: { participantIds: [\\\"{{target_account_id}}\\\"], type: \\\"DIRECT\\\" }) { id type createdAt participants { accountId displayName } } }\"}"
             },
             "url": {
               "raw": "{{gql_url}}",
@@ -777,7 +789,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"query\":\"query { messages(conversationId: \\\"{{conversation_id}}\\\", limit: 20) { messageId senderId content createdAt } }\"}"
+              "raw": "{\"query\":\"query { messages(conversationId: \\\"{{conversation_id}}\\\", limit: 50) { messageId senderId content createdAt media { url contentType } } }\"}"
             },
             "url": {
               "raw": "{{gql_url}}",
@@ -930,7 +942,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"query\": \"mutation { createPost(input: { content: \\\"Baru selesai project landing page, cek portfolio saya!\\\", tagIds: [\\\"550e8400-e29b-41d4-a716-446655440000\\\"], mediaIds: [\\\"{{last_media_id}}\\\"] }) { postId content } }\"\n}"
+              "raw": "{\n  \"query\": \"mutation { createPost(input: { content: \\\"Baru selesai project landing page, cek portfolio saya!\\\", tagIds: [\\\"{{tag_id}}\\\"], mediaIds: [\\\"{{last_media_id}}\\\"] }) { postId content } }\"\n}"
             },
             "url": {
               "raw": "{{gql_url}}",
@@ -967,7 +979,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"query\":\"query { feed(limit: 10) { postId authorId content createdAt authorDisplayName authorUsername authorSchoolName } }\"}"
+              "raw": "{\"query\":\"query { feed(limit: 20) { postId content authorDisplayName authorUsername authorSchoolName authorAvatarObjectKey media { id url contentType } createdAt } }\"}"
             },
             "url": {
               "raw": "{{gql_url}}",
@@ -1137,6 +1149,21 @@
       "item": [
         {
           "name": "Request Upload URL",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var d=pm.response.json();",
+                  "if(d.data && d.data.requestUploadUrl){",
+                  "  pm.environment.set('last_object_key', d.data.requestUploadUrl.objectKey);",
+                  "  console.log('last_object_key saved: ' + d.data.requestUploadUrl.objectKey);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -1169,7 +1196,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"query\":\"mutation { confirmUpload(objectKey: \\\"scyllapost/test.png\\\", input: { fileName: \\\"portfolio.png\\\", contentType: \\\"image/png\\\", attachedType: \\\"ScyllaPost\\\" }) { id fileName objectKey isPrivate createdAt } }\"}"
+              "raw": "{\"query\":\"mutation { confirmUpload(objectKey: \\\"{{last_object_key}}\\\", input: { fileName: \\\"portfolio.png\\\", contentType: \\\"image/png\\\", attachedType: \\\"ScyllaPost\\\" }) { id fileName objectKey isPrivate createdAt } }\"}"
             },
             "url": {
               "raw": "{{gql_url}}",
@@ -1206,7 +1233,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"query\":\"query { mediaForObject(attachedType: \\\"ScyllaPost\\\", attachedId: \\\"test-post-id\\\") { id fileName contentType objectKey url isPrivate createdAt } }\"}"
+              "raw": "{\"query\":\"query { mediaForObject(attachedType: \\\"ScyllaPost\\\", attachedId: \\\"{{last_post_id}}\\\") { id fileName contentType objectKey url isPrivate createdAt } }\"}"
             },
             "url": {
               "raw": "{{gql_url}}",
@@ -1236,7 +1263,22 @@
                 "{{gql_url}}"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var d=pm.response.json();",
+                  "if(d.data && d.data.requestUploadUrl){",
+                  "  pm.environment.set('last_object_key', d.data.requestUploadUrl.objectKey);",
+                  "  console.log('last_object_key saved: ' + d.data.requestUploadUrl.objectKey);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Upload Media for Listing (Thumbnail)",
@@ -1258,7 +1300,22 @@
                 "{{gql_url}}"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var d=pm.response.json();",
+                  "if(d.data && d.data.requestUploadUrl){",
+                  "  pm.environment.set('last_object_key', d.data.requestUploadUrl.objectKey);",
+                  "  console.log('last_object_key saved: ' + d.data.requestUploadUrl.objectKey);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Upload Media for ScyllaPost (Image)",
@@ -1280,7 +1337,22 @@
                 "{{gql_url}}"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var d=pm.response.json();",
+                  "if(d.data && d.data.requestUploadUrl){",
+                  "  pm.environment.set('last_object_key', d.data.requestUploadUrl.objectKey);",
+                  "  console.log('last_object_key saved: ' + d.data.requestUploadUrl.objectKey);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     }

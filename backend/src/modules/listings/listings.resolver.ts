@@ -1,4 +1,12 @@
-import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  ID,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql';
 import { ListingsService } from './listings.service';
 import { ListingModel } from './models/listing.model';
 import { CreateListingInput } from './dto/create-listing.input';
@@ -8,10 +16,15 @@ import {
   type CurrentUserPayload,
 } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
+import { MediaService } from '../media/media.service';
+import { MediaAttachmentModel } from '../media/models/media-attachment.model';
 
 @Resolver(() => ListingModel)
 export class ListingsResolver {
-  constructor(private readonly listingsService: ListingsService) {}
+  constructor(
+    private readonly listingsService: ListingsService,
+    private readonly mediaService: MediaService,
+  ) {}
 
   @Mutation(() => ListingModel)
   async createListing(
@@ -58,5 +71,10 @@ export class ListingsResolver {
     @Args('accountId', { type: () => ID }) accountId: string,
   ): Promise<ListingModel[]> {
     return this.listingsService.findByAccount(accountId);
+  }
+
+  @ResolveField(() => [MediaAttachmentModel])
+  async media(@Parent() listing: ListingModel) {
+    return this.mediaService.getMediaForObject('Listing', listing.id);
   }
 }

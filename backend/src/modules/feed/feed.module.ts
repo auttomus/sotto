@@ -2,9 +2,10 @@ import { Module } from '@nestjs/common';
 import { FeedService } from './feed.service';
 import { FeedResolver } from './feed.resolver';
 import { TagsModule } from '../tags/tags.module';
+import { MediaModule } from '../media/media.module';
 
 @Module({
-  imports: [TagsModule],
+  imports: [TagsModule, MediaModule],
   providers: [FeedResolver, FeedService],
   exports: [FeedService],
 })

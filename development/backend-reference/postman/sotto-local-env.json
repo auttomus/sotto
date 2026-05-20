@@ -43,6 +43,48 @@
       "value": "",
       "type": "default",
       "enabled": true
+    },
+    {
+      "key": "school_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "message_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "last_post_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "last_media_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "target_account_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "tag_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "last_object_key",
+      "value": "",
+      "type": "default",
+      "enabled": true
     }
   ]
 }

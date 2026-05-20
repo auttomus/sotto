@@ -27,6 +27,7 @@ type AccountPartial {
 }
 
 type ConversationModel {
+  activeOrder: OrderModel
   createdAt: DateTime!
   id: ID!
   lastMessageAt: DateTime
@@ -116,6 +117,7 @@ type ListingModel {
   id: ID!
   isUnlimited: Boolean!
   maxActiveOrders: Int
+  media: [MediaAttachmentModel!]
   price: Float!
   status: ListingStatus!
   title: String!
@@ -154,6 +156,7 @@ type MessageModel {
   content: String!
   conversationId: String!
   createdAt: DateTime!
+  media: [MediaAttachmentModel!]
   messageId: String!
   senderAvatarObjectKey: String
   senderDisplayName: String
@@ -243,6 +246,7 @@ type PostModel {
   createdAt: DateTime!
   inReplyToPostId: String
   linkedServiceId: String
+  media: [MediaAttachmentModel!]
   postId: ID!
 }
 
