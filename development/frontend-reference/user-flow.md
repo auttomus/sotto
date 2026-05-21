@@ -270,3 +270,225 @@ Karena produk digital tidak diserahkan melalui _chat room_ proyek, pengguna butu
   - `[Text: Dibeli pada 12 Mei 2026]`.
   - `[Button Utama: Unduh File]` $\rightarrow$ Tombol ini memanggil NestJS untuk meminta _Presigned URL_ dari MinIO, lalu memicu _download_ otomatis di _browser_ pembeli.
   - `[Button: Beri Ulasan]`.
+
+---
+
+### TAMBAHAN: Alur yang Hilang dari Referensi Asli
+
+> Bagian di bawah ini ditambahkan setelah audit menyeluruh terhadap setiap perjalanan pengguna dari awal hingga akhir, dan dicocokkan dengan skema GraphQL backend yang sudah jadi. Semua alur di bawah ini memiliki dukungan API backend (`schema.gql`) namun tidak memiliki spesifikasi UI.
+
+---
+
+### 8. Tampilan Login (Gerbang Masuk)
+
+Layar pertama yang muncul jika pengguna belum terautentikasi. Harus cepat, sederhana, dan meyakinkan.
+
+- **A. Header Visual:**
+  - `[App Logo: Sotto]` (Besar, tengah, di atas form).
+  - `[Text Tagline]`: _"Panggung Digital untuk Talenta Siswa"_ (Satu baris pendek di bawah logo).
+
+- **B. Form Area:**
+  - `[Input: Email]` (Placeholder: "Email sekolah atau pribadi").
+  - `[Input: Password]` (Dengan tombol `[Icon: Eye]` untuk show/hide).
+  - `[Button Utama: Masuk]` (Full width, warna primary).
+  - `[Text Link: Lupa kata sandi?]` (Di bawah tombol, ukuran kecil — **MVP: bisa diabaikan** dulu, tapi tampilannya harus ada).
+
+- **C. Register CTA:**
+  - `[Divider: "atau"]`
+  - `[Text: Belum punya akun?]` `[Text Link Bold: Daftar Sekarang]` $\rightarrow$ Navigasi ke `/register`.
+
+- **API:** REST `POST /iam/login` → simpan JWT ke `localStorage` / `httpOnly cookie`.
+
+---
+
+### 9. Tampilan Registrasi (Wizard Multi-Step)
+
+Registrasi _tidak boleh_ berupa satu form raksasa. Gunakan wizard agar tidak mengintimidasi siswa baru.
+
+- **Header:** `[Progress Bar: Langkah 1 dari 3]`.
+
+- **Step 1: Akun Dasar**
+  - `[Input: Email]`.
+  - `[Input: Password]` (Dengan indikator kekuatan: Lemah/Sedang/Kuat).
+  - `[Input: Konfirmasi Password]`.
+  - `[Button: Lanjut]`.
+
+- **Step 2: Identitas Profesional**
+  - `[Input: Display Name]` (Placeholder: "Nama yang ingin ditampilkan").
+  - `[Input: Username]` (Dengan prefix `@`, _real-time availability check_ — panggil `searchAccounts` query).
+  - `[Dropdown Autocomplete: Asal Sekolah]` (Ditarik dari query `searchSchools`). Saat user mengetik "SMK N", dropdown muncul.
+  - `[Input: Jurusan]` (Placeholder: "Contoh: RPL, DKV, Akuntansi").
+  - `[Button: Lanjut]`.
+
+- **Step 3: Foto Profil (Opsional)**
+  - `[Avatar Uploader]`: Area lingkaran besar, klik untuk pilih foto. Jika belum ada foto, tampilkan inisial dari display name.
+  - `[Text: Kamu bisa menambahkan foto nanti]`.
+  - `[Button Utama: Mulai Menjelajah]` $\rightarrow$ Langsung masuk ke feed.
+
+- **API:** REST `POST /iam/register` → auto-login → redirect ke feed.
+
+---
+
+### 10. Tampilan Laci Notifikasi (Notification Drawer)
+
+**Trigger:** Menekan ikon lonceng di Header. Bisa berupa _bottom sheet_ (mobile) atau _dropdown panel_ (desktop).
+
+- **A. Header Laci:**
+  - `[Text: Notifikasi]`.
+  - `[Text Link: Tandai Semua Dibaca]` $\rightarrow$ Panggil `markAllNotificationsAsRead`.
+
+- **B. Daftar Notifikasi (Scrollable):**
+  Setiap item notifikasi memiliki struktur:
+  - `[Avatar Pengirim]` (Dari `fromAccountId`).
+  - `[Text: Nama Pengirim]` + `[Text: Aksi]`.
+  - `[Text: Timestamp]` (Relatif: "5 menit lalu").
+  - `[Dot Indicator]`: Titik biru kecil jika `is_read = false`.
+
+  Tipe-tipe notifikasi dan teks yang muncul:
+  - **FOLLOW:** _"**Melani Putri** mulai mengikutimu"_ → Tap menuju profil Melani.
+  - **ORDER_UPDATE:** _"**Kadek Agus** mengirimkan hasil kerja untuk pesanan #ORD-982"_ → Tap menuju `/workspace/order/:id`.
+  - **NEW_MESSAGE:** _"**Budi Santoso** mengirimkan pesan baru"_ → Tap menuju `/workspace/chat/:id`.
+  - **MENTION:** _"**Wayan Surya** menyebutmu dalam postingan"_ → Tap menuju post detail.
+
+- **C. Empty State:**
+  - `[Ilustrasi SVG: Lonceng Tidur]` + _"Belum ada notifikasi. Mulai unggah karya atau ikuti seseorang!"_
+
+- **API:** Query `notifications(cursor, take)` + Mutation `markNotificationAsRead(id)`.
+
+---
+
+### 11. Tampilan Edit Profil
+
+**Trigger:** Menekan ikon gear/settings di halaman profil pribadi.
+
+- **A. Avatar Editor:**
+  - `[Image: Avatar saat ini]` dengan overlay `[Icon: Kamera]` saat di-hover/tap.
+  - Tap → buka file picker → upload ke MinIO via `requestUploadUrl` → `updateProfile(avatarObjectKey)`.
+
+- **B. Form Fields:**
+  - `[Input: Display Name]` (Pre-filled dari data saat ini).
+  - `[Input: Username]` (Pre-filled, _grayed out / read-only_ di MVP — perubahan username kompleks).
+  - `[Text Area: Bio]` (Maks 160 karakter, dengan penghitung `0/160`).
+  - `[Input: Jurusan]`.
+  - `[Dropdown: Sekolah]` (Autocomplete seperti saat registrasi).
+
+- **C. Action Bar (Sticky Bottom):**
+  - `[Button: Simpan Perubahan]`.
+  - **Transition State:** Tombol berubah jadi loading spinner saat menunggu respon `updateProfile`.
+
+- **API:** Mutation `updateProfile(input: UpdateProfileInput!)`.
+
+---
+
+### 12. Tampilan Komentar (Comment Bottom Sheet)
+
+**Trigger:** Menekan tombol komentar di PostCard footer.
+
+- **A. Sheet Header:**
+  - `[Text: Komentar]` + `[Drag Handle]` (garis pendek abu-abu di atas, bisa di-swipe untuk tutup).
+
+- **B. Daftar Komentar (Scrollable):**
+  Setiap komentar:
+  - `[Avatar]` + `[Display Name]` + `[Timestamp]`.
+  - `[Text: Isi komentar]`.
+  - `[Button Mini: Balas]` (Mengisi mention di input field).
+
+- **C. Input Area (Sticky Bottom di dalam Sheet):**
+  - `[Avatar User Saat Ini]` (kecil, di kiri).
+  - `[Input: Tulis komentar...]`.
+  - `[Button: Kirim]`.
+
+- **Catatan Implementasi:** Komentar disimpan di ScyllaDB sebagai `Post` dengan `inReplyToPostId` yang merujuk ke postingan induk. Query menggunakan `feed` dengan filter parent, atau butuh query baru di backend.
+
+---
+
+### 13. Tampilan Detail Post
+
+**Trigger:** Menekan area teks/konten di PostCard (bukan tombol like/comment/share).
+
+Layar ini menampilkan postingan secara penuh beserta komentar _inline_, tanpa perlu _bottom sheet_.
+
+- **A. Post Penuh:**
+  - Struktur identik dengan PostCard di feed, tapi tanpa batas `line-clamp` pada teks deskripsi.
+  - Semua gambar carousel bisa di-scroll horizontal penuh.
+  - _Attached Listing_ box tetap bisa diklik menuju detail listing.
+
+- **B. Komentar Section (Di bawah postingan):**
+  - Separator: `[Divider]` + `[Text: Komentar (34)]`.
+  - Daftar komentar vertikal (seperti X/Twitter replies).
+  - `[Input: Tambahkan komentar...]` (Sticky bottom).
+
+- **URL:** `/post/:postId` (Route baru yang dibutuhkan).
+
+---
+
+### 14. Tampilan Hasil Pencarian (Search Results)
+
+**Trigger:** Mengetik query di search bar (TopHeader atau Explore page) lalu submit.
+
+- **A. Search Header:**
+  - `[Input: Query yang diketik]` (Dengan tombol `[X]` untuk clear).
+  - `[Filter Chips]`: `Semua` | `Talenta` | `Jasa` | `Karya` — bisa di-tap untuk filter tipe hasil.
+
+- **B. Mixed Results List:**
+  Hasil pencarian menampilkan campuran tiga tipe dalam satu daftar terurut relevansi:
+
+  - **Tipe: Talenta (Account):**
+    - `[Avatar]` + `[Display Name]` + `[School Badge]` + `[Button: Ikuti]`.
+    - Tap → ke profil publik.
+
+  - **Tipe: Jasa/Produk (Listing):**
+    - `[Thumbnail]` + `[Judul]` + `[Harga]` + `[Badge: Jasa / Produk Digital]`.
+    - Tap → ke listing detail.
+
+  - **Tipe: Karya (Post):**
+    - PostCard yang diperkecil (_compact variant_): avatar + nama + satu baris teks + thumbnail media.
+    - Tap → ke post detail.
+
+- **C. Empty State:**
+  - `[Ilustrasi SVG: Kaca Pembesar Sedih]` + _"Tidak ditemukan hasil untuk \"[query]\". Coba kata kunci lain."_
+
+- **API:** Query `searchAccounts(query)`, `searchListings(query, tagIds)`. Post search belum ada di backend — butuh query baru atau gunakan kombinasi tag + content filter.
+
+---
+
+### 15. Tampilan Manajemen Listing (Seller Dashboard)
+
+**Trigger:** Di halaman profil sendiri, setiap listing card di tab "Penawaran & Produk" memiliki tombol `[⋮ More]` yang membuka _popover_ menu.
+
+- **A. Popover Menu:**
+  - `[Edit Penawaran]` → Buka wizard edit dengan data pre-filled.
+  - `[Nonaktifkan]` → Ubah status listing ke `PAUSED` (listing tidak muncul di pencarian tapi tidak dihapus).
+  - `[Hapus]` → Konfirmasi dialog: _"Penawaran yang sudah dihapus tidak bisa dikembalikan. Lanjutkan?"_ dengan `[Button: Batal]` dan `[Button Danger: Hapus]`.
+
+- **B. Edit Wizard:**
+  - Identik dengan Create Listing Wizard, tapi semua field sudah terisi.
+  - Action: `[Button: Simpan Perubahan]` menggantikan "Terbitkan Jasa".
+
+- **C. Status Indicator di Listing Card:**
+  - Listing dengan status `PAUSED`: overlay gelap + `[Badge: Dinonaktifkan]` di thumbnail.
+  - Listing dengan status `DRAFT`: overlay + `[Badge: Draf]`.
+
+- **API:** Mutation `updateListing(id, input)`, `deleteListing(id)`.
+
+---
+
+### 16. Area Obrolan di Dalam Order Room (Klarifikasi)
+
+> Referensi asli (Bagian 6) menyebutkan Order Room "mirip dengan Ruang Obrolan" tapi hanya mendeskripsikan Progress Tracker dan Action Board. Bagian ini mengklarifikasi area pesan yang juga ada di dalam Order Room.
+
+Order Room sebenarnya memiliki **dua zona** dalam satu layar:
+
+- **Zona Atas: Progress Tracker** (seperti yang sudah dideskripsikan di Bagian 6).
+
+- **Zona Tengah: Area Chat Terbatas**
+  - Sama persis dengan Message List di Ruang Obrolan (Bagian 5C), tapi dengan konteks:
+    - Semua pesan hanya terkait deliverables pesanan ini.
+    - `[Contextual Banner]` bertuliskan: _"Pesanan #ORD-982 — Jasa Pembuatan Web Company Profile MVP"_.
+  - Penjual bisa mengirim file hasil kerja melalui attachment (`[Klip]` → upload ke MinIO).
+  - Pesan file hasil kerja memiliki UI khusus: `[File Card: nama_file.zip — 14.2 MB]` + `[Button: Unduh]`.
+
+- **Zona Bawah: Input Area ATAU Action Board** (bergantian sesuai status)
+  - Jika status = `IN_PROGRESS`: Tampilkan input pesan biasa + tombol attachment.
+  - Jika status = `COMPLETED` atau `CANCELLED`: Input area di-_disable_ atau diganti teks: _"Pesanan ini sudah selesai."_
+  - Action Board (Kirim Hasil / Review) overlay di atas input saat status membutuhkannya.

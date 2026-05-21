@@ -12,10 +12,17 @@ sotto/frontend/
 │   │
 │   ├── core/               # 3. PENGATURAN INFRASTRUKTUR & UTILITAS GLOBAL
 │   │   ├── apollo/         # Konfigurasi Apollo Client & generated.ts dari codegen
-│   │   ├── store/          # Zustand global store (misal: useAuthStore.ts, useThemeStore.ts)
+│   │   │   ├── client.ts   # Inisialisasi ApolloClient (link, cache, auth header injection)
+│   │   │   ├── base-types.ts # Tipe dasar dari codegen
+│   │   │   └── generated.ts  # Hooks & dokumen dari codegen (auto-generated, jangan edit manual)
+│   │   ├── store/          # Zustand global store
+│   │   │   ├── useAuthStore.ts   # Token JWT, data user login, actions: login/logout/refresh
+│   │   │   └── useThemeStore.ts  # Dark/light mode state, toggleTheme action
 │   │   ├── utils/          # Fungsi murni (formatCurrency.ts, formatDate.ts, cn.ts untuk Tailwind)
 │   │   ├── constants/      # Variabel statis global (ROUTES.ts, ERROR_MESSAGES.ts)
-│   │   └── hooks/          # Custom hooks global (useDebounce.ts, useWindowSize.ts)
+│   │   └── hooks/          # Custom hooks global
+│   │       ├── useDebounce.ts    # Debounce input (search autocomplete)
+│   │       └── useMediaUpload.ts # Shared hook: requestUploadUrl → upload file → confirmUpload
 │   │
 │   ├── components/         # 4. KOMPONEN UI GLOBAL (Dumb/Presentation Components) Komponen yang di bawah cuma contoh, nanti lihat kebutuhan.
 │   │   ├── ui/             # Komponen atomik (Bisa pakai Shadcn UI atau buat sendiri)
@@ -60,9 +67,14 @@ sotto/frontend/
 │   │   │   ├── components/ # ProgressTracker.tsx, CheckoutSummary.tsx, ReviewModal.tsx
 │   │   │   └── types/      # Tipe data pesanan spesifik
 │   │   │
+│   │   ├── notifications/  # Domain: Notifikasi In-App
+│   │   │   ├── api/
+│   │   │   ├── components/ # NotificationDrawer.tsx, NotificationItem.tsx
+│   │   │   └── hooks/      # useUnreadCount.ts (polling atau subscription)
+│   │   │
 │   │   └── profile/        # Domain: Profil Publik & Koleksi Pribadi
 │   │       ├── api/
-│   │       ├── components/ # HeroSection.tsx, DigitalLibraryCard.tsx
+│   │       ├── components/ # HeroSection.tsx, DigitalLibraryCard.tsx, EditProfileForm.tsx
 │   │       └── hooks/
 │   │
 │   └── routes/             # 6. PENYUSUN HALAMAN (RRv7 File-based Routing Conventions)
@@ -70,14 +82,23 @@ sotto/frontend/
 │       ├── _main.tsx       # Layout Route (Pembungkus dengan MainLayout & BottomNav)
 │       ├── _main._index.tsx# URL: "/" -> Halaman Home/Feed
 │       ├── _main.explore.tsx# URL: "/explore" -> Halaman Pencarian
-│       ├── _main.profile.tsx# URL: "/profile" -> Halaman Profil
+│       ├── _main.chats.tsx # URL: "/chats" -> Kotak Masuk Pesan
+│       ├── _main.orders.tsx# URL: "/orders" -> Daftar Order
+│       ├── _main.profile.tsx# URL: "/profile" -> Halaman Profil Sendiri
+│       ├── _main.profile.$username.tsx # URL: "/profile/:username" -> Profil Publik Orang Lain
+│       ├── _main.listing.$id.tsx       # URL: "/listing/:id" -> Detail Jasa/Produk
+│       ├── _main.post.$postId.tsx      # URL: "/post/:postId" -> Detail Postingan + Komentar
 │       ├── login.tsx       # URL: "/login" -> Rute Publik
 │       ├── register.tsx    # URL: "/register"
-│       ├── workspace.chat.tsx # URL: "/workspace/chat" -> Layar penuh tanpa BottomNav
-│       ├── workspace.order.tsx
-│       └── workspace.create.tsx
+│       ├── workspace.chat.$conversationId.tsx # URL: "/workspace/chat/:conversationId" -> Layar penuh tanpa BottomNav
+│       ├── workspace.order.$orderId.tsx       # URL: "/workspace/order/:orderId"
+│       └── workspace.create.tsx               # URL: "/workspace/create"
 │
-├── .env                    # Variabel lingkungan Vite (VITE_GRAPHQL_URL)
+├── .env                    # Variabel lingkungan Vite:
+│                           #   VITE_GRAPHQL_URL=http://localhost:3000/graphql
+│                           #   VITE_WS_URL=ws://localhost:3000 (Socket.io chat)
+│                           #   VITE_MINIO_PUBLIC_URL=http://localhost:9000 (CDN base untuk objek publik)
+│                           #   VITE_IAM_BASE_URL=http://localhost:3000/iam (REST auth endpoints)
 ├── codegen.ts              # Konfigurasi GraphQL Code Generator
 ├── react-router.config.ts  # Konfigurasi bawaan RR v7 (menentukan letak folder app/)
 ├── tailwind.config.ts      # Konfigurasi Tailwind v4
