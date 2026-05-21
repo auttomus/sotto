@@ -21,7 +21,7 @@ function SchoolAutocomplete({ value, onChange }: { value: string; onChange: (id:
     skip: debouncedSearch.length < 2,
   });
 
-  const selectedSchool = data?.searchSchools.find(s => s.id === value) || (value ? { id: value, name: 'Sekolah Terpilih' } : null);
+  const selectedSchool = data?.searchSchools.find((s: any) => s.id === value) || (value ? { id: value, name: 'Sekolah Terpilih' } : null);
 
   return (
     <div className="relative">
@@ -58,7 +58,7 @@ function SchoolAutocomplete({ value, onChange }: { value: string; onChange: (id:
             {data?.searchSchools.length === 0 ? (
               <div className="p-3 text-sm text-gray-500 text-center">Tidak ditemukan</div>
             ) : (
-              data?.searchSchools.map((school) => (
+              data?.searchSchools.map((school: any) => (
                 <button
                   key={school.id}
                   type="button"

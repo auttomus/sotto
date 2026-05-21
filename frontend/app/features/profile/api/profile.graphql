@@ -29,6 +29,34 @@ query GetUserProfile($username: String!) {
   }
 }
 
+query GetListingsByAccount($accountId: ID!) {
+  listingsByAccount(accountId: $accountId) {
+    id
+    title
+    description
+    price
+    isUnlimited
+    deliveryTimeDays
+    status
+    type
+    media {
+      id
+      url
+      objectKey
+      fileName
+      contentType
+    }
+  }
+}
+
+mutation FollowAccount($targetAccountId: ID!) {
+  follow(targetAccountId: $targetAccountId)
+}
+
+mutation UnfollowAccount($targetAccountId: ID!) {
+  unfollow(targetAccountId: $targetAccountId)
+}
+
 mutation UpdateProfile($input: UpdateProfileInput!) {
   updateProfile(input: $input) {
     id
@@ -36,14 +64,7 @@ mutation UpdateProfile($input: UpdateProfileInput!) {
     username
     note
     avatarObjectKey
+    avatarUrl
     major
   }
-}
-
-mutation FollowUser($targetAccountId: ID!) {
-  follow(targetAccountId: $targetAccountId)
-}
-
-mutation UnfollowUser($targetAccountId: ID!) {
-  unfollow(targetAccountId: $targetAccountId)
 }

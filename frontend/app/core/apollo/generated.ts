@@ -160,26 +160,33 @@ export type GetUserProfileQueryVariables = Exact<{
 
 export type GetUserProfileQuery = { profile: { id: string, displayName: string, username: string, note: string | null, avatarObjectKey: string | null, avatarUrl: string | null, trustScore: number, isFollowing: boolean | null, followersCount: string, followingCount: string, schoolName: string | null, major: string | null } | null };
 
+export type GetListingsByAccountQueryVariables = Exact<{
+  accountId: string | number;
+}>;
+
+
+export type GetListingsByAccountQuery = { listingsByAccount: Array<{ id: string, title: string, description: string, price: number, isUnlimited: boolean, deliveryTimeDays: number | null, status: Types.ListingStatus, type: Types.ListingType, media: Array<{ id: string, url: string | null, objectKey: string, fileName: string, contentType: string }> | null }> };
+
+export type FollowAccountMutationVariables = Exact<{
+  targetAccountId: string | number;
+}>;
+
+
+export type FollowAccountMutation = { follow: boolean };
+
+export type UnfollowAccountMutationVariables = Exact<{
+  targetAccountId: string | number;
+}>;
+
+
+export type UnfollowAccountMutation = { unfollow: boolean };
+
 export type UpdateProfileMutationVariables = Exact<{
   input: Types.UpdateProfileInput;
 }>;
 
 
-export type UpdateProfileMutation = { updateProfile: { id: string, displayName: string, username: string, note: string | null, avatarObjectKey: string | null, major: string | null } };
-
-export type FollowUserMutationVariables = Exact<{
-  targetAccountId: string | number;
-}>;
-
-
-export type FollowUserMutation = { follow: boolean };
-
-export type UnfollowUserMutationVariables = Exact<{
-  targetAccountId: string | number;
-}>;
-
-
-export type UnfollowUserMutation = { unfollow: boolean };
+export type UpdateProfileMutation = { updateProfile: { id: string, displayName: string, username: string, note: string | null, avatarObjectKey: string | null, avatarUrl: string | null, major: string | null } };
 
 
 export const SearchSchoolsDocument = gql`
@@ -1129,6 +1136,125 @@ export type GetUserProfileQueryHookResult = ReturnType<typeof useGetUserProfileQ
 export type GetUserProfileLazyQueryHookResult = ReturnType<typeof useGetUserProfileLazyQuery>;
 export type GetUserProfileSuspenseQueryHookResult = ReturnType<typeof useGetUserProfileSuspenseQuery>;
 export type GetUserProfileQueryResult = Apollo.QueryResult<GetUserProfileQuery, GetUserProfileQueryVariables>;
+export const GetListingsByAccountDocument = gql`
+    query GetListingsByAccount($accountId: ID!) {
+  listingsByAccount(accountId: $accountId) {
+    id
+    title
+    description
+    price
+    isUnlimited
+    deliveryTimeDays
+    status
+    type
+    media {
+      id
+      url
+      objectKey
+      fileName
+      contentType
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetListingsByAccountQuery__
+ *
+ * To run a query within a React component, call `useGetListingsByAccountQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetListingsByAccountQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetListingsByAccountQuery({
+ *   variables: {
+ *      accountId: // value for 'accountId'
+ *   },
+ * });
+ */
+export function useGetListingsByAccountQuery(baseOptions: Apollo.QueryHookOptions<GetListingsByAccountQuery, GetListingsByAccountQueryVariables> & ({ variables: GetListingsByAccountQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetListingsByAccountQuery, GetListingsByAccountQueryVariables>(GetListingsByAccountDocument, options);
+      }
+export function useGetListingsByAccountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetListingsByAccountQuery, GetListingsByAccountQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetListingsByAccountQuery, GetListingsByAccountQueryVariables>(GetListingsByAccountDocument, options);
+        }
+// @ts-ignore
+export function useGetListingsByAccountSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetListingsByAccountQuery, GetListingsByAccountQueryVariables>): Apollo.UseSuspenseQueryResult<GetListingsByAccountQuery, GetListingsByAccountQueryVariables>;
+export function useGetListingsByAccountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetListingsByAccountQuery, GetListingsByAccountQueryVariables>): Apollo.UseSuspenseQueryResult<GetListingsByAccountQuery | undefined, GetListingsByAccountQueryVariables>;
+export function useGetListingsByAccountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetListingsByAccountQuery, GetListingsByAccountQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetListingsByAccountQuery, GetListingsByAccountQueryVariables>(GetListingsByAccountDocument, options);
+        }
+export type GetListingsByAccountQueryHookResult = ReturnType<typeof useGetListingsByAccountQuery>;
+export type GetListingsByAccountLazyQueryHookResult = ReturnType<typeof useGetListingsByAccountLazyQuery>;
+export type GetListingsByAccountSuspenseQueryHookResult = ReturnType<typeof useGetListingsByAccountSuspenseQuery>;
+export type GetListingsByAccountQueryResult = Apollo.QueryResult<GetListingsByAccountQuery, GetListingsByAccountQueryVariables>;
+export const FollowAccountDocument = gql`
+    mutation FollowAccount($targetAccountId: ID!) {
+  follow(targetAccountId: $targetAccountId)
+}
+    `;
+export type FollowAccountMutationFn = Apollo.MutationFunction<FollowAccountMutation, FollowAccountMutationVariables>;
+
+/**
+ * __useFollowAccountMutation__
+ *
+ * To run a mutation, you first call `useFollowAccountMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useFollowAccountMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [followAccountMutation, { data, loading, error }] = useFollowAccountMutation({
+ *   variables: {
+ *      targetAccountId: // value for 'targetAccountId'
+ *   },
+ * });
+ */
+export function useFollowAccountMutation(baseOptions?: Apollo.MutationHookOptions<FollowAccountMutation, FollowAccountMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<FollowAccountMutation, FollowAccountMutationVariables>(FollowAccountDocument, options);
+      }
+export type FollowAccountMutationHookResult = ReturnType<typeof useFollowAccountMutation>;
+export type FollowAccountMutationResult = Apollo.MutationResult<FollowAccountMutation>;
+export type FollowAccountMutationOptions = Apollo.BaseMutationOptions<FollowAccountMutation, FollowAccountMutationVariables>;
+export const UnfollowAccountDocument = gql`
+    mutation UnfollowAccount($targetAccountId: ID!) {
+  unfollow(targetAccountId: $targetAccountId)
+}
+    `;
+export type UnfollowAccountMutationFn = Apollo.MutationFunction<UnfollowAccountMutation, UnfollowAccountMutationVariables>;
+
+/**
+ * __useUnfollowAccountMutation__
+ *
+ * To run a mutation, you first call `useUnfollowAccountMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUnfollowAccountMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [unfollowAccountMutation, { data, loading, error }] = useUnfollowAccountMutation({
+ *   variables: {
+ *      targetAccountId: // value for 'targetAccountId'
+ *   },
+ * });
+ */
+export function useUnfollowAccountMutation(baseOptions?: Apollo.MutationHookOptions<UnfollowAccountMutation, UnfollowAccountMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UnfollowAccountMutation, UnfollowAccountMutationVariables>(UnfollowAccountDocument, options);
+      }
+export type UnfollowAccountMutationHookResult = ReturnType<typeof useUnfollowAccountMutation>;
+export type UnfollowAccountMutationResult = Apollo.MutationResult<UnfollowAccountMutation>;
+export type UnfollowAccountMutationOptions = Apollo.BaseMutationOptions<UnfollowAccountMutation, UnfollowAccountMutationVariables>;
 export const UpdateProfileDocument = gql`
     mutation UpdateProfile($input: UpdateProfileInput!) {
   updateProfile(input: $input) {
@@ -1137,6 +1263,7 @@ export const UpdateProfileDocument = gql`
     username
     note
     avatarObjectKey
+    avatarUrl
     major
   }
 }
@@ -1167,65 +1294,3 @@ export function useUpdateProfileMutation(baseOptions?: Apollo.MutationHookOption
 export type UpdateProfileMutationHookResult = ReturnType<typeof useUpdateProfileMutation>;
 export type UpdateProfileMutationResult = Apollo.MutationResult<UpdateProfileMutation>;
 export type UpdateProfileMutationOptions = Apollo.BaseMutationOptions<UpdateProfileMutation, UpdateProfileMutationVariables>;
-export const FollowUserDocument = gql`
-    mutation FollowUser($targetAccountId: ID!) {
-  follow(targetAccountId: $targetAccountId)
-}
-    `;
-export type FollowUserMutationFn = Apollo.MutationFunction<FollowUserMutation, FollowUserMutationVariables>;
-
-/**
- * __useFollowUserMutation__
- *
- * To run a mutation, you first call `useFollowUserMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useFollowUserMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [followUserMutation, { data, loading, error }] = useFollowUserMutation({
- *   variables: {
- *      targetAccountId: // value for 'targetAccountId'
- *   },
- * });
- */
-export function useFollowUserMutation(baseOptions?: Apollo.MutationHookOptions<FollowUserMutation, FollowUserMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<FollowUserMutation, FollowUserMutationVariables>(FollowUserDocument, options);
-      }
-export type FollowUserMutationHookResult = ReturnType<typeof useFollowUserMutation>;
-export type FollowUserMutationResult = Apollo.MutationResult<FollowUserMutation>;
-export type FollowUserMutationOptions = Apollo.BaseMutationOptions<FollowUserMutation, FollowUserMutationVariables>;
-export const UnfollowUserDocument = gql`
-    mutation UnfollowUser($targetAccountId: ID!) {
-  unfollow(targetAccountId: $targetAccountId)
-}
-    `;
-export type UnfollowUserMutationFn = Apollo.MutationFunction<UnfollowUserMutation, UnfollowUserMutationVariables>;
-
-/**
- * __useUnfollowUserMutation__
- *
- * To run a mutation, you first call `useUnfollowUserMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUnfollowUserMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [unfollowUserMutation, { data, loading, error }] = useUnfollowUserMutation({
- *   variables: {
- *      targetAccountId: // value for 'targetAccountId'
- *   },
- * });
- */
-export function useUnfollowUserMutation(baseOptions?: Apollo.MutationHookOptions<UnfollowUserMutation, UnfollowUserMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UnfollowUserMutation, UnfollowUserMutationVariables>(UnfollowUserDocument, options);
-      }
-export type UnfollowUserMutationHookResult = ReturnType<typeof useUnfollowUserMutation>;
-export type UnfollowUserMutationResult = Apollo.MutationResult<UnfollowUserMutation>;
-export type UnfollowUserMutationOptions = Apollo.BaseMutationOptions<UnfollowUserMutation, UnfollowUserMutationVariables>;

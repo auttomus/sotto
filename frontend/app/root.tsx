@@ -11,6 +11,7 @@ import { apolloClient } from "~/core/apollo/client";
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import { ToastProvider } from "~/components/ui/ToastProvider";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -60,6 +61,7 @@ export default function App() {
   return (
     <ApolloProvider client={apolloClient}>
       <Outlet />
+      <ToastProvider />
     </ApolloProvider>
   );
 }

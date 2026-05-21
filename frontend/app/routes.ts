@@ -5,6 +5,7 @@ export default [
     index("routes/_main._index.tsx"),
     route("explore", "routes/_main.explore.tsx"),
     route("profile", "routes/_main.profile.tsx"),
+    route("profile/:username", "routes/_main.profile.$username.tsx"),
     route("chats", "routes/_main.chats.tsx"),
     route("orders", "routes/_main.orders.tsx"),
   ]),

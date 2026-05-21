@@ -1,26 +1,31 @@
-import { Plus, Loader2 } from "lucide-react";
+import { Plus } from "lucide-react";
+import { useEffect } from "react";
 import { PostCard } from "../features/feed/components/PostCard";
 import { Link } from "react-router";
 import { useGetFeedQuery } from "~/core/apollo/generated";
+import { PostCardSkeleton } from "~/components/ui/Skeleton";
+import { useToastStore } from "~/core/store/useToastStore";
 
 export default function FeedTimelineRoute() {
   const { data, loading, error } = useGetFeedQuery({
     variables: { limit: 20 },
     fetchPolicy: "cache-and-network",
   });
+  
+  const addToast = useToastStore(s => s.addToast);
+
+  useEffect(() => {
+    if (error) {
+      addToast('error', `Gagal memuat feed: ${error.message}`);
+    }
+  }, [error, addToast]);
 
   if (loading && !data) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-4 text-center text-red-500">
-        <p>Gagal memuat feed: {error.message}</p>
+      <div className="flex flex-col pb-20">
+        {[1, 2, 3].map((i) => (
+          <PostCardSkeleton key={i} />
+        ))}
       </div>
     );
   }
@@ -34,7 +39,7 @@ export default function FeedTimelineRoute() {
         {posts.length === 0 ? (
           <div className="text-center p-8 text-gray-500">Belum ada postingan</div>
         ) : (
-          posts.map((post) => (
+          posts.map((post: any) => (
             <PostCard key={post.postId} post={post} />
           ))
         )}

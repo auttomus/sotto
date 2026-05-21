@@ -1,0 +1,297 @@
+import * as React from "react";
+import { Star, MapPin, Link as LinkIcon, Settings, Calendar, Briefcase, Loader2, X, Check } from "lucide-react";
+import { Avatar } from "~/components/ui/Avatar";
+import { Button } from "~/components/ui/Button";
+import { useFollowAccountMutation, useUnfollowAccountMutation, useUpdateProfileMutation, type GetMyProfileQuery, type GetListingsByAccountQuery } from "~/core/apollo/generated";
+import { formatDate } from "~/core/utils/formatDate";
+import { useNavigate } from "react-router";
+import { useToastStore } from "~/core/store/useToastStore";
+
+interface ProfileLayoutProps {
+  profile: any; // Using any or extended type since it can be myProfile or userProfile
+  listings: GetListingsByAccountQuery['listingsByAccount'];
+  isOwnProfile?: boolean;
+}
+
+export function ProfileLayout({ profile, listings, isOwnProfile = false }: ProfileLayoutProps) {
+  const [activeTab, setActiveTab] = React.useState<"penawaran" | "pengalaman">("penawaran");
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [editForm, setEditForm] = React.useState({
+    displayName: profile.displayName || "",
+    note: profile.note || "",
+    major: profile.major || "",
+  });
+
+  const navigate = useNavigate();
+  const addToast = useToastStore(s => s.addToast);
+
+  const [followMutation, { loading: followLoading }] = useFollowAccountMutation({
+    onCompleted: () => addToast('success', `Berhasil mengikuti ${profile.displayName}`),
+    onError: (e: any) => addToast('error', e.message),
+    update: (cache: any) => {
+      cache.modify({
+        id: cache.identify(profile),
+        fields: {
+          isFollowing: () => true,
+          followersCount: (prev: number = 0) => prev + 1
+        }
+      });
+    }
+  });
+
+  const [unfollowMutation, { loading: unfollowLoading }] = useUnfollowAccountMutation({
+    onCompleted: () => addToast('success', `Berhenti mengikuti ${profile.displayName}`),
+    onError: (e: any) => addToast('error', e.message),
+    update: (cache: any) => {
+      cache.modify({
+        id: cache.identify(profile),
+        fields: {
+          isFollowing: () => false,
+          followersCount: (prev: number = 1) => prev - 1
+        }
+      });
+    }
+  });
+
+  const [updateProfileMutation, { loading: updateLoading }] = useUpdateProfileMutation({
+    onCompleted: () => {
+      addToast('success', 'Profil berhasil diperbarui');
+      setIsEditing(false);
+    },
+    onError: (e: any) => addToast('error', e.message),
+  });
+
+  const handleFollowToggle = () => {
+    if (profile.isFollowing) {
+      unfollowMutation({ variables: { targetAccountId: profile.id } });
+    } else {
+      followMutation({ variables: { targetAccountId: profile.id } });
+    }
+  };
+
+  const handleSaveProfile = () => {
+    updateProfileMutation({
+      variables: {
+        input: {
+          displayName: editForm.displayName,
+          note: editForm.note,
+          major: editForm.major,
+        }
+      }
+    });
+  };
+
+  const isFollowLoading = followLoading || unfollowLoading;
+
+  return (
+    <div className="pb-20 relative bg-white dark:bg-gray-950 min-h-screen">
+      {/* Header Mobile */}
+      <div className="sticky top-0 z-10 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-4 py-3 border-b border-gray-100 dark:border-gray-800 md:hidden">
+        <h2 className="font-bold text-gray-900 dark:text-gray-100 text-lg leading-none">{profile.displayName}</h2>
+        <p className="text-xs text-gray-500 dark:text-gray-400">{listings.length} Penawaran</p>
+      </div>
+
+      {/* Cover Section */}
+      <div className="relative">
+        <div className="h-32 md:h-48 w-full overflow-hidden bg-gradient-to-r from-indigo-500 to-purple-600">
+          {/* Default cover gradient for now */}
+        </div>
+      </div>
+
+      {/* Profile Info Section */}
+      <div className="px-4 relative">
+        <div className="flex justify-between items-start">
+          <div className="relative -mt-12 md:-mt-16 mb-3">
+            <div className="rounded-full border-4 border-white dark:border-gray-950 inline-block bg-white dark:bg-gray-900">
+              <Avatar 
+                src={profile.avatarObjectKey || ""} 
+                alt={profile.displayName} 
+                size="xl" 
+                className="w-20 h-20 md:w-28 md:h-28"
+              />
+            </div>
+          </div>
+          <div className="mt-3 flex gap-2">
+            {isOwnProfile ? (
+              isEditing ? (
+                <>
+                  <button onClick={() => setIsEditing(false)} className="p-2 border border-gray-200 dark:border-gray-700 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                    <X className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+                  </button>
+                  <Button variant="primary" onClick={handleSaveProfile} disabled={updateLoading} className="font-bold px-4 rounded-full shadow-md shadow-indigo-500/20">
+                    {updateLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                  </Button>
+                </>
+              ) : (
+                <button onClick={() => setIsEditing(true)} className="p-2 border border-gray-200 dark:border-gray-700 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                  <Settings className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+                </button>
+              )
+            ) : (
+              <Button 
+                variant={profile.isFollowing ? "outline" : "primary"} 
+                className="font-bold px-5 rounded-full shadow-md shadow-indigo-500/20"
+                onClick={handleFollowToggle}
+                disabled={isFollowLoading}
+              >
+                {isFollowLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (profile.isFollowing ? "Mengikuti" : "Ikuti")}
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {isEditing ? (
+          <div className="mt-2 space-y-3 bg-gray-50 dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800">
+            <div>
+              <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Nama Tampilan</label>
+              <input 
+                type="text" 
+                value={editForm.displayName} 
+                onChange={(e) => setEditForm(prev => ({ ...prev, displayName: e.target.value }))}
+                className="w-full bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-md p-2 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Bio / Catatan</label>
+              <textarea 
+                value={editForm.note} 
+                onChange={(e) => setEditForm(prev => ({ ...prev, note: e.target.value }))}
+                className="w-full bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-md p-2 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[80px]"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Jurusan / Keahlian</label>
+              <input 
+                type="text" 
+                value={editForm.major} 
+                onChange={(e) => setEditForm(prev => ({ ...prev, major: e.target.value }))}
+                className="w-full bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-md p-2 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="mt-1">
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-gray-100">{profile.displayName}</h1>
+              <p className="text-gray-500 dark:text-gray-400">@{profile.username}</p>
+            </div>
+            <p className="text-sm md:text-base text-gray-900 dark:text-gray-100 mt-3 leading-relaxed">
+              {profile.note || "Belum ada bio."}
+            </p>
+          </>
+        )}
+
+        {/* Metadata */}
+        <div className="flex flex-wrap items-center gap-y-2 gap-x-4 mt-3 text-sm text-gray-500 dark:text-gray-400">
+          {profile.schoolName && (
+            <div className="flex items-center gap-1.5">
+              <MapPin className="h-4 w-4" />
+              {profile.schoolName}
+            </div>
+          )}
+          <div className="flex items-center gap-1.5">
+            <Star className="h-4 w-4 text-amber-500" />
+            <span className="text-gray-900 dark:text-gray-100 font-medium">{profile.trustScore.toFixed(1)}</span> Trust Score
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4 mt-3 text-sm">
+          <div className="flex gap-1 hover:underline cursor-pointer">
+            {/* API myProfile doesn't have following/followers yet, falling back to 0 or mock */}
+            <span className="font-bold text-gray-900 dark:text-gray-100">0</span>
+            <span className="text-gray-500 dark:text-gray-400">Mengikuti</span>
+          </div>
+          <div className="flex gap-1 hover:underline cursor-pointer">
+            <span className="font-bold text-gray-900 dark:text-gray-100">0</span>
+            <span className="text-gray-500 dark:text-gray-400">Pengikut</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex items-center mt-4 border-b border-gray-200 dark:border-gray-800 px-4 md:px-0">
+        <button
+          onClick={() => setActiveTab("penawaran")}
+          className="flex-1 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors relative"
+        >
+          <div className={`py-3.5 text-sm font-bold w-fit mx-auto relative ${activeTab === "penawaran" ? "text-gray-900 dark:text-gray-100" : "text-gray-500 dark:text-gray-400"}`}>
+            Penawaran & Produk
+            {activeTab === "penawaran" && (
+              <div className="absolute bottom-0 left-0 w-full h-1 bg-indigo-600 dark:bg-indigo-400 rounded-full"></div>
+            )}
+          </div>
+        </button>
+        <button
+          onClick={() => setActiveTab("pengalaman")}
+          className="flex-1 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors relative"
+        >
+          <div className={`py-3.5 text-sm font-bold w-fit mx-auto relative ${activeTab === "pengalaman" ? "text-gray-900 dark:text-gray-100" : "text-gray-500 dark:text-gray-400"}`}>
+            Pengalaman
+            {activeTab === "pengalaman" && (
+              <div className="absolute bottom-0 left-0 w-full h-1 bg-indigo-600 dark:bg-indigo-400 rounded-full"></div>
+            )}
+          </div>
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      <div className="w-full">
+        {activeTab === "penawaran" ? (
+          <div className="flex flex-col">
+            {listings.length === 0 ? (
+              <div className="text-center p-8 text-gray-500">Belum ada penawaran.</div>
+            ) : (
+              listings.map((item) => (
+                <div key={item.id} className="p-4 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition cursor-pointer flex gap-4">
+                  <Avatar src={profile.avatarObjectKey || ""} size="sm" className="hidden sm:block shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 mb-1 hidden sm:flex">
+                      <span className="font-bold text-gray-900 dark:text-gray-100 text-sm">{profile.displayName}</span>
+                      <span className="text-gray-500 dark:text-gray-400 text-sm">@{profile.username}</span>
+                    </div>
+                    
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden mt-1 group">
+                      {item.media && item.media.length > 0 && (
+                        <div className="h-40 sm:h-48 w-full overflow-hidden relative">
+                          <img src={item.media[0].url || ""} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+                          <div className="absolute top-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-md rounded-md text-[10px] font-bold text-white uppercase tracking-wider">
+                            {item.type === 'SERVICE' ? 'Jasa' : 'Produk Digital'}
+                          </div>
+                        </div>
+                      )}
+                      <div className="p-4">
+                        <h3 className="font-bold text-gray-900 dark:text-gray-100 text-lg leading-tight mb-1">{item.title}</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 mb-3">{item.description}</p>
+                        
+                        <div className="flex items-center justify-between border-t border-gray-100 dark:border-gray-800 pt-3">
+                          <div>
+                            <span className="text-xs text-gray-500 dark:text-gray-400 block mb-0.5">Harga</span>
+                            <span className="font-black text-indigo-600 dark:text-indigo-400 text-base">Rp {item.price.toLocaleString("id-ID")}</span>
+                          </div>
+                          {item.type === 'DIGITAL_PRODUCT' ? (
+                            <div className="text-right">
+                              <span className="text-xs text-gray-500 dark:text-gray-400 block mb-0.5">Akses Instan</span>
+                            </div>
+                          ) : (
+                            <div className="text-right">
+                              <span className="text-xs text-gray-500 dark:text-gray-400 block mb-0.5">Estimasi</span>
+                              <span className="font-medium text-gray-800 dark:text-gray-200 text-sm">{item.deliveryTimeDays} Hari</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        ) : (
+          <div className="flex flex-col">
+            <div className="text-center p-8 text-gray-500">Belum ada pengalaman yang ditambahkan.</div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
