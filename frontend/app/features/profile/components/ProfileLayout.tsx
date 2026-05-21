@@ -6,6 +6,8 @@ import { useFollowAccountMutation, useUnfollowAccountMutation, useUpdateProfileM
 import { formatDate } from "~/core/utils/formatDate";
 import { useNavigate } from "react-router";
 import { useToastStore } from "~/core/store/useToastStore";
+import { EditProfileForm } from "./EditProfileForm";
+import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
 
 interface ProfileLayoutProps {
   profile: any; // Using any or extended type since it can be myProfile or userProfile
@@ -16,11 +18,6 @@ interface ProfileLayoutProps {
 export function ProfileLayout({ profile, listings, isOwnProfile = false }: ProfileLayoutProps) {
   const [activeTab, setActiveTab] = React.useState<"penawaran" | "pengalaman">("penawaran");
   const [isEditing, setIsEditing] = React.useState(false);
-  const [editForm, setEditForm] = React.useState({
-    displayName: profile.displayName || "",
-    note: profile.note || "",
-    major: profile.major || "",
-  });
 
   const navigate = useNavigate();
   const addToast = useToastStore(s => s.addToast);
@@ -53,32 +50,12 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
     }
   });
 
-  const [updateProfileMutation, { loading: updateLoading }] = useUpdateProfileMutation({
-    onCompleted: () => {
-      addToast('success', 'Profil berhasil diperbarui');
-      setIsEditing(false);
-    },
-    onError: (e: any) => addToast('error', e.message),
-  });
-
   const handleFollowToggle = () => {
     if (profile.isFollowing) {
       unfollowMutation({ variables: { targetAccountId: profile.id } });
     } else {
       followMutation({ variables: { targetAccountId: profile.id } });
     }
-  };
-
-  const handleSaveProfile = () => {
-    updateProfileMutation({
-      variables: {
-        input: {
-          displayName: editForm.displayName,
-          note: editForm.note,
-          major: editForm.major,
-        }
-      }
-    });
   };
 
   const isFollowLoading = followLoading || unfollowLoading;
@@ -101,28 +78,21 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
       {/* Profile Info Section */}
       <div className="px-4 relative">
         <div className="flex justify-between items-start">
-          <div className="relative -mt-12 md:-mt-16 mb-3">
-            <div className="rounded-full border-4 border-white dark:border-gray-950 inline-block bg-white dark:bg-gray-900">
-              <Avatar 
-                src={profile.avatarObjectKey || ""} 
-                alt={profile.displayName} 
-                size="xl" 
-                className="w-20 h-20 md:w-28 md:h-28"
-              />
+          {!isEditing && (
+            <div className="relative -mt-12 md:-mt-16 mb-3">
+              <div className="rounded-full border-4 border-white dark:border-gray-950 inline-block bg-white dark:bg-gray-900">
+                <Avatar 
+                  src={resolveMediaUrl(profile.avatarObjectKey)} 
+                  alt={profile.displayName} 
+                  size="xl" 
+                  className="w-20 h-20 md:w-28 md:h-28"
+                />
+              </div>
             </div>
-          </div>
-          <div className="mt-3 flex gap-2">
+          )}
+          <div className="mt-3 flex gap-2 w-full justify-end relative">
             {isOwnProfile ? (
-              isEditing ? (
-                <>
-                  <button onClick={() => setIsEditing(false)} className="p-2 border border-gray-200 dark:border-gray-700 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                    <X className="h-5 w-5 text-gray-900 dark:text-gray-100" />
-                  </button>
-                  <Button variant="primary" onClick={handleSaveProfile} disabled={updateLoading} className="font-bold px-4 rounded-full shadow-md shadow-indigo-500/20">
-                    {updateLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-                  </Button>
-                </>
-              ) : (
+              !isEditing && (
                 <button onClick={() => setIsEditing(true)} className="p-2 border border-gray-200 dark:border-gray-700 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800 transition">
                   <Settings className="h-5 w-5 text-gray-900 dark:text-gray-100" />
                 </button>
@@ -141,34 +111,11 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
         </div>
 
         {isEditing ? (
-          <div className="mt-2 space-y-3 bg-gray-50 dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800">
-            <div>
-              <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Nama Tampilan</label>
-              <input 
-                type="text" 
-                value={editForm.displayName} 
-                onChange={(e) => setEditForm(prev => ({ ...prev, displayName: e.target.value }))}
-                className="w-full bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-md p-2 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Bio / Catatan</label>
-              <textarea 
-                value={editForm.note} 
-                onChange={(e) => setEditForm(prev => ({ ...prev, note: e.target.value }))}
-                className="w-full bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-md p-2 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[80px]"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Jurusan / Keahlian</label>
-              <input 
-                type="text" 
-                value={editForm.major} 
-                onChange={(e) => setEditForm(prev => ({ ...prev, major: e.target.value }))}
-                className="w-full bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-md p-2 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-          </div>
+          <EditProfileForm 
+            profile={profile} 
+            onCancel={() => setIsEditing(false)} 
+            onSuccess={() => setIsEditing(false)} 
+          />
         ) : (
           <>
             <div className="mt-1">
@@ -243,7 +190,7 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
             ) : (
               listings.map((item) => (
                 <div key={item.id} className="p-4 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition cursor-pointer flex gap-4">
-                  <Avatar src={profile.avatarObjectKey || ""} size="sm" className="hidden sm:block shrink-0" />
+                  <Avatar src={resolveMediaUrl(profile.avatarObjectKey)} size="sm" className="hidden sm:block shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 mb-1 hidden sm:flex">
                       <span className="font-bold text-gray-900 dark:text-gray-100 text-sm">{profile.displayName}</span>
@@ -253,7 +200,7 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
                     <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden mt-1 group">
                       {item.media && item.media.length > 0 && (
                         <div className="h-40 sm:h-48 w-full overflow-hidden relative">
-                          <img src={item.media[0].url || ""} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+                          <img src={resolveMediaUrl(item.media[0].url || (item.media[0] as any).objectKey)} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
                           <div className="absolute top-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-md rounded-md text-[10px] font-bold text-white uppercase tracking-wider">
                             {item.type === 'SERVICE' ? 'Jasa' : 'Produk Digital'}
                           </div>

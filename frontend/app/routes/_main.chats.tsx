@@ -1,38 +1,35 @@
 import * as React from "react";
 import { Link } from "react-router";
 import { Avatar } from "../components/ui/Avatar";
-import { Search } from "lucide-react";
+import { Search, Loader2 } from "lucide-react";
+import { useGetConversationsQuery } from "~/core/apollo/generated";
+import { useAuthStore } from "~/core/store/useAuthStore";
+import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
+import { formatDate } from "~/core/utils/formatDate";
 
 export default function ChatsListRoute() {
-  const chats = [
-    {
-      id: "1",
-      name: "Kadek Agus",
-      avatar: "https://i.pravatar.cc/150?u=kadek",
-      lastMessage: "Iya Bli, saya butuh web landing page sederhana...",
-      time: "09:45",
-      unread: 0,
-      online: true,
-    },
-    {
-      id: "2",
-      name: "Budi Santoso",
-      avatar: "https://i.pravatar.cc/150?u=budi",
-      lastMessage: "Terima kasih atas orderannya, file sudah saya kirim.",
-      time: "Kemarin",
-      unread: 2,
-      online: false,
-    },
-    {
-      id: "3",
-      name: "Siti Aminah",
-      avatar: "https://i.pravatar.cc/150?u=siti",
-      lastMessage: "Kira-kira harganya bisa kurang lagi nggak ya?",
-      time: "Senin",
-      unread: 0,
-      online: true,
-    }
-  ];
+  const { user } = useAuthStore();
+  const { data, loading, error } = useGetConversationsQuery({
+    fetchPolicy: "cache-and-network"
+  });
+
+  const chats = data?.conversations || [];
+
+  if (loading && !data) {
+    return (
+      <div className="flex justify-center items-center h-full min-h-[60vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-8 text-center text-red-500">
+        Gagal memuat pesan.
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-900 w-full relative">
@@ -53,34 +50,38 @@ export default function ChatsListRoute() {
         </div>
 
         <div className="space-y-1">
-          {chats.map((chat) => (
-            <Link 
-              key={chat.id} 
-              to="/workspace/chat" 
-              className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition cursor-pointer group"
-            >
-              <div className="relative">
-                <Avatar src={chat.avatar} size="md" />
-                {chat.online && (
-                  <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full"></div>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-1">
-                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm truncate">{chat.name}</h3>
-                  <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap ml-2">{chat.time}</span>
-                </div>
-                <p className={`text-sm truncate ${chat.unread > 0 ? "font-semibold text-gray-900 dark:text-gray-100" : "text-gray-500 dark:text-gray-400"}`}>
-                  {chat.lastMessage}
-                </p>
-              </div>
-              {chat.unread > 0 && (
-                <div className="shrink-0 h-5 w-5 bg-indigo-600 text-white flex items-center justify-center rounded-full text-[10px] font-bold">
-                  {chat.unread}
-                </div>
-              )}
-            </Link>
-          ))}
+          {chats.length === 0 ? (
+            <div className="text-center text-gray-500 py-10">Belum ada pesan.</div>
+          ) : (
+            chats.map((chat: any) => {
+              const otherParticipant = chat.participants?.find((p: any) => p.accountId !== user?.id) || chat.participants?.[0];
+              const displayName = otherParticipant?.displayName || 'User';
+              const avatar = resolveMediaUrl(otherParticipant?.avatarObjectKey);
+              
+              return (
+                <Link 
+                  key={chat.id} 
+                  to={`/workspace/chat/${chat.id}`} 
+                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition cursor-pointer group"
+                >
+                  <div className="relative">
+                    <Avatar src={avatar} size="md" alt={displayName} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm truncate">{displayName}</h3>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap ml-2">
+                        {formatDate(chat.updatedAt as string)}
+                      </span>
+                    </div>
+                    <p className={`text-sm truncate text-gray-500 dark:text-gray-400`}>
+                      {chat.activeOrder ? "Order Aktif" : "Buka pesan"}
+                    </p>
+                  </div>
+                </Link>
+              );
+            })
+          )}
         </div>
       </div>
     </div>

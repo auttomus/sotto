@@ -1,0 +1,16 @@
+mutation RequestUploadUrl($input: RequestUploadInput!) {
+  requestUploadUrl(input: $input) {
+    uploadUrl
+    objectKey
+  }
+}
+
+mutation ConfirmUpload($input: RequestUploadInput!, $objectKey: String!) {
+  confirmUpload(input: $input, objectKey: $objectKey) {
+    id
+    objectKey
+    url
+    fileName
+    contentType
+  }
+}

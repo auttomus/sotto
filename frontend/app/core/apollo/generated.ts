@@ -34,12 +34,33 @@ export type CreateConversationMutationVariables = Exact<{
 
 export type CreateConversationMutation = { createConversation: { id: string, type: Types.ConversationType, createdAt: unknown } };
 
+export type SearchAccountsQueryVariables = Exact<{
+  query: string;
+}>;
+
+
+export type SearchAccountsQuery = { searchAccounts: Array<{ id: string, displayName: string, username: string, avatarObjectKey: string | null }> };
+
+export type SearchListingsQueryVariables = Exact<{
+  query: string;
+}>;
+
+
+export type SearchListingsQuery = { searchListings: Array<{ id: string, title: string, type: Types.ListingType, price: number, media: Array<{ objectKey: string, url: string | null }> | null }> };
+
 export type GetFeedQueryVariables = Exact<{
   limit?: number | null | undefined;
 }>;
 
 
-export type GetFeedQuery = { feed: Array<{ postId: string, content: string, createdAt: unknown, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null }> | null }> };
+export type GetFeedQuery = { feed: Array<{ postId: string, content: string, createdAt: unknown, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null }> };
+
+export type CreatePostMutationVariables = Exact<{
+  input: Types.CreatePostInput;
+}>;
+
+
+export type CreatePostMutation = { createPost: { postId: string, content: string, createdAt: unknown, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null } };
 
 export type GetListingsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -51,7 +72,7 @@ export type GetListingDetailQueryVariables = Exact<{
 }>;
 
 
-export type GetListingDetailQuery = { listing: { id: string, title: string, description: string, price: number, status: Types.ListingStatus, createdAt: unknown, accountId: string, account: { displayName: string, major: string | null, trustScore: number, username: string | null } | null, media: Array<{ id: string, fileName: string, contentType: string, objectKey: string, url: string | null, isPrivate: boolean }> | null } | null };
+export type GetListingDetailQuery = { listing: { id: string, title: string, description: string, price: number, status: Types.ListingStatus, type: Types.ListingType, isUnlimited: boolean, deliveryTimeDays: number | null, createdAt: unknown, accountId: string, account: { displayName: string, major: string | null, trustScore: number, username: string | null } | null, media: Array<{ id: string, fileName: string, contentType: string, objectKey: string, url: string | null, isPrivate: boolean }> | null } | null };
 
 export type CreateListingMutationVariables = Exact<{
   input: Types.CreateListingInput;
@@ -377,6 +398,102 @@ export function useCreateConversationMutation(baseOptions?: Apollo.MutationHookO
 export type CreateConversationMutationHookResult = ReturnType<typeof useCreateConversationMutation>;
 export type CreateConversationMutationResult = Apollo.MutationResult<CreateConversationMutation>;
 export type CreateConversationMutationOptions = Apollo.BaseMutationOptions<CreateConversationMutation, CreateConversationMutationVariables>;
+export const SearchAccountsDocument = gql`
+    query SearchAccounts($query: String!) {
+  searchAccounts(query: $query) {
+    id
+    displayName
+    username
+    avatarObjectKey
+  }
+}
+    `;
+
+/**
+ * __useSearchAccountsQuery__
+ *
+ * To run a query within a React component, call `useSearchAccountsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSearchAccountsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSearchAccountsQuery({
+ *   variables: {
+ *      query: // value for 'query'
+ *   },
+ * });
+ */
+export function useSearchAccountsQuery(baseOptions: Apollo.QueryHookOptions<SearchAccountsQuery, SearchAccountsQueryVariables> & ({ variables: SearchAccountsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SearchAccountsQuery, SearchAccountsQueryVariables>(SearchAccountsDocument, options);
+      }
+export function useSearchAccountsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchAccountsQuery, SearchAccountsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SearchAccountsQuery, SearchAccountsQueryVariables>(SearchAccountsDocument, options);
+        }
+// @ts-ignore
+export function useSearchAccountsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SearchAccountsQuery, SearchAccountsQueryVariables>): Apollo.UseSuspenseQueryResult<SearchAccountsQuery, SearchAccountsQueryVariables>;
+export function useSearchAccountsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<SearchAccountsQuery, SearchAccountsQueryVariables>): Apollo.UseSuspenseQueryResult<SearchAccountsQuery | undefined, SearchAccountsQueryVariables>;
+export function useSearchAccountsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<SearchAccountsQuery, SearchAccountsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<SearchAccountsQuery, SearchAccountsQueryVariables>(SearchAccountsDocument, options);
+        }
+export type SearchAccountsQueryHookResult = ReturnType<typeof useSearchAccountsQuery>;
+export type SearchAccountsLazyQueryHookResult = ReturnType<typeof useSearchAccountsLazyQuery>;
+export type SearchAccountsSuspenseQueryHookResult = ReturnType<typeof useSearchAccountsSuspenseQuery>;
+export type SearchAccountsQueryResult = Apollo.QueryResult<SearchAccountsQuery, SearchAccountsQueryVariables>;
+export const SearchListingsDocument = gql`
+    query SearchListings($query: String!) {
+  searchListings(query: $query) {
+    id
+    title
+    type
+    price
+    media {
+      objectKey
+      url
+    }
+  }
+}
+    `;
+
+/**
+ * __useSearchListingsQuery__
+ *
+ * To run a query within a React component, call `useSearchListingsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSearchListingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSearchListingsQuery({
+ *   variables: {
+ *      query: // value for 'query'
+ *   },
+ * });
+ */
+export function useSearchListingsQuery(baseOptions: Apollo.QueryHookOptions<SearchListingsQuery, SearchListingsQueryVariables> & ({ variables: SearchListingsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SearchListingsQuery, SearchListingsQueryVariables>(SearchListingsDocument, options);
+      }
+export function useSearchListingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchListingsQuery, SearchListingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SearchListingsQuery, SearchListingsQueryVariables>(SearchListingsDocument, options);
+        }
+// @ts-ignore
+export function useSearchListingsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SearchListingsQuery, SearchListingsQueryVariables>): Apollo.UseSuspenseQueryResult<SearchListingsQuery, SearchListingsQueryVariables>;
+export function useSearchListingsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<SearchListingsQuery, SearchListingsQueryVariables>): Apollo.UseSuspenseQueryResult<SearchListingsQuery | undefined, SearchListingsQueryVariables>;
+export function useSearchListingsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<SearchListingsQuery, SearchListingsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<SearchListingsQuery, SearchListingsQueryVariables>(SearchListingsDocument, options);
+        }
+export type SearchListingsQueryHookResult = ReturnType<typeof useSearchListingsQuery>;
+export type SearchListingsLazyQueryHookResult = ReturnType<typeof useSearchListingsLazyQuery>;
+export type SearchListingsSuspenseQueryHookResult = ReturnType<typeof useSearchListingsSuspenseQuery>;
+export type SearchListingsQueryResult = Apollo.QueryResult<SearchListingsQuery, SearchListingsQueryVariables>;
 export const GetFeedDocument = gql`
     query GetFeed($limit: Int) {
   feed(limit: $limit) {
@@ -388,11 +505,14 @@ export const GetFeedDocument = gql`
     authorUsername
     authorAvatarObjectKey
     authorSchoolName
+    linkedServiceId
+    inReplyToPostId
     media {
       id
       fileName
       contentType
       url
+      objectKey
     }
   }
 }
@@ -433,6 +553,54 @@ export type GetFeedQueryHookResult = ReturnType<typeof useGetFeedQuery>;
 export type GetFeedLazyQueryHookResult = ReturnType<typeof useGetFeedLazyQuery>;
 export type GetFeedSuspenseQueryHookResult = ReturnType<typeof useGetFeedSuspenseQuery>;
 export type GetFeedQueryResult = Apollo.QueryResult<GetFeedQuery, GetFeedQueryVariables>;
+export const CreatePostDocument = gql`
+    mutation CreatePost($input: CreatePostInput!) {
+  createPost(input: $input) {
+    postId
+    content
+    createdAt
+    authorId
+    authorDisplayName
+    authorUsername
+    authorAvatarObjectKey
+    authorSchoolName
+    linkedServiceId
+    media {
+      id
+      fileName
+      contentType
+      url
+      objectKey
+    }
+  }
+}
+    `;
+export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, CreatePostMutationVariables>;
+
+/**
+ * __useCreatePostMutation__
+ *
+ * To run a mutation, you first call `useCreatePostMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreatePostMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createPostMutation, { data, loading, error }] = useCreatePostMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreatePostMutation(baseOptions?: Apollo.MutationHookOptions<CreatePostMutation, CreatePostMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreatePostMutation, CreatePostMutationVariables>(CreatePostDocument, options);
+      }
+export type CreatePostMutationHookResult = ReturnType<typeof useCreatePostMutation>;
+export type CreatePostMutationResult = Apollo.MutationResult<CreatePostMutation>;
+export type CreatePostMutationOptions = Apollo.BaseMutationOptions<CreatePostMutation, CreatePostMutationVariables>;
 export const GetListingsDocument = gql`
     query GetListings {
   listings {
@@ -495,6 +663,9 @@ export const GetListingDetailDocument = gql`
     description
     price
     status
+    type
+    isUnlimited
+    deliveryTimeDays
     createdAt
     accountId
     account {

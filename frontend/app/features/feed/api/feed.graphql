@@ -8,11 +8,35 @@ query GetFeed($limit: Int) {
     authorUsername
     authorAvatarObjectKey
     authorSchoolName
+    linkedServiceId
+    inReplyToPostId
     media {
       id
       fileName
       contentType
       url
+      objectKey
+    }
+  }
+}
+
+mutation CreatePost($input: CreatePostInput!) {
+  createPost(input: $input) {
+    postId
+    content
+    createdAt
+    authorId
+    authorDisplayName
+    authorUsername
+    authorAvatarObjectKey
+    authorSchoolName
+    linkedServiceId
+    media {
+      id
+      fileName
+      contentType
+      url
+      objectKey
     }
   }
 }

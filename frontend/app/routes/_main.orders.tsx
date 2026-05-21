@@ -1,43 +1,20 @@
 import * as React from "react";
 import { Link } from "react-router";
-import { CheckCircle2, Clock, CheckCircle } from "lucide-react";
+import { CheckCircle2, Clock, CheckCircle, Loader2 } from "lucide-react";
+import { useGetMyOrdersQuery } from "~/core/apollo/generated";
+import { useAuthStore } from "~/core/store/useAuthStore";
+import { formatDate } from "~/core/utils/formatDate";
 
 export default function OrdersListRoute() {
-  const orders = [
-    {
-      id: "ORD-982",
-      title: "Jasa Pembuatan Web Company Profile MVP",
-      partner: "Kadek Agus",
-      price: "Rp 150.000",
-      status: "review",
-      statusLabel: "Review",
-      date: "13 May 2026",
-      isBuyer: true,
-      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=200"
-    },
-    {
-      id: "ORD-951",
-      title: "Desain Logo Startup E-Commerce",
-      partner: "Dian Sastro",
-      price: "Rp 350.000",
-      status: "working",
-      statusLabel: "Dikerjakan",
-      date: "10 May 2026",
-      isBuyer: false,
-      image: "https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&q=80&w=200"
-    },
-    {
-      id: "ORD-820",
-      title: "Konsultasi Backend Architecture",
-      partner: "Ahmad Dani",
-      price: "Rp 500.000",
-      status: "completed",
-      statusLabel: "Selesai",
-      date: "01 May 2026",
-      isBuyer: true,
-      image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=200"
-    }
-  ];
+  const { user } = useAuthStore();
+  const [role, setRole] = React.useState<"ALL" | "BUYER" | "SELLER">("ALL");
+
+  const { data, loading, error } = useGetMyOrdersQuery({
+    variables: { role },
+    fetchPolicy: "cache-and-network"
+  });
+
+  const orders = data?.myOrders || [];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -62,56 +39,65 @@ export default function OrdersListRoute() {
       <div className="p-4 border-b border-gray-100 dark:border-gray-800 sticky top-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-10 hidden md:flex items-center justify-between">
         <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Daftar Order</h1>
         <div className="flex gap-2">
-          <button className="px-4 py-1.5 rounded-full text-sm font-medium bg-indigo-600 text-white">Semua</button>
-          <button className="px-4 py-1.5 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">Pembelian</button>
-          <button className="px-4 py-1.5 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">Penjualan</button>
+          <button onClick={() => setRole("ALL")} className={`px-4 py-1.5 rounded-full text-sm font-medium ${role === "ALL" ? "bg-indigo-600 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"}`}>Semua</button>
+          <button onClick={() => setRole("BUYER")} className={`px-4 py-1.5 rounded-full text-sm font-medium ${role === "BUYER" ? "bg-indigo-600 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"}`}>Pembelian</button>
+          <button onClick={() => setRole("SELLER")} className={`px-4 py-1.5 rounded-full text-sm font-medium ${role === "SELLER" ? "bg-indigo-600 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"}`}>Penjualan</button>
         </div>
       </div>
       
       <div className="p-4">
         {/* Mobile Tabs */}
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2 md:hidden hide-scrollbar">
-          <button className="px-4 py-1.5 rounded-full text-sm font-medium bg-indigo-600 text-white shrink-0">Semua</button>
-          <button className="px-4 py-1.5 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 shrink-0">Pembelian</button>
-          <button className="px-4 py-1.5 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 shrink-0">Penjualan</button>
+          <button onClick={() => setRole("ALL")} className={`px-4 py-1.5 rounded-full text-sm font-medium shrink-0 ${role === "ALL" ? "bg-indigo-600 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"}`}>Semua</button>
+          <button onClick={() => setRole("BUYER")} className={`px-4 py-1.5 rounded-full text-sm font-medium shrink-0 ${role === "BUYER" ? "bg-indigo-600 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"}`}>Pembelian</button>
+          <button onClick={() => setRole("SELLER")} className={`px-4 py-1.5 rounded-full text-sm font-medium shrink-0 ${role === "SELLER" ? "bg-indigo-600 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"}`}>Penjualan</button>
         </div>
 
         <div className="space-y-4">
-          {orders.map((order) => (
-            <Link 
-              key={order.id} 
-              to="/workspace/order" 
-              className="block bg-white dark:bg-gray-950 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 hover:border-indigo-200 dark:hover:border-indigo-800 shadow-sm hover:shadow-md transition group"
-            >
-              <div className="flex justify-between items-center mb-3">
-                <div className="flex items-center gap-2">
-                  <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold flex items-center gap-1.5 ${getStatusColor(order.status)}`}>
-                    {getStatusIcon(order.status)}
-                    {order.statusLabel}
-                  </span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                    {order.isBuyer ? "Pembelian dari" : "Penjualan ke"} <span className="font-bold text-gray-700 dark:text-gray-300">{order.partner}</span>
-                  </span>
-                </div>
-                <span className="text-xs text-gray-400 font-medium">{order.date}</span>
-              </div>
-
-              <div className="flex gap-4">
-                <div className="h-16 w-16 bg-gray-100 dark:bg-gray-800 rounded-xl overflow-hidden shrink-0">
-                  <img src={order.image} alt={order.title} className="w-full h-full object-cover" />
-                </div>
-                <div className="flex flex-col flex-1">
-                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 text-sm mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">
-                    {order.title}
-                  </h4>
-                  <div className="mt-auto flex justify-between items-end">
-                    <span className="text-xs text-gray-500">{order.id}</span>
-                    <p className="font-bold text-indigo-600 dark:text-indigo-400">{order.price}</p>
+          {loading && orders.length === 0 ? (
+            <div className="flex justify-center py-10">
+              <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
+            </div>
+          ) : orders.length === 0 ? (
+            <div className="text-center text-gray-500 py-10">Tidak ada order.</div>
+          ) : (
+            orders.map((order: any) => {
+              const isBuyer = order.buyerAccountId === user?.id;
+              
+              return (
+                <Link 
+                  key={order.id} 
+                  to={`/workspace/order/${order.id}`} 
+                  className="block bg-white dark:bg-gray-950 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 hover:border-indigo-200 dark:hover:border-indigo-800 shadow-sm hover:shadow-md transition group"
+                >
+                  <div className="flex justify-between items-center mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold flex items-center gap-1.5 ${getStatusColor(order.status)}`}>
+                        {getStatusIcon(order.status)}
+                        {order.status}
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                        {isBuyer ? "Pembelian" : "Penjualan"} 
+                      </span>
+                    </div>
+                    <span className="text-xs text-gray-400 font-medium">{formatDate(order.createdAt)}</span>
                   </div>
-                </div>
-              </div>
-            </Link>
-          ))}
+
+                  <div className="flex gap-4">
+                    <div className="flex flex-col flex-1">
+                      <h4 className="font-semibold text-gray-900 dark:text-gray-100 text-sm mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">
+                        Order #{order.id.slice(0, 8)}
+                      </h4>
+                      <div className="mt-auto flex justify-between items-end">
+                        <span className="text-xs text-gray-500">Listing: {order.listingId}</span>
+                        <p className="font-bold text-indigo-600 dark:text-indigo-400">Rp {order.agreedPrice?.toLocaleString('id-ID')}</p>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })
+          )}
         </div>
       </div>
     </div>

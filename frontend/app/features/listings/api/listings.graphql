@@ -23,6 +23,9 @@ query GetListingDetail($id: ID!) {
     description
     price
     status
+    type
+    isUnlimited
+    deliveryTimeDays
     createdAt
     accountId
     account {

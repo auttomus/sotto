@@ -1,0 +1,21 @@
+query SearchAccounts($query: String!) {
+  searchAccounts(query: $query) {
+    id
+    displayName
+    username
+    avatarObjectKey
+  }
+}
+
+query SearchListings($query: String!) {
+  searchListings(query: $query) {
+    id
+    title
+    type
+    price
+    media {
+      objectKey
+      url
+    }
+  }
+}
