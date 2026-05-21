@@ -16,11 +16,3 @@ query GetFeed($limit: Int) {
     }
   }
 }
-
-mutation CreatePost($input: CreatePostInput!) {
-  createPost(input: $input) {
-    postId
-    content
-    createdAt
-  }
-}

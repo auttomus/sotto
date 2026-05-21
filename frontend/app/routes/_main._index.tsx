@@ -1,71 +1,43 @@
-import { Plus } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { PostCard } from "../features/feed/components/PostCard";
 import { Link } from "react-router";
-
-// Mock Data for the Feed
-const MOCK_POSTS = [
-  {
-    id: "1",
-    author: {
-      name: "Kadek Agus",
-      avatarUrl: "https://i.pravatar.cc/150?u=kadek",
-      school: "SMK Negeri 1 Denpasar - RPL",
-    },
-    createdAt: "2 jam yang lalu",
-    content: "Akhirnya selesai nge-build UI untuk sistem POS kasir pakai React dan Tailwind CSS v4!🔥 Sangat smooth dan gampang dikustomisasi.",
-    tags: ["React", "TailwindCSS", "Frontend"],
-    media: ["https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800"],
-    attachedListing: {
-      thumbnailUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=200",
-      title: "Jasa Pembuatan Web MVP",
-      price: 150000,
-    },
-    stats: {
-      likes: 128,
-      comments: 34,
-    },
-  },
-  {
-    id: "2",
-    author: {
-      name: "Melani Putri",
-      avatarUrl: "https://i.pravatar.cc/150?u=melani",
-      school: "SMK Dwijendra - DKV",
-    },
-    createdAt: "5 jam yang lalu",
-    content: "Eksplorasi desain logo untuk startup coffee shop lokal di Bali. Gimana menurut kalian? Masih butuh sedikit revisi di bagian tipografinya sih 🤔",
-    tags: ["LogoDesign", "Figma", "Branding"],
-    media: ["https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&q=80&w=800"],
-    stats: {
-      likes: 85,
-      comments: 12,
-    },
-  },
-  {
-    id: "3",
-    author: {
-      name: "Wayan Surya",
-      avatarUrl: "https://i.pravatar.cc/150?u=wayan",
-      school: "SMK TI Bali Global",
-    },
-    createdAt: "1 hari yang lalu",
-    content: "Sedang mengerjakan backend pakai NestJS + GraphQL. Bener-bener powerful buat handle relational data yang kompleks dibanding REST biasa.",
-    tags: ["NestJS", "GraphQL", "Backend"],
-    stats: {
-      likes: 45,
-      comments: 8,
-    },
-  }
-];
+import { useGetFeedQuery } from "~/core/apollo/generated";
 
 export default function FeedTimelineRoute() {
+  const { data, loading, error } = useGetFeedQuery({
+    variables: { limit: 20 },
+    fetchPolicy: "cache-and-network",
+  });
+
+  if (loading && !data) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 text-center text-red-500">
+        <p>Gagal memuat feed: {error.message}</p>
+      </div>
+    );
+  }
+
+  const posts = data?.feed || [];
+
   return (
     <div className="pb-20 relative min-h-screen">
       {/* List of Posts */}
       <div className="flex flex-col">
-        {MOCK_POSTS.map((post) => (
-          <PostCard key={post.id} {...post} />
-        ))}
+        {posts.length === 0 ? (
+          <div className="text-center p-8 text-gray-500">Belum ada postingan</div>
+        ) : (
+          posts.map((post) => (
+            <PostCard key={post.postId} post={post} />
+          ))
+        )}
       </div>
 
       {/* Floating Action Button for Create Post */}

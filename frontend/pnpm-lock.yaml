@@ -44,6 +44,9 @@ importers:
       tailwind-merge:
         specifier: ^3.5.0
         version: 3.6.0
+      zustand:
+        specifier: ^5.0.13
+        version: 5.0.13(@types/react@19.2.14)(react@19.2.5)
     devDependencies:
       '@graphql-codegen/cli':
         specifier: ^7.0.0
@@ -2703,6 +2706,24 @@ packages:
     resolution: {integrity: sha512-CzhO+pFNo8ajLM2d2IW/R93ipy99LWjtwblvC1RsoSUMZgyLbYFr221TnSNT7GjGdYui6P459mw9JH/g/zW2ug==}
     engines: {node: '>=18'}
 
+  zustand@5.0.13:
+    resolution: {integrity: sha512-efI2tVaVQPqtOh114loML/Z80Y4NP3yc+Ff0fYiZJPauNeWZeIp/bRFD7I9bfmCOYBh/PHxlglQ9+wvlwnPikQ==}
+    engines: {node: '>=12.20.0'}
+    peerDependencies:
+      '@types/react': '>=18.0.0'
+      immer: '>=9.0.6'
+      react: '>=18.0.0'
+      use-sync-external-store: '>=1.2.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      immer:
+        optional: true
+      react:
+        optional: true
+      use-sync-external-store:
+        optional: true
+
 snapshots:
 
   '@apollo/client@4.1.9(graphql-ws@6.0.8(graphql@16.14.0)(ws@8.20.1))(graphql@16.14.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(rxjs@7.8.2)':
@@ -5303,3 +5324,8 @@ snapshots:
   yocto-queue@0.1.0: {}
 
   yoctocolors@2.1.2: {}
+
+  zustand@5.0.13(@types/react@19.2.14)(react@19.2.5):
+    optionalDependencies:
+      '@types/react': 19.2.14
+      react: 19.2.5

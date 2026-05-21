@@ -1,0 +1,6 @@
+query SearchSchools($query: String!) {
+  searchSchools(query: $query) {
+    id
+    name
+  }
+}

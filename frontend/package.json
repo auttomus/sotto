@@ -21,7 +21,8 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router": "7.14.0",
-    "tailwind-merge": "^3.5.0"
+    "tailwind-merge": "^3.5.0",
+    "zustand": "^5.0.13"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^7.0.0",

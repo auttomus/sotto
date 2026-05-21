@@ -2,7 +2,7 @@ import type { CodegenConfig } from '@graphql-codegen/cli';
 
 const config: CodegenConfig = {
   // 1. URL ke server NestJS milikmu (harus dalam keadaan menyala saat codegen dijalankan)
-  schema: 'http://localhost:3000/graphql',
+  schema: '../backend/src/schema.gql',
 
   // 2. Tempat tim frontend menyimpan file kueri mereka
   documents: ['app/features/**/api/*.graphql'],

@@ -7,6 +7,13 @@ import type * as Types from './base-types';
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
 const defaultOptions = {} as const;
+export type SearchSchoolsQueryVariables = Exact<{
+  query: string;
+}>;
+
+
+export type SearchSchoolsQuery = { searchSchools: Array<{ id: string, name: string }> };
+
 export type GetConversationsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -33,13 +40,6 @@ export type GetFeedQueryVariables = Exact<{
 
 
 export type GetFeedQuery = { feed: Array<{ postId: string, content: string, createdAt: unknown, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null }> | null }> };
-
-export type CreatePostMutationVariables = Exact<{
-  input: Types.CreatePostInput;
-}>;
-
-
-export type CreatePostMutation = { createPost: { postId: string, content: string, createdAt: unknown } };
 
 export type GetListingsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -182,6 +182,50 @@ export type UnfollowUserMutationVariables = Exact<{
 export type UnfollowUserMutation = { unfollow: boolean };
 
 
+export const SearchSchoolsDocument = gql`
+    query SearchSchools($query: String!) {
+  searchSchools(query: $query) {
+    id
+    name
+  }
+}
+    `;
+
+/**
+ * __useSearchSchoolsQuery__
+ *
+ * To run a query within a React component, call `useSearchSchoolsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSearchSchoolsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSearchSchoolsQuery({
+ *   variables: {
+ *      query: // value for 'query'
+ *   },
+ * });
+ */
+export function useSearchSchoolsQuery(baseOptions: Apollo.QueryHookOptions<SearchSchoolsQuery, SearchSchoolsQueryVariables> & ({ variables: SearchSchoolsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SearchSchoolsQuery, SearchSchoolsQueryVariables>(SearchSchoolsDocument, options);
+      }
+export function useSearchSchoolsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchSchoolsQuery, SearchSchoolsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SearchSchoolsQuery, SearchSchoolsQueryVariables>(SearchSchoolsDocument, options);
+        }
+// @ts-ignore
+export function useSearchSchoolsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SearchSchoolsQuery, SearchSchoolsQueryVariables>): Apollo.UseSuspenseQueryResult<SearchSchoolsQuery, SearchSchoolsQueryVariables>;
+export function useSearchSchoolsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<SearchSchoolsQuery, SearchSchoolsQueryVariables>): Apollo.UseSuspenseQueryResult<SearchSchoolsQuery | undefined, SearchSchoolsQueryVariables>;
+export function useSearchSchoolsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<SearchSchoolsQuery, SearchSchoolsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<SearchSchoolsQuery, SearchSchoolsQueryVariables>(SearchSchoolsDocument, options);
+        }
+export type SearchSchoolsQueryHookResult = ReturnType<typeof useSearchSchoolsQuery>;
+export type SearchSchoolsLazyQueryHookResult = ReturnType<typeof useSearchSchoolsLazyQuery>;
+export type SearchSchoolsSuspenseQueryHookResult = ReturnType<typeof useSearchSchoolsSuspenseQuery>;
+export type SearchSchoolsQueryResult = Apollo.QueryResult<SearchSchoolsQuery, SearchSchoolsQueryVariables>;
 export const GetConversationsDocument = gql`
     query GetConversations {
   conversations {
@@ -382,41 +426,6 @@ export type GetFeedQueryHookResult = ReturnType<typeof useGetFeedQuery>;
 export type GetFeedLazyQueryHookResult = ReturnType<typeof useGetFeedLazyQuery>;
 export type GetFeedSuspenseQueryHookResult = ReturnType<typeof useGetFeedSuspenseQuery>;
 export type GetFeedQueryResult = Apollo.QueryResult<GetFeedQuery, GetFeedQueryVariables>;
-export const CreatePostDocument = gql`
-    mutation CreatePost($input: CreatePostInput!) {
-  createPost(input: $input) {
-    postId
-    content
-    createdAt
-  }
-}
-    `;
-export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, CreatePostMutationVariables>;
-
-/**
- * __useCreatePostMutation__
- *
- * To run a mutation, you first call `useCreatePostMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreatePostMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [createPostMutation, { data, loading, error }] = useCreatePostMutation({
- *   variables: {
- *      input: // value for 'input'
- *   },
- * });
- */
-export function useCreatePostMutation(baseOptions?: Apollo.MutationHookOptions<CreatePostMutation, CreatePostMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreatePostMutation, CreatePostMutationVariables>(CreatePostDocument, options);
-      }
-export type CreatePostMutationHookResult = ReturnType<typeof useCreatePostMutation>;
-export type CreatePostMutationResult = Apollo.MutationResult<CreatePostMutation>;
-export type CreatePostMutationOptions = Apollo.BaseMutationOptions<CreatePostMutation, CreatePostMutationVariables>;
 export const GetListingsDocument = gql`
     query GetListings {
   listings {

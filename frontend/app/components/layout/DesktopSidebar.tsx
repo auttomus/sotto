@@ -1,9 +1,10 @@
-import * as React from "react";
 import { Home, Search, MessageSquare, ClipboardList, User, Moon, Sun, PlusSquare, Menu } from "lucide-react";
 import { NavLink, Link } from "react-router";
 import { cn } from "../../core/utils/cn";
+import { useThemeStore } from "~/core/store/useThemeStore";
 
-export default function DesktopSidebar({ toggleTheme, isDark }: { toggleTheme: () => void, isDark: boolean }) {
+export default function DesktopSidebar() {
+  const { isDark, toggleTheme } = useThemeStore();
   const navItems = [
     { icon: Home, label: "Beranda", to: "/" },
     { icon: Search, label: "Eksplor", to: "/explore" },
