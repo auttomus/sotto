@@ -9,28 +9,63 @@ export default function OrdersListRoute() {
   const { user } = useAuthStore();
   const [role, setRole] = React.useState<"ALL" | "BUYER" | "SELLER">("ALL");
 
-  const { data, loading, error } = useGetMyOrdersQuery({
-    variables: { role },
-    fetchPolicy: "cache-and-network"
+  // When "ALL" is selected, fetch both buyer and seller orders
+  const { data: buyerData, loading: buyerLoading, error: buyerError } = useGetMyOrdersQuery({
+    variables: { role: "buyer" },
+    fetchPolicy: "cache-and-network",
+    skip: role === "SELLER",
   });
 
-  const orders = data?.myOrders || [];
+  const { data: sellerData, loading: sellerLoading, error: sellerError } = useGetMyOrdersQuery({
+    variables: { role: "seller" },
+    fetchPolicy: "cache-and-network",
+    skip: role === "BUYER",
+  });
+
+  const loading = buyerLoading || sellerLoading;
+  const error = buyerError || sellerError;
+
+  const orders = React.useMemo(() => {
+    const buyerOrders = role !== "SELLER" ? (buyerData?.myOrders || []) : [];
+    const sellerOrders = role !== "BUYER" ? (sellerData?.myOrders || []) : [];
+    
+    if (role === "ALL") {
+      // Merge and deduplicate by id, sort by createdAt desc
+      const map = new Map<string, any>();
+      [...buyerOrders, ...sellerOrders].forEach(o => map.set(o.id, o));
+      return Array.from(map.values()).sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+    }
+    return role === "BUYER" ? buyerOrders : sellerOrders;
+  }, [role, buyerData, sellerData]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "completed": return "text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-900/30";
-      case "working": return "text-orange-600 bg-orange-50 dark:text-orange-400 dark:bg-orange-900/30";
-      case "review": return "text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/30";
+      case "COMPLETED": return "text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-900/30";
+      case "IN_PROGRESS": return "text-orange-600 bg-orange-50 dark:text-orange-400 dark:bg-orange-900/30";
+      case "PENDING_PAYMENT": return "text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/30";
+      case "CANCELLED": return "text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-900/30";
       default: return "text-gray-600 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/30";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "completed": return <CheckCircle2 className="h-3.5 w-3.5" />;
-      case "working": return <Clock className="h-3.5 w-3.5" />;
-      case "review": return <CheckCircle className="h-3.5 w-3.5" />;
+      case "COMPLETED": return <CheckCircle2 className="h-3.5 w-3.5" />;
+      case "IN_PROGRESS": return <Clock className="h-3.5 w-3.5" />;
+      case "PENDING_PAYMENT": return <CheckCircle className="h-3.5 w-3.5" />;
       default: return null;
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "COMPLETED": return "Selesai";
+      case "IN_PROGRESS": return "Dikerjakan";
+      case "PENDING_PAYMENT": return "Menunggu Bayar";
+      case "CANCELLED": return "Dibatalkan";
+      default: return status;
     }
   };
 
@@ -62,7 +97,7 @@ export default function OrdersListRoute() {
             <div className="text-center text-gray-500 py-10">Tidak ada order.</div>
           ) : (
             orders.map((order: any) => {
-              const isBuyer = order.buyerAccountId === user?.id;
+              const isBuyer = order.buyerAccountId === user?.accountId;
               
               return (
                 <Link 
@@ -74,7 +109,7 @@ export default function OrdersListRoute() {
                     <div className="flex items-center gap-2">
                       <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold flex items-center gap-1.5 ${getStatusColor(order.status)}`}>
                         {getStatusIcon(order.status)}
-                        {order.status}
+                        {getStatusLabel(order.status)}
                       </span>
                       <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
                         {isBuyer ? "Pembelian" : "Penjualan"} 
@@ -89,7 +124,7 @@ export default function OrdersListRoute() {
                         Order #{order.id.slice(0, 8)}
                       </h4>
                       <div className="mt-auto flex justify-between items-end">
-                        <span className="text-xs text-gray-500">Listing: {order.listingId}</span>
+                        <span className="text-xs text-gray-500">Listing: {order.listingId?.slice(0, 8)}...</span>
                         <p className="font-bold text-indigo-600 dark:text-indigo-400">Rp {order.agreedPrice?.toLocaleString('id-ID')}</p>
                       </div>
                     </div>
@@ -103,3 +138,4 @@ export default function OrdersListRoute() {
     </div>
   );
 }
+

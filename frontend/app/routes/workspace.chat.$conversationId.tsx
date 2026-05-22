@@ -5,12 +5,14 @@ import { Avatar } from "../components/ui/Avatar";
 import { useGetMessagesQuery, useGetConversationsQuery } from "~/core/apollo/generated";
 import { useAuthStore } from "~/core/store/useAuthStore";
 import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
+import { useChatSocket } from "~/core/hooks/useChatSocket";
 
 export default function ChatRoute() {
   const { conversationId } = useParams();
   const { user } = useAuthStore();
   const [inputText, setInputText] = React.useState("");
   const [localMessages, setLocalMessages] = React.useState<any[]>([]);
+  const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
   const { data, loading } = useGetMessagesQuery({
     variables: { conversationId: conversationId as string, limit: 50 },
@@ -23,28 +25,49 @@ export default function ChatRoute() {
   });
 
   const conversation = convData?.conversations?.find((c: any) => c.id === conversationId);
-  const recipient = conversation?.participants?.find((p: any) => p.accountId !== user?.id);
+  const recipient = conversation?.participants?.find((p: any) => p.accountId !== user?.accountId);
+
+  // Real-time messaging via Socket.io
+  const { sendMessage: socketSendMessage, sendTyping } = useChatSocket({
+    conversationId: conversationId as string,
+    onNewMessage: (message) => {
+      // Only add if not from us (our own messages are added optimistically)
+      if (message.senderId !== user?.accountId) {
+        setLocalMessages(prev => [...prev, message]);
+      }
+    },
+  });
 
   const allMessages = React.useMemo(() => {
     const serverMessages = data?.messages || [];
     return [...serverMessages].reverse().concat(localMessages);
   }, [data, localMessages]);
 
+  // Auto-scroll to bottom on new messages
+  React.useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [allMessages.length]);
+
   const handleSend = () => {
     if (!inputText.trim()) return;
     
-    // Optimistic mock
+    const content = inputText.trim();
+    
+    // Optimistic UI update
     const newMsg = {
-      messageId: Date.now().toString(),
-      senderId: user?.id,
-      content: inputText,
+      messageId: `local-${Date.now()}`,
+      senderId: user?.accountId,
+      content,
       createdAt: new Date().toISOString(),
       media: []
     };
     
     setLocalMessages(prev => [...prev, newMsg]);
     setInputText("");
-    // TODO: Send via WebSocket
+
+    // Send via WebSocket
+    socketSendMessage(content);
+    sendTyping(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -52,6 +75,11 @@ export default function ChatRoute() {
       e.preventDefault();
       handleSend();
     }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputText(e.target.value);
+    sendTyping(e.target.value.length > 0);
   };
 
   if (loading && !data) {
@@ -66,7 +94,7 @@ export default function ChatRoute() {
       {/* Header */}
       <header className="shrink-0 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-10 px-3 h-16 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3">
-          <Link to="/" className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+          <Link to="/chats" className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition">
             <ArrowLeft className="h-5 w-5 text-gray-700 dark:text-gray-300" />
           </Link>
           <div className="flex items-center gap-2.5">
@@ -93,7 +121,7 @@ export default function ChatRoute() {
         </div>
 
         {allMessages.map((msg: any) => {
-          const isMine = msg.senderId === user?.id;
+          const isMine = msg.senderId === user?.accountId;
           
           return (
             <div key={msg.messageId} className={`flex gap-2 max-w-[85%] ${isMine ? 'self-end' : ''}`}>
@@ -114,6 +142,7 @@ export default function ChatRoute() {
             </div>
           );
         })}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input Area */}
@@ -125,7 +154,7 @@ export default function ChatRoute() {
           <input
             type="text"
             value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
+            onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2 px-2 text-gray-900 dark:text-gray-100 placeholder-gray-500 outline-none"
             placeholder="Ketik pesan..."

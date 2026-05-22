@@ -12,6 +12,12 @@ const config: CodegenConfig = {
     // File 1: Base types saja (schema types, inputs, enums)
     'app/core/apollo/base-types.ts': {
       plugins: ['typescript'],
+      config: {
+        scalars: {
+          DateTime: 'string',
+          Date: 'string',
+        },
+      },
     },
     // File 2: Operations & React Hooks (mengimpor dari base-types)
     'app/core/apollo/generated.ts': {
@@ -21,7 +27,13 @@ const config: CodegenConfig = {
       ],
       config: {
         withHooks: true,
-        importSchemaTypesFrom: 'app/core/apollo/base-types',
+        withSuspense: false,
+        apolloReactHooksImportFrom: '@apollo/client/react',
+        importSchemaTypesFrom: './base-types',
+        scalars: {
+          DateTime: 'string',
+          Date: 'string',
+        },
       },
     },
   },

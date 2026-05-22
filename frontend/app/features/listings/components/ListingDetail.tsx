@@ -1,10 +1,13 @@
 import * as React from "react";
-import { ArrowLeft, Share2, Heart, Star, ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
+import { ArrowLeft, Share2, Heart, Star, ChevronLeft, ChevronRight, MessageCircle, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { Avatar } from "~/components/ui/Avatar";
 import { Button } from "~/components/ui/Button";
 import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
 import { ROUTES } from "~/core/constants/ROUTES";
+import { useCreateOrderMutation, useCreateConversationMutation } from "~/core/apollo/generated";
+import { useAuthStore } from "~/core/store/useAuthStore";
+import { useToastStore } from "~/core/store/useToastStore";
 import type { GetListingDetailQuery } from "~/core/apollo/generated";
 
 type RawListingDetail = NonNullable<GetListingDetailQuery["listing"]>;
@@ -15,10 +18,28 @@ interface ListingDetailProps {
 
 export function ListingDetail({ listing }: ListingDetailProps) {
   const navigate = useNavigate();
+  const { user } = useAuthStore();
+  const addToast = useToastStore(s => s.addToast);
   const [currentMedia, setCurrentMedia] = React.useState(0);
   
   const mediaList = listing.media || [];
   const hasMedia = mediaList.length > 0;
+  const isOwnListing = listing.accountId === user?.accountId;
+
+  const [createOrder, { loading: orderLoading }] = useCreateOrderMutation({
+    onCompleted: (data: any) => {
+      addToast('success', 'Order berhasil dibuat!');
+      navigate(ROUTES.WORKSPACE_ORDER(data.createOrder.id));
+    },
+    onError: (e: any) => addToast('error', e.message),
+  });
+
+  const [createConversation, { loading: chatLoading }] = useCreateConversationMutation({
+    onCompleted: (data: any) => {
+      navigate(ROUTES.WORKSPACE_CHAT(data.createConversation.id));
+    },
+    onError: (e: any) => addToast('error', e.message),
+  });
 
   const handlePrevMedia = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -30,8 +51,40 @@ export function ListingDetail({ listing }: ListingDetailProps) {
     setCurrentMedia(prev => (prev < mediaList.length - 1 ? prev + 1 : 0));
   };
 
+  const handleOrder = () => {
+    if (!user) {
+      navigate(ROUTES.LOGIN);
+      return;
+    }
+    createOrder({
+      variables: {
+        input: {
+          listingId: listing.id,
+          agreedPrice: listing.price,
+        }
+      }
+    });
+  };
+
+  const handleChat = () => {
+    if (!user) {
+      navigate(ROUTES.LOGIN);
+      return;
+    }
+    // Create a direct conversation with the listing owner
+    createConversation({
+      variables: {
+        input: {
+          participantIds: [listing.accountId],
+          type: "DIRECT",
+        }
+      }
+    });
+  };
+
   // Determine if seller is fully booked
   const isFullyBooked = !listing.isUnlimited && listing.status === 'PAUSED';
+  const isActionLoading = orderLoading || chatLoading;
 
   return (
     <div className="pb-24 bg-white dark:bg-gray-950 min-h-screen relative">
@@ -169,16 +222,33 @@ export function ListingDetail({ listing }: ListingDetailProps) {
 
       {/* Sticky Bottom Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 p-4 pb-safe flex items-center gap-3">
-        <button className="h-12 w-12 flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition text-gray-900 dark:text-gray-100">
-          <MessageCircle className="h-5 w-5" />
+        <button 
+          onClick={handleChat}
+          disabled={isOwnListing || isActionLoading}
+          className="h-12 w-12 flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition text-gray-900 dark:text-gray-100 disabled:opacity-50"
+        >
+          {chatLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <MessageCircle className="h-5 w-5" />}
         </button>
         {isFullyBooked ? (
           <Button variant="secondary" className="flex-1 h-12 text-base font-bold opacity-70" disabled>
             Sedang Penuh
           </Button>
+        ) : isOwnListing ? (
+          <Button variant="secondary" className="flex-1 h-12 text-base font-bold" disabled>
+            Listing Milik Anda
+          </Button>
         ) : (
-          <Button variant="primary" className="flex-1 h-12 text-base font-bold shadow-lg shadow-indigo-500/20">
-            {listing.type === 'DIGITAL_PRODUCT' ? 'Beli Sekarang' : 'Pesan Jasa'}
+          <Button 
+            variant="primary" 
+            className="flex-1 h-12 text-base font-bold shadow-lg shadow-indigo-500/20"
+            onClick={handleOrder}
+            disabled={isActionLoading}
+          >
+            {orderLoading ? (
+              <span className="flex items-center gap-2"><Loader2 className="h-5 w-5 animate-spin" /> Memproses...</span>
+            ) : (
+              listing.type === 'DIGITAL_PRODUCT' ? 'Beli Sekarang' : 'Pesan Jasa'
+            )}
           </Button>
         )}
       </div>

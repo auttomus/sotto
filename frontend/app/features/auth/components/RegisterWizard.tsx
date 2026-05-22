@@ -86,15 +86,14 @@ export default function RegisterWizard() {
 
   const [formData, setFormData] = useState<RegisterPayload>({
     email: '',
-    passwordConfirm: '', // We use this field to store password. (Backend expects password/confirm match handling, but here we just pass password in our adapted hook, wait, backend schema needs checking. We will just send what is needed). Let's assume password and email.
-    // For now we'll just send a normal payload.
+    password: '',
     username: '',
     displayName: '',
-    schoolId: '', // Changed to empty string
+    schoolId: '',
     major: '',
   });
 
-  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const nextStep = () => setStep((s) => Math.min(s + 1, 3));
   const prevStep = () => setStep((s) => Math.max(s - 1, 1));
@@ -106,10 +105,10 @@ export default function RegisterWizard() {
       return;
     }
     // Final step submission
-    handleRegister({
-      ...formData,
-      passwordConfirm: password, 
-    });
+    if (formData.password !== confirmPassword) {
+      return; // Password mismatch, don't submit
+    }
+    handleRegister(formData);
   };
 
   return (
@@ -150,21 +149,25 @@ export default function RegisterWizard() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kata Sandi</label>
               <input
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 transition-all"
                 required
+                minLength={8}
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Konfirmasi Kata Sandi</label>
               <input
                 type="password"
-                value={formData.passwordConfirm}
-                onChange={(e) => setFormData({ ...formData, passwordConfirm: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 transition-all"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className={`w-full px-4 py-2 border rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 transition-all ${confirmPassword && formData.password !== confirmPassword ? 'border-red-400 dark:border-red-600' : 'border-gray-200 dark:border-gray-700'}`}
                 required
               />
+              {confirmPassword && formData.password !== confirmPassword && (
+                <p className="text-xs text-red-500 mt-1">Kata sandi tidak cocok</p>
+              )}
             </div>
           </div>
         )}

@@ -35,7 +35,7 @@ export function SearchResults({ isLoading, accounts, listings, searchQuery }: Se
           <h2 className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-3">Talenta</h2>
           <div className="grid grid-cols-2 gap-3">
             {accounts.map((account) => (
-              <Link to={`/${account.username}`} key={account.id} className="bg-white dark:bg-gray-900 rounded-2xl p-4 border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col items-center text-center hover:shadow-md transition cursor-pointer">
+              <Link to={`/profile/${account.username}`} key={account.id} className="bg-white dark:bg-gray-900 rounded-2xl p-4 border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col items-center text-center hover:shadow-md transition cursor-pointer">
                 <div className="h-16 w-16 rounded-full bg-gray-200 mb-3 overflow-hidden">
                   <img src={resolveMediaUrl(account.avatarObjectKey)} alt={account.displayName} className="h-full w-full object-cover" />
                 </div>
@@ -65,7 +65,7 @@ export function SearchResults({ isLoading, accounts, listings, searchQuery }: Se
                   <h4 className="font-semibold text-gray-900 dark:text-gray-100 text-sm mb-1 line-clamp-2">{listing.title}</h4>
                   <span className="text-xs text-gray-500 mb-2 inline-block px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded-md self-start">{listing.type}</span>
                   <p className="font-bold text-indigo-600 dark:text-indigo-400 text-sm mt-auto">
-                    Rp {listing.basePrice?.toLocaleString('id-ID')}
+                    Rp {listing.price?.toLocaleString('id-ID')}
                   </p>
                 </div>
               </Link>

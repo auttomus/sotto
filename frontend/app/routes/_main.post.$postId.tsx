@@ -47,7 +47,7 @@ export default function PostDetailRoute() {
       </div>
       
       <div className="p-4 md:p-6 border-b border-gray-100 dark:border-gray-800">
-        <Link to={ROUTES.PROFILE_PUBLIC(post.authorUsername)} className="flex items-start gap-3 mb-4 hover:opacity-80 transition cursor-pointer">
+        <Link to={ROUTES.PROFILE_PUBLIC(post.authorUsername ?? "")} className="flex items-start gap-3 mb-4 hover:opacity-80 transition cursor-pointer">
           <Avatar src={resolveMediaUrl(post.authorAvatarObjectKey)} size="md" />
           <div className="flex-1">
             <h3 className="font-bold text-gray-900 dark:text-gray-100">{post.authorDisplayName}</h3>

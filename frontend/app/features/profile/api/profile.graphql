@@ -9,6 +9,8 @@ query GetMyProfile {
     trustScore
     schoolName
     major
+    followersCount
+    followingCount
   }
 }
 

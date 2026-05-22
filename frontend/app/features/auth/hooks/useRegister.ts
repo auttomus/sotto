@@ -5,7 +5,7 @@ import { ROUTES } from '~/core/constants/ROUTES';
 
 export interface RegisterPayload {
   email: string;
-  passwordConfirm: string;
+  password: string;
   username: string;
   displayName: string;
   schoolId: string;

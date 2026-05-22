@@ -66,15 +66,27 @@ export class IamService {
       return { user, account };
     });
 
+    const payload = {
+      sub: result.user.id,
+      accountId: result.account.id,
+    };
+
     return {
-      message: 'Registrasi berhasil',
-      accountId: result.account.id, // Sekarang otomatis ter-serialize menjadi string berkat patch global
+      accessToken: await this.jwtService.signAsync(payload),
+      user: {
+        id: result.user.id.toString(),
+        accountId: result.account.id.toString(),
+        username: result.account.username,
+        displayName: result.account.displayName,
+        avatarObjectKey: result.account.avatarObjectKey,
+      },
     };
   }
 
   async login(dto: LoginDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
+      include: { account: true },
     });
     if (!user) throw new UnauthorizedException('Email atau kata sandi salah.');
 
@@ -92,6 +104,13 @@ export class IamService {
 
     return {
       accessToken: await this.jwtService.signAsync(payload),
+      user: {
+        id: user.id.toString(),
+        accountId: user.accountId.toString(),
+        username: user.account.username,
+        displayName: user.account.displayName,
+        avatarObjectKey: user.account.avatarObjectKey,
+      },
     };
   }
 }

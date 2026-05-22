@@ -144,12 +144,11 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
 
         <div className="flex items-center gap-4 mt-3 text-sm">
           <div className="flex gap-1 hover:underline cursor-pointer">
-            {/* API myProfile doesn't have following/followers yet, falling back to 0 or mock */}
-            <span className="font-bold text-gray-900 dark:text-gray-100">0</span>
+            <span className="font-bold text-gray-900 dark:text-gray-100">{profile.followingCount ?? 0}</span>
             <span className="text-gray-500 dark:text-gray-400">Mengikuti</span>
           </div>
           <div className="flex gap-1 hover:underline cursor-pointer">
-            <span className="font-bold text-gray-900 dark:text-gray-100">0</span>
+            <span className="font-bold text-gray-900 dark:text-gray-100">{profile.followersCount ?? 0}</span>
             <span className="text-gray-500 dark:text-gray-400">Pengikut</span>
           </div>
         </div>

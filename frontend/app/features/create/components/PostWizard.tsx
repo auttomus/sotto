@@ -6,8 +6,7 @@ import { useCreateStore } from "../store/useCreateStore";
 import { useUpload } from "~/core/hooks/useUpload";
 import { useToastStore } from "~/core/store/useToastStore";
 import { gql } from "@apollo/client";
-// @ts-ignore - Apollo v4 types issue
-import { useMutation } from "@apollo/client";
+import { useMutation } from "@apollo/client/react";
 import { PostMediaGallery } from "./wizard-steps/PostMediaGallery";
 import { PostTagsInput } from "./wizard-steps/PostTagsInput";
 
