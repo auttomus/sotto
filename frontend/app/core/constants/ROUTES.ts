@@ -4,7 +4,8 @@
  */
 export const ROUTES = {
   // Main (with BottomNav)
-  HOME: '/',
+  HOME: '/home',
+  LANDING: '/',
   EXPLORE: '/explore',
   CHATS: '/chats',
   ORDERS: '/orders',

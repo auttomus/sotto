@@ -1,18 +1,19 @@
 import * as React from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { X, Image as ImageIcon, Briefcase, FileCode2, ChevronRight } from "lucide-react";
 import { useCreateStore } from "../store/useCreateStore";
 
 export function TypeSelector() {
   const setSelectedType = useCreateStore(s => s.setSelectedType);
+  const navigate = useNavigate();
 
   return (
     <div className="flex flex-col min-h-[100dvh] bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 w-full max-w-lg mx-auto border-x border-gray-100 dark:border-gray-800 relative transition-colors duration-200">
       <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 px-4 h-14 flex items-center justify-between sticky top-0 z-10">
         <h1 className="font-bold text-gray-900 dark:text-gray-100">Buat Baru</h1>
-        <Link to="/" className="p-2 -mr-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+        <button onClick={() => navigate(-1)} className="p-2 -mr-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition">
           <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-        </Link>
+        </button>
       </header>
       
       <div className="p-4 space-y-3 mt-2">

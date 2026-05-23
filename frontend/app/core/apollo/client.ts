@@ -6,8 +6,11 @@ import {
 } from '@apollo/client';
 import { useAuthStore } from '~/core/store/useAuthStore';
 
+const isDockerOrProd = typeof window !== 'undefined' && (window.location.port === '8080' || !window.location.port);
 const httpLink = new HttpLink({
-  uri: import.meta.env.VITE_GRAPHQL_URL || 'http://localhost:3000/graphql',
+  uri: isDockerOrProd
+    ? `${window.location.origin}/graphql`
+    : import.meta.env.VITE_GRAPHQL_URL || 'http://localhost:3000/graphql',
 });
 
 const authLink = new ApolloLink((operation, forward) => {

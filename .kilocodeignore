@@ -1,0 +1,12 @@
+# Exclude large dependencies
+node_modules/
+venv/
+
+# Exclude build outputs
+dist/
+build/
+
+# Exclude sensitive or large data files
+.env
+*.log
+large_dataset.csv

@@ -2,38 +2,24 @@ import * as React from "react";
 import { ArrowLeft, CheckCircle2, Clock, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import { Link, useParams } from "react-router";
 import { Button } from "../components/ui/Button";
-import { useGetOrderDetailQuery, useAdvanceOrderStatusMutation, useCancelOrderMutation } from "~/core/apollo/generated";
-import { useAuthStore } from "~/core/store/useAuthStore";
-import { useToastStore } from "~/core/store/useToastStore";
+import { useOrderDetail } from "~/features/orders/hooks/useOrderDetail";
 
 export default function OrderRoute() {
   const { orderId } = useParams();
-  const { user } = useAuthStore();
-  const addToast = useToastStore(s => s.addToast);
   
-  const { data, loading, error, refetch } = useGetOrderDetailQuery({
-    variables: { id: orderId as string },
-    skip: !orderId,
-    fetchPolicy: "cache-and-network"
-  });
+  const {
+    order,
+    loading,
+    error,
+    isBuyer,
+    partnerLabel,
+    isActionLoading,
+    getStatusLabel,
+    handleAdvance,
+    handleCancel,
+  } = useOrderDetail({ orderId: orderId as string });
 
-  const [advanceOrder, { loading: advanceLoading }] = useAdvanceOrderStatusMutation({
-    onCompleted: () => {
-      addToast('success', 'Status order berhasil diperbarui');
-      refetch();
-    },
-    onError: (e: any) => addToast('error', e.message),
-  });
-
-  const [cancelOrder, { loading: cancelLoading }] = useCancelOrderMutation({
-    onCompleted: () => {
-      addToast('success', 'Order berhasil dibatalkan');
-      refetch();
-    },
-    onError: (e: any) => addToast('error', e.message),
-  });
-
-  if (loading && !data) {
+  if (loading && !order) {
     return (
       <div className="flex flex-col h-[100dvh] bg-gray-50 dark:bg-gray-950 w-full max-w-lg mx-auto border-x border-gray-100 dark:border-gray-800 justify-center items-center">
         <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
@@ -41,7 +27,7 @@ export default function OrderRoute() {
     );
   }
 
-  if (error || !data?.order) {
+  if (error || !order) {
     return (
       <div className="flex flex-col h-[100dvh] bg-gray-50 dark:bg-gray-950 w-full max-w-lg mx-auto border-x border-gray-100 dark:border-gray-800 justify-center items-center p-4 text-center">
         <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Order tidak ditemukan</h2>
@@ -51,31 +37,6 @@ export default function OrderRoute() {
       </div>
     );
   }
-
-  const order = data.order;
-  const isBuyer = order.buyerAccountId === user?.accountId;
-  const partnerLabel = isBuyer ? "Penjual" : "Pembeli";
-  const isActionLoading = advanceLoading || cancelLoading;
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "COMPLETED": return "Selesai";
-      case "IN_PROGRESS": return "Dikerjakan";
-      case "PENDING_PAYMENT": return "Menunggu Pembayaran";
-      case "CANCELLED": return "Dibatalkan";
-      default: return status;
-    }
-  };
-
-  const handleAdvance = () => {
-    advanceOrder({ variables: { orderId: order.id } });
-  };
-
-  const handleCancel = () => {
-    if (confirm('Apakah Anda yakin ingin membatalkan order ini?')) {
-      cancelOrder({ variables: { orderId: order.id } });
-    }
-  };
 
   return (
     <div className="flex flex-col h-[100dvh] bg-gray-50 dark:bg-gray-950 w-full max-w-lg mx-auto border-x border-gray-100 dark:border-gray-800 relative">

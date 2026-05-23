@@ -5,7 +5,7 @@ import { cn } from "../../core/utils/cn";
 
 export default function BottomNav() {
   const navItems = [
-    { icon: Home, label: "Beranda", to: "/" },
+    { icon: Home, label: "Beranda", to: "/home" },
     { icon: Search, label: "Eksplor", to: "/explore" },
     { icon: MessageSquare, label: "Pesan", to: "/chats", hasBadge: true },
     { icon: ClipboardList, label: "Order", to: "/orders" },

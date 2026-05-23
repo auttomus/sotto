@@ -1,36 +1,27 @@
-import { Search, Filter, TrendingUp, Loader2 } from "lucide-react";
-import { useState, useEffect } from "react";
-import { Link } from "react-router";
+import { Search, Filter, TrendingUp, AlertCircle } from "lucide-react";
 import { Badge } from "../components/ui/Badge";
-import { useSearchAccountsQuery, useSearchListingsQuery } from "~/core/apollo/generated";
-import { useDebounce } from "~/core/hooks/useDebounce";
 import { SearchResults } from "~/features/explore/components/SearchResults";
+import { useExplore } from "~/features/explore/hooks/useExplore";
 
 const CATEGORIES = ["Semua", "UI/UX Design", "Web Dev", "Mobile App", "Logo", "Ilustrasi", "Copywriting"];
 const TRENDING_TAGS = ["#ReactJS", "#Figma", "#TailwindCSS", "#NodeJS", "#NextJS"];
 
 export default function ExploreRoute() {
-  const [activeCategory, setActiveCategory] = useState("Semua");
-  const [searchQuery, setSearchQuery] = useState("");
-  const debouncedQuery = useDebounce(searchQuery, 500);
-
-  const { data: accountsData, loading: accountsLoading } = useSearchAccountsQuery({
-    variables: { query: debouncedQuery },
-    skip: !debouncedQuery,
-  });
-
-  const { data: listingsData, loading: listingsLoading } = useSearchListingsQuery({
-    variables: { query: debouncedQuery },
-    skip: !debouncedQuery,
-  });
-
-  const isSearching = debouncedQuery.length > 0;
-  const isLoading = accountsLoading || listingsLoading;
+  const {
+    activeCategory,
+    setActiveCategory,
+    searchQuery,
+    setSearchQuery,
+    isSearching,
+    isLoading,
+    error,
+    searchResults
+  } = useExplore();
 
   return (
-    <div className="pb-20 bg-gray-50 dark:bg-gray-950 min-h-screen">
-      {/* Search Header (Secondary because TopHeader already has one, but Explore needs a focused one) */}
-      <div className="bg-white dark:bg-gray-900 px-4 pt-4 pb-3 border-b border-gray-100 dark:border-gray-800">
+    <div className="pb-20 bg-gray-50 dark:bg-gray-950 min-h-screen flex flex-col">
+      {/* Search Header */}
+      <div className="bg-white dark:bg-gray-900 px-4 pt-4 pb-3 border-b border-gray-100 dark:border-gray-800 shrink-0">
         <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">Eksplorasi</h1>
         <div className="flex gap-2">
           <div className="relative flex-1">
@@ -51,8 +42,8 @@ export default function ExploreRoute() {
         </div>
       </div>
 
-      {!isSearching ? (
-        <>
+      {!isSearching && (
+        <div className="shrink-0">
           {/* Categories Scroll */}
           <div className="bg-white dark:bg-gray-900 py-3 border-b border-gray-100 dark:border-gray-800">
             <div className="flex overflow-x-auto hide-scrollbar px-4 gap-2 pb-1">
@@ -86,39 +77,29 @@ export default function ExploreRoute() {
               ))}
             </div>
           </div>
-
-          {/* Recommended Talents Grid Mock */}
-          <div className="px-4 mt-2">
-            <h2 className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-3">Talenta Tersorot</h2>
-            <div className="grid grid-cols-2 gap-3">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="bg-white dark:bg-gray-900 rounded-2xl p-4 border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col items-center text-center hover:shadow-md transition cursor-pointer">
-                  <div className="h-16 w-16 rounded-full bg-gray-200 mb-3 overflow-hidden">
-                    <img src={`https://i.pravatar.cc/150?u=${i}`} alt="Avatar" className="h-full w-full object-cover" />
-                  </div>
-                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">Siswa {i}</h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">UI/UX Designer</p>
-                  <div className="mt-3 w-full">
-                    <button className="w-full py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs font-semibold hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition">
-                      Lihat Profil
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </>
-      ) : (
-        /* Search Results Area */
-        <div className="px-4 py-6">
-          <SearchResults 
-            isLoading={isLoading}
-            accounts={accountsData?.searchAccounts || []}
-            listings={listingsData?.searchListings || []}
-            searchQuery={searchQuery}
-          />
         </div>
       )}
+
+      {/* Main Content Area */}
+      <div className="px-4 flex-1">
+        {!isSearching && <h2 className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-3 mt-2">Pilihan Untukmu</h2>}
+        {isSearching && <h2 className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-3 mt-6">Hasil Pencarian</h2>}
+        
+        {error ? (
+          <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
+            <AlertCircle className="h-10 w-10 text-red-500 mb-3" />
+            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Gagal memuat data</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Terjadi kesalahan saat menghubungi server. Silakan coba beberapa saat lagi.</p>
+          </div>
+        ) : (
+          <SearchResults 
+            isLoading={isLoading}
+            accounts={searchResults.accounts}
+            listings={searchResults.listings}
+            searchQuery={searchQuery}
+          />
+        )}
+      </div>
     </div>
   );
 }

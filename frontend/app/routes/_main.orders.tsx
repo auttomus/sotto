@@ -1,44 +1,11 @@
 import * as React from "react";
 import { Link } from "react-router";
-import { CheckCircle2, Clock, CheckCircle, Loader2 } from "lucide-react";
-import { useGetMyOrdersQuery } from "~/core/apollo/generated";
-import { useAuthStore } from "~/core/store/useAuthStore";
+import { CheckCircle2, Clock, CheckCircle, Loader2, AlertCircle } from "lucide-react";
+import { useMyOrders } from "~/features/orders/hooks/useMyOrders";
 import { formatDate } from "~/core/utils/formatDate";
 
 export default function OrdersListRoute() {
-  const { user } = useAuthStore();
-  const [role, setRole] = React.useState<"ALL" | "BUYER" | "SELLER">("ALL");
-
-  // When "ALL" is selected, fetch both buyer and seller orders
-  const { data: buyerData, loading: buyerLoading, error: buyerError } = useGetMyOrdersQuery({
-    variables: { role: "buyer" },
-    fetchPolicy: "cache-and-network",
-    skip: role === "SELLER",
-  });
-
-  const { data: sellerData, loading: sellerLoading, error: sellerError } = useGetMyOrdersQuery({
-    variables: { role: "seller" },
-    fetchPolicy: "cache-and-network",
-    skip: role === "BUYER",
-  });
-
-  const loading = buyerLoading || sellerLoading;
-  const error = buyerError || sellerError;
-
-  const orders = React.useMemo(() => {
-    const buyerOrders = role !== "SELLER" ? (buyerData?.myOrders || []) : [];
-    const sellerOrders = role !== "BUYER" ? (sellerData?.myOrders || []) : [];
-    
-    if (role === "ALL") {
-      // Merge and deduplicate by id, sort by createdAt desc
-      const map = new Map<string, any>();
-      [...buyerOrders, ...sellerOrders].forEach(o => map.set(o.id, o));
-      return Array.from(map.values()).sort((a, b) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-    }
-    return role === "BUYER" ? buyerOrders : sellerOrders;
-  }, [role, buyerData, sellerData]);
+  const { role, setRole, orders, loading, error, user } = useMyOrders();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -89,7 +56,13 @@ export default function OrdersListRoute() {
         </div>
 
         <div className="space-y-4">
-          {loading && orders.length === 0 ? (
+          {error ? (
+            <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
+              <AlertCircle className="h-10 w-10 text-red-500 mb-3" />
+              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Gagal memuat order</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Terjadi kesalahan saat menghubungi server. Silakan coba beberapa saat lagi.</p>
+            </div>
+          ) : loading && orders.length === 0 ? (
             <div className="flex justify-center py-10">
               <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
             </div>
