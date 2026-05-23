@@ -53,10 +53,13 @@ export class SearchService {
         OR: [
           { username: { contains: query, mode: 'insensitive' } },
           { displayName: { contains: query, mode: 'insensitive' } },
-          { major: { contains: query, mode: 'insensitive' } },
+          { major: { name: { contains: query, mode: 'insensitive' } } },
         ],
       },
-      include: { school: { select: { name: true } } },
+      include: {
+        school: { select: { name: true } },
+        major: { select: { name: true } },
+      },
       take: 20,
     });
   }

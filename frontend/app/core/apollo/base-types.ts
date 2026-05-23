@@ -22,7 +22,9 @@ export type AccountModel = {
   id: Scalars['ID']['output'];
   isFollowing?: Maybe<Scalars['Boolean']['output']>;
   major?: Maybe<Scalars['String']['output']>;
+  majorId?: Maybe<Scalars['String']['output']>;
   note?: Maybe<Scalars['String']['output']>;
+  schoolId?: Maybe<Scalars['String']['output']>;
   schoolName?: Maybe<Scalars['String']['output']>;
   trustScore: Scalars['Float']['output'];
   updatedAt: Scalars['DateTime']['output'];
@@ -146,6 +148,13 @@ export enum ListingType {
   DigitalProduct = 'DIGITAL_PRODUCT',
   Service = 'SERVICE'
 }
+
+export type MajorModel = {
+  __typename?: 'MajorModel';
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  schoolId: Scalars['ID']['output'];
+};
 
 export type MediaAttachmentModel = {
   __typename?: 'MediaAttachmentModel';
@@ -393,6 +402,7 @@ export type Query = {
   listing?: Maybe<ListingModel>;
   listings: Array<ListingModel>;
   listingsByAccount: Array<ListingModel>;
+  majorsBySchool: Array<MajorModel>;
   mediaForObject: Array<MediaAttachmentModel>;
   messages: Array<MessageModel>;
   myOrders: Array<OrderModel>;
@@ -424,6 +434,11 @@ export type QueryListingArgs = {
 
 export type QueryListingsByAccountArgs = {
   accountId: Scalars['ID']['input'];
+};
+
+
+export type QueryMajorsBySchoolArgs = {
+  schoolId: Scalars['ID']['input'];
 };
 
 
@@ -543,6 +558,5 @@ export type UpdateListingInput = {
 export type UpdateProfileInput = {
   avatarObjectKey?: InputMaybe<Scalars['String']['input']>;
   displayName?: InputMaybe<Scalars['String']['input']>;
-  major?: InputMaybe<Scalars['String']['input']>;
   note?: InputMaybe<Scalars['String']['input']>;
 };

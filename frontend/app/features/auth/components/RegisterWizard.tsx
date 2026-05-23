@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router';
-import { ChevronRight, ChevronLeft, Loader2, Search } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Loader2, Search, GraduationCap } from 'lucide-react';
 import { useRegister, type RegisterPayload } from '../hooks/useRegister';
 import { ROUTES } from '~/core/constants/ROUTES';
-import { useSearchSchoolsQuery } from '~/core/apollo/generated';
+import { useSearchSchoolsQuery, useMajorsBySchoolQuery } from '~/core/apollo/generated';
 
 function SchoolAutocomplete({ value, onChange }: { value: string; onChange: (id: string) => void }) {
   const [search, setSearch] = useState('');
@@ -80,6 +80,51 @@ function SchoolAutocomplete({ value, onChange }: { value: string; onChange: (id:
   );
 }
 
+function MajorSelect({ schoolId, value, onChange }: { schoolId: string; value: string; onChange: (id: string) => void }) {
+  const { data, loading } = useMajorsBySchoolQuery({
+    variables: { schoolId },
+    skip: !schoolId,
+  });
+
+  // Reset selection when schoolId changes
+  useEffect(() => {
+    onChange('');
+  }, [schoolId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const majors = data?.majorsBySchool ?? [];
+  const isDisabled = !schoolId;
+
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Jurusan</label>
+      <div className="relative">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          {loading ? <Loader2 className="h-4 w-4 animate-spin text-gray-400" /> : <GraduationCap className="h-4 w-4 text-gray-400" />}
+        </div>
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          disabled={isDisabled}
+          required
+          className={`w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 transition-all appearance-none ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          <option value="">
+            {isDisabled ? 'Pilih sekolah terlebih dahulu' : loading ? 'Memuat jurusan...' : 'Pilih jurusan'}
+          </option>
+          {majors.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.name}
+            </option>
+          ))}
+        </select>
+        {!isDisabled && !loading && majors.length === 0 && schoolId && (
+          <p className="text-xs text-amber-500 mt-1">Belum ada jurusan terdaftar untuk sekolah ini.</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function RegisterWizard() {
   const [step, setStep] = useState(1);
   const { handleRegister, isLoading, error } = useRegister();
@@ -90,7 +135,7 @@ export default function RegisterWizard() {
     username: '',
     displayName: '',
     schoolId: '',
-    major: '',
+    majorId: '',
   });
 
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -197,19 +242,14 @@ export default function RegisterWizard() {
             
             <SchoolAutocomplete
               value={formData.schoolId}
-              onChange={(schoolId) => setFormData({ ...formData, schoolId })}
+              onChange={(schoolId) => setFormData({ ...formData, schoolId, majorId: '' })}
             />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Jurusan</label>
-              <input
-                type="text"
-                value={formData.major}
-                onChange={(e) => setFormData({ ...formData, major: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 transition-all"
-                required
-              />
-            </div>
+            <MajorSelect
+              schoolId={formData.schoolId}
+              value={formData.majorId}
+              onChange={(majorId) => setFormData({ ...formData, majorId })}
+            />
           </div>
         )}
 

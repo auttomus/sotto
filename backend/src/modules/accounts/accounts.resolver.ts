@@ -21,7 +21,8 @@ export class AccountsResolver {
       id: string;
       username: string;
       displayName: string;
-      major: string | null;
+      majorId: string | null;
+      schoolId: string | null;
       note: string | null;
       avatarObjectKey: string | null;
       followersCount: number | bigint;
@@ -30,6 +31,7 @@ export class AccountsResolver {
       createdAt: Date;
       updatedAt: Date;
       school?: { name?: string | null } | null;
+      major?: { name?: string | null } | null;
     },
     extra: Record<string, unknown> = {},
   ): AccountModel {
@@ -37,7 +39,9 @@ export class AccountsResolver {
       id: account.id,
       username: account.username,
       displayName: account.displayName,
-      major: account.major,
+      major: account.major?.name ?? null,
+      majorId: account.majorId,
+      schoolId: account.schoolId,
       note: account.note,
       avatarObjectKey: account.avatarObjectKey,
       followersCount: account.followersCount.toString(),

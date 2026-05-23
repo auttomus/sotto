@@ -37,14 +37,18 @@ export class SearchResolver {
       id: a.id,
       username: a.username,
       displayName: a.displayName,
-      major: a.major,
+      major:
+        (a as unknown as { major?: { name?: string | null } | null }).major
+          ?.name ?? null,
+      majorId: a.majorId,
+      schoolId: a.schoolId,
       note: a.note,
       avatarObjectKey: a.avatarObjectKey,
       followersCount: a.followersCount.toString(),
       followingCount: a.followingCount.toString(),
       trustScore: Number(a.trustScore),
-      schoolName: (a as { school?: { name?: string | null } | null }).school
-        ?.name,
+      schoolName: (a as unknown as { school?: { name?: string | null } | null })
+        .school?.name,
       createdAt: a.createdAt,
     }));
   }

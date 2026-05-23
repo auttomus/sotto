@@ -4,6 +4,7 @@ import {
   IsString,
   MinLength,
   Matches,
+  IsUUID,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 
@@ -38,10 +39,11 @@ export class RegisterDto {
   @IsNotEmpty({ message: 'ID Sekolah wajib dipilih.' })
   schoolId: string;
 
-  @IsString()
-  @IsNotEmpty({
-    message:
-      'Jurusan (Major) wajib dipilih untuk keperluan algoritma rekomendasi.',
+  @IsUUID('all', {
+    message: 'ID Jurusan (Major) tidak valid.',
   })
-  major: string;
+  @IsNotEmpty({
+    message: 'Jurusan (Major) wajib dipilih untuk keperluan pendaftaran.',
+  })
+  majorId: string;
 }

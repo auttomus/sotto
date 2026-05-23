@@ -15,6 +15,12 @@ export class AccountModel {
   major?: string | null;
 
   @Field(() => String, { nullable: true })
+  majorId?: string | null;
+
+  @Field(() => String, { nullable: true })
+  schoolId?: string | null;
+
+  @Field(() => String, { nullable: true })
   note?: string | null;
 
   @Field(() => String, { nullable: true })

@@ -15,6 +15,13 @@ export type SearchSchoolsQueryVariables = Exact<{
 
 export type SearchSchoolsQuery = { searchSchools: Array<{ id: string, name: string }> };
 
+export type MajorsBySchoolQueryVariables = Exact<{
+  schoolId: string | number;
+}>;
+
+
+export type MajorsBySchoolQuery = { majorsBySchool: Array<{ id: string, name: string }> };
+
 export type GetConversationsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -173,7 +180,7 @@ export type CreateReviewMutation = { createReview: { id: string, rating: number,
 export type GetMyProfileQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetMyProfileQuery = { myProfile: { id: string, displayName: string, username: string, note: string | null, avatarObjectKey: string | null, avatarUrl: string | null, trustScore: number, schoolName: string | null, major: string | null, followersCount: string, followingCount: string } };
+export type GetMyProfileQuery = { myProfile: { id: string, displayName: string, username: string, note: string | null, avatarObjectKey: string | null, avatarUrl: string | null, trustScore: number, schoolName: string | null, schoolId: string | null, major: string | null, majorId: string | null, followersCount: string, followingCount: string } };
 
 export type GetUserProfileQueryVariables = Exact<{
   username: string;
@@ -208,7 +215,7 @@ export type UpdateProfileMutationVariables = Exact<{
 }>;
 
 
-export type UpdateProfileMutation = { updateProfile: { id: string, displayName: string, username: string, note: string | null, avatarObjectKey: string | null, avatarUrl: string | null, major: string | null } };
+export type UpdateProfileMutation = { updateProfile: { id: string, displayName: string, username: string, note: string | null, avatarObjectKey: string | null, avatarUrl: string | null, major: string | null, majorId: string | null } };
 
 
 export const SearchSchoolsDocument = gql`
@@ -255,6 +262,50 @@ export type SearchSchoolsQueryHookResult = ReturnType<typeof useSearchSchoolsQue
 export type SearchSchoolsLazyQueryHookResult = ReturnType<typeof useSearchSchoolsLazyQuery>;
 export type SearchSchoolsSuspenseQueryHookResult = ReturnType<typeof useSearchSchoolsSuspenseQuery>;
 export type SearchSchoolsQueryResult = Apollo.QueryResult<SearchSchoolsQuery, SearchSchoolsQueryVariables>;
+export const MajorsBySchoolDocument = gql`
+    query MajorsBySchool($schoolId: ID!) {
+  majorsBySchool(schoolId: $schoolId) {
+    id
+    name
+  }
+}
+    `;
+
+/**
+ * __useMajorsBySchoolQuery__
+ *
+ * To run a query within a React component, call `useMajorsBySchoolQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMajorsBySchoolQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMajorsBySchoolQuery({
+ *   variables: {
+ *      schoolId: // value for 'schoolId'
+ *   },
+ * });
+ */
+export function useMajorsBySchoolQuery(baseOptions: ApolloReactHooks.QueryHookOptions<MajorsBySchoolQuery, MajorsBySchoolQueryVariables> & ({ variables: MajorsBySchoolQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<MajorsBySchoolQuery, MajorsBySchoolQueryVariables>(MajorsBySchoolDocument, options);
+      }
+export function useMajorsBySchoolLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<MajorsBySchoolQuery, MajorsBySchoolQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<MajorsBySchoolQuery, MajorsBySchoolQueryVariables>(MajorsBySchoolDocument, options);
+        }
+// @ts-ignore
+export function useMajorsBySchoolSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<MajorsBySchoolQuery, MajorsBySchoolQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<MajorsBySchoolQuery, MajorsBySchoolQueryVariables>;
+export function useMajorsBySchoolSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<MajorsBySchoolQuery, MajorsBySchoolQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<MajorsBySchoolQuery | undefined, MajorsBySchoolQueryVariables>;
+export function useMajorsBySchoolSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<MajorsBySchoolQuery, MajorsBySchoolQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<MajorsBySchoolQuery, MajorsBySchoolQueryVariables>(MajorsBySchoolDocument, options);
+        }
+export type MajorsBySchoolQueryHookResult = ReturnType<typeof useMajorsBySchoolQuery>;
+export type MajorsBySchoolLazyQueryHookResult = ReturnType<typeof useMajorsBySchoolLazyQuery>;
+export type MajorsBySchoolSuspenseQueryHookResult = ReturnType<typeof useMajorsBySchoolSuspenseQuery>;
+export type MajorsBySchoolQueryResult = Apollo.QueryResult<MajorsBySchoolQuery, MajorsBySchoolQueryVariables>;
 export const GetConversationsDocument = gql`
     query GetConversations {
   conversations {
@@ -1215,7 +1266,9 @@ export const GetMyProfileDocument = gql`
     avatarUrl
     trustScore
     schoolName
+    schoolId
     major
+    majorId
     followersCount
     followingCount
   }
@@ -1439,6 +1492,7 @@ export const UpdateProfileDocument = gql`
     avatarObjectKey
     avatarUrl
     major
+    majorId
   }
 }
     `;

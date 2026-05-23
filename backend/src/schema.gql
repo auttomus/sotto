@@ -12,7 +12,9 @@ type AccountModel {
   id: ID!
   isFollowing: Boolean
   major: String
+  majorId: String
   note: String
+  schoolId: String
   schoolName: String
   trustScore: Float!
   updatedAt: DateTime!
@@ -135,6 +137,12 @@ enum ListingStatus {
 enum ListingType {
   DIGITAL_PRODUCT
   SERVICE
+}
+
+type MajorModel {
+  id: ID!
+  name: String!
+  schoolId: ID!
 }
 
 type MediaAttachmentModel {
@@ -261,6 +269,7 @@ type Query {
   listing(id: ID!): ListingModel
   listings: [ListingModel!]!
   listingsByAccount(accountId: ID!): [ListingModel!]!
+  majorsBySchool(schoolId: ID!): [MajorModel!]!
   mediaForObject(attachedId: String!, attachedType: String!): [MediaAttachmentModel!]!
   messages(conversationId: ID!, limit: Int! = 50): [MessageModel!]!
   myOrders(role: String!, status: String): [OrderModel!]!
@@ -328,6 +337,5 @@ input UpdateListingInput {
 input UpdateProfileInput {
   avatarObjectKey: String
   displayName: String
-  major: String
   note: String
 }

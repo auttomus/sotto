@@ -28,6 +28,15 @@ export class IamService {
       );
     }
 
+    const majorExists = await this.prisma.major.findFirst({
+      where: { id: dto.majorId, schoolId: dto.schoolId, isActive: true },
+    });
+    if (!majorExists) {
+      throw new BadRequestException(
+        'ID Jurusan tidak valid atau tidak tersedia di sekolah ini.',
+      );
+    }
+
     // 1. Pengecekan Duplikasi
     const existingEmail = await this.prisma.user.findUnique({
       where: { email: dto.email },
@@ -51,7 +60,7 @@ export class IamService {
           username: dto.username,
           displayName: dto.displayName,
           schoolId: dto.schoolId,
-          major: dto.major,
+          majorId: dto.majorId,
         },
       });
 

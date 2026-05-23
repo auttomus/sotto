@@ -17,7 +17,6 @@ export function EditProfileForm({ profile, onCancel, onSuccess }: EditProfileFor
   const [editForm, setEditForm] = React.useState({
     displayName: profile.displayName || "",
     note: profile.note || "",
-    major: profile.major || "",
     avatarObjectKey: profile.avatarObjectKey || "",
   });
   const [isUploading, setIsUploading] = React.useState(false);
@@ -65,7 +64,6 @@ export function EditProfileForm({ profile, onCancel, onSuccess }: EditProfileFor
         input: {
           displayName: editForm.displayName,
           note: editForm.note,
-          major: editForm.major,
           avatarObjectKey: editForm.avatarObjectKey,
         }
       }
@@ -125,13 +123,10 @@ export function EditProfileForm({ profile, onCancel, onSuccess }: EditProfileFor
         </div>
         <div>
           <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 block">Jurusan / Keahlian</label>
-          <input 
-            type="text" 
-            value={editForm.major} 
-            onChange={(e) => setEditForm(prev => ({ ...prev, major: e.target.value }))}
-            className="w-full bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl p-3 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-shadow"
-            placeholder="Contoh: Teknik Informatika"
-          />
+          <div className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-800 rounded-xl p-3 text-sm text-gray-500 dark:text-gray-400 cursor-not-allowed">
+            {profile.major || "Belum ditentukan"}
+          </div>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Jurusan dikelola oleh administrator sekolah.</p>
         </div>
         <div>
           <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 block">Bio / Catatan</label>
