@@ -5,7 +5,7 @@ import { useRegister, type RegisterPayload } from '../hooks/useRegister';
 import { ROUTES } from '~/core/constants/ROUTES';
 import { useSearchSchoolsQuery, useMajorsBySchoolQuery } from '~/core/apollo/generated';
 
-function SchoolAutocomplete({ value, onChange }: { value: string; onChange: (id: string) => void }) {
+function SchoolAutocomplete({ value, onChange }: { value: { id: string; name: string } | null; onChange: (school: { id: string; name: string } | null) => void }) {
   const [search, setSearch] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   
@@ -21,18 +21,26 @@ function SchoolAutocomplete({ value, onChange }: { value: string; onChange: (id:
     skip: debouncedSearch.length < 2,
   });
 
-  const selectedSchool = data?.searchSchools.find((s: any) => s.id === value) || (value ? { id: value, name: 'Sekolah Terpilih' } : null);
-
   return (
     <div className="relative">
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sekolah / Universitas</label>
       <div 
         className="relative"
-        onFocus={() => setIsOpen(true)}
+        onFocus={() => {
+          setIsOpen(true);
+          if (value && !search) {
+            setSearch(value.name);
+          }
+        }}
         onBlur={(e) => {
           // Allow click inside dropdown
           if (!e.currentTarget.contains(e.relatedTarget as Node)) {
             setIsOpen(false);
+            if (!value) {
+              setSearch('');
+            } else {
+              setSearch(value.name);
+            }
           }
         }}
         tabIndex={-1}
@@ -42,11 +50,11 @@ function SchoolAutocomplete({ value, onChange }: { value: string; onChange: (id:
         </div>
         <input
           type="text"
-          value={isOpen ? search : (selectedSchool?.name || '')}
+          value={isOpen ? search : (value?.name || '')}
           onChange={(e) => {
             setSearch(e.target.value);
             setIsOpen(true);
-            onChange(''); // Clear selection on type
+            if (value) onChange(null); // Clear selection on type
           }}
           className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 transition-all"
           placeholder="Cari nama sekolah..."
@@ -55,16 +63,19 @@ function SchoolAutocomplete({ value, onChange }: { value: string; onChange: (id:
         
         {isOpen && debouncedSearch.length >= 2 && (
           <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-            {data?.searchSchools.length === 0 ? (
+            {loading ? (
+              <div className="p-3 text-sm text-gray-500 text-center">Mencari...</div>
+            ) : !data?.searchSchools || data.searchSchools.length === 0 ? (
               <div className="p-3 text-sm text-gray-500 text-center">Tidak ditemukan</div>
             ) : (
-              data?.searchSchools.map((school: any) => (
+              data.searchSchools.map((school: any) => (
                 <button
                   key={school.id}
                   type="button"
-                  onClick={() => {
-                    onChange(school.id);
-                    setSearch('');
+                  onMouseDown={(e) => {
+                    e.preventDefault(); // Mencegah input kehilangan fokus (onBlur) sebelum event ini selesai
+                    onChange({ id: school.id, name: school.name });
+                    setSearch(school.name);
                     setIsOpen(false);
                   }}
                   className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
@@ -128,6 +139,7 @@ function MajorSelect({ schoolId, value, onChange }: { schoolId: string; value: s
 export default function RegisterWizard() {
   const [step, setStep] = useState(1);
   const { handleRegister, isLoading, error } = useRegister();
+  const [selectedSchool, setSelectedSchool] = useState<{ id: string; name: string } | null>(null);
 
   const [formData, setFormData] = useState<RegisterPayload>({
     email: '',
@@ -241,8 +253,11 @@ export default function RegisterWizard() {
             </div>
             
             <SchoolAutocomplete
-              value={formData.schoolId}
-              onChange={(schoolId) => setFormData({ ...formData, schoolId, majorId: '' })}
+              value={selectedSchool}
+              onChange={(school) => {
+                setSelectedSchool(school);
+                setFormData({ ...formData, schoolId: school?.id || '', majorId: '' });
+              }}
             />
 
             <MajorSelect
