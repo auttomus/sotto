@@ -76,23 +76,28 @@ export default function DesktopSidebar() {
         </NavLink>
       </nav>
 
-      <div className="mt-auto pt-4 space-y-2">
-        <button 
-          onClick={toggleTheme}
-          className="w-full flex items-center gap-4 px-3 py-3 rounded-xl transition-all text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium group"
+      <div className="mt-auto pt-4">
+        <NavLink
+          to="/settings"
+          className={({ isActive }) =>
+            cn(
+              "flex items-center gap-4 px-3 py-3 rounded-xl transition-all group relative",
+              isActive 
+                ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 font-bold" 
+                : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium"
+            )
+          }
         >
-          {isDark ? (
-            <Sun className="h-6 w-6 transition-transform group-hover:scale-110" strokeWidth={2} />
-          ) : (
-            <Moon className="h-6 w-6 transition-transform group-hover:scale-110" strokeWidth={2} />
+          {({ isActive }) => (
+            <>
+              <Menu 
+                className={cn("h-6 w-6 transition-transform group-hover:scale-110", isActive && "scale-110")} 
+                strokeWidth={isActive ? 2.5 : 2} 
+              />
+              <span className="text-base">Lainnya</span>
+            </>
           )}
-          <span className="text-base">{isDark ? "Mode Terang" : "Mode Gelap"}</span>
-        </button>
-
-        <button className="w-full flex items-center gap-4 px-3 py-3 rounded-xl transition-all text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 font-medium group">
-          <Menu className="h-6 w-6 transition-transform group-hover:scale-110" strokeWidth={2} />
-          <span className="text-base">Lainnya</span>
-        </button>
+        </NavLink>
       </div>
     </aside>
   );

@@ -30,9 +30,19 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
   return (
     <div className="pb-20 relative bg-white dark:bg-gray-950 min-h-screen">
       {/* Header Mobile */}
-      <div className="sticky top-0 z-10 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-4 py-3 border-b border-gray-100 dark:border-gray-800 md:hidden">
-        <h2 className="font-bold text-gray-900 dark:text-gray-100 text-lg leading-none">{profile.displayName}</h2>
-        <p className="text-xs text-gray-500 dark:text-gray-400">{listings.length} Penawaran</p>
+      <div className="sticky top-0 z-10 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-4 py-3 border-b border-gray-100 dark:border-gray-800 md:hidden flex justify-between items-center">
+        <div>
+          <h2 className="font-bold text-gray-900 dark:text-gray-100 text-lg leading-none">{profile.displayName}</h2>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{listings.length} Penawaran</p>
+        </div>
+        {isOwnProfile && (
+          <button 
+            onClick={() => navigate("/settings")} 
+            className="p-2 -mr-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+          >
+            <Settings className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+          </button>
+        )}
       </div>
 
       {/* Cover Section */}
@@ -57,12 +67,24 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
               </div>
             </div>
           )}
-          <div className="mt-3 flex gap-2 w-full justify-end relative">
+          <div className="mt-3 flex gap-2 w-full justify-end relative items-center">
             {isOwnProfile ? (
               !isEditing && (
-                <button onClick={() => setIsEditing(true)} className="p-2 border border-gray-200 dark:border-gray-700 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                  <Settings className="h-5 w-5 text-gray-900 dark:text-gray-100" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="font-bold px-4 rounded-full text-xs h-9"
+                    onClick={() => setIsEditing(true)}
+                  >
+                    Edit Profil
+                  </Button>
+                  <button 
+                    onClick={() => navigate("/settings")} 
+                    className="p-2 border border-gray-200 dark:border-gray-700 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800 transition h-9 w-9 flex items-center justify-center shrink-0"
+                  >
+                    <Settings className="h-4 w-4 text-gray-700 dark:text-gray-300" />
+                  </button>
+                </div>
               )
             ) : (
               <Button 

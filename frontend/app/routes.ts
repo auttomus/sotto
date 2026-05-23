@@ -7,6 +7,7 @@ export default [
     route("explore", "routes/_main.explore.tsx"),
     route("profile", "routes/_main.profile.tsx"),
     route("profile/:username", "routes/_main.profile.$username.tsx"),
+    route("settings", "routes/_main.settings.tsx"),
     route("chats", "routes/_main.chats.tsx"),
     route("orders", "routes/_main.orders.tsx"),
     route("listing/:id", "routes/_main.listing.$id.tsx"),
