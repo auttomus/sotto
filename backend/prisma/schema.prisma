@@ -65,7 +65,7 @@ model Account {
   displayName String @map("display_name")
 
   schoolId String? @map("school_id") @db.Uuid
-  major    String?
+  majorId  String? @map("major_id") @db.Uuid
 
   note            String? @db.Text
   avatarObjectKey String? @map("avatar_object_key")
@@ -80,6 +80,7 @@ model Account {
   // Relations
   user                   User?
   school                 School?                   @relation(fields: [schoolId], references: [id], onDelete: Restrict)
+  major                  Major?                    @relation(fields: [majorId], references: [id], onDelete: Restrict)
   listings               Listing[]
   ordersAsBuyer          Order[]                   @relation("BuyerOrders")
   ordersAsSeller         Order[]                   @relation("SellerOrders")
@@ -303,8 +304,24 @@ model School {
   updatedAt  DateTime @updatedAt @map("updated_at")
 
   accounts Account[]
+  majors   Major[]
 
   @@map("schools")
+}
+
+model Major {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  name      String
+  schoolId  String   @map("school_id") @db.Uuid
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  school   School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  accounts Account[]
+
+  @@unique([schoolId, name])
+  @@map("majors")
 }
 
 // ==========================================

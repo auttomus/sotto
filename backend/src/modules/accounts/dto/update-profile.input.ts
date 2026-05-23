@@ -18,10 +18,5 @@ export class UpdateProfileInput {
   @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
-  major?: string;
-
-  @Field(() => String, { nullable: true })
-  @IsOptional()
-  @IsString()
   avatarObjectKey?: string;
 }

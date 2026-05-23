@@ -9,7 +9,7 @@ export interface RegisterPayload {
   username: string;
   displayName: string;
   schoolId: string;
-  major: string;
+  majorId: string;
 }
 
 export function useRegister() {

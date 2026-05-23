@@ -44,6 +44,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { MediaModule } from './modules/media/media.module';
 import { TagsModule } from './modules/tags/tags.module';
 import { SchoolsModule } from './modules/schools/schools.module';
+import { MajorsModule } from './modules/majors/majors.module';
 
 @Module({
   imports: [
@@ -98,6 +99,7 @@ import { SchoolsModule } from './modules/schools/schools.module';
     MediaModule,
     TagsModule,
     SchoolsModule,
+    MajorsModule,
   ],
   controllers: [AppController],
   providers: [

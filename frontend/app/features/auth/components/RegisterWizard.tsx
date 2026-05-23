@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router';
-import { ChevronRight, ChevronLeft, Loader2, Search } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Loader2, Search, GraduationCap } from 'lucide-react';
 import { useRegister, type RegisterPayload } from '../hooks/useRegister';
 import { ROUTES } from '~/core/constants/ROUTES';
-import { useSearchSchoolsQuery } from '~/core/apollo/generated';
+import { useSearchSchoolsQuery, useMajorsBySchoolQuery } from '~/core/apollo/generated';
 
-function SchoolAutocomplete({ value, onChange }: { value: string; onChange: (id: string) => void }) {
+function SchoolAutocomplete({ value, onChange }: { value: { id: string; name: string } | null; onChange: (school: { id: string; name: string } | null) => void }) {
   const [search, setSearch] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   
@@ -21,18 +21,26 @@ function SchoolAutocomplete({ value, onChange }: { value: string; onChange: (id:
     skip: debouncedSearch.length < 2,
   });
 
-  const selectedSchool = data?.searchSchools.find((s: any) => s.id === value) || (value ? { id: value, name: 'Sekolah Terpilih' } : null);
-
   return (
     <div className="relative">
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sekolah / Universitas</label>
       <div 
         className="relative"
-        onFocus={() => setIsOpen(true)}
+        onFocus={() => {
+          setIsOpen(true);
+          if (value && !search) {
+            setSearch(value.name);
+          }
+        }}
         onBlur={(e) => {
           // Allow click inside dropdown
           if (!e.currentTarget.contains(e.relatedTarget as Node)) {
             setIsOpen(false);
+            if (!value) {
+              setSearch('');
+            } else {
+              setSearch(value.name);
+            }
           }
         }}
         tabIndex={-1}
@@ -42,11 +50,11 @@ function SchoolAutocomplete({ value, onChange }: { value: string; onChange: (id:
         </div>
         <input
           type="text"
-          value={isOpen ? search : (selectedSchool?.name || '')}
+          value={isOpen ? search : (value?.name || '')}
           onChange={(e) => {
             setSearch(e.target.value);
             setIsOpen(true);
-            onChange(''); // Clear selection on type
+            if (value) onChange(null); // Clear selection on type
           }}
           className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 transition-all"
           placeholder="Cari nama sekolah..."
@@ -55,16 +63,19 @@ function SchoolAutocomplete({ value, onChange }: { value: string; onChange: (id:
         
         {isOpen && debouncedSearch.length >= 2 && (
           <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-            {data?.searchSchools.length === 0 ? (
+            {loading ? (
+              <div className="p-3 text-sm text-gray-500 text-center">Mencari...</div>
+            ) : !data?.searchSchools || data.searchSchools.length === 0 ? (
               <div className="p-3 text-sm text-gray-500 text-center">Tidak ditemukan</div>
             ) : (
-              data?.searchSchools.map((school: any) => (
+              data.searchSchools.map((school: any) => (
                 <button
                   key={school.id}
                   type="button"
-                  onClick={() => {
-                    onChange(school.id);
-                    setSearch('');
+                  onMouseDown={(e) => {
+                    e.preventDefault(); // Mencegah input kehilangan fokus (onBlur) sebelum event ini selesai
+                    onChange({ id: school.id, name: school.name });
+                    setSearch(school.name);
                     setIsOpen(false);
                   }}
                   className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
@@ -80,9 +91,55 @@ function SchoolAutocomplete({ value, onChange }: { value: string; onChange: (id:
   );
 }
 
+function MajorSelect({ schoolId, value, onChange }: { schoolId: string; value: string; onChange: (id: string) => void }) {
+  const { data, loading } = useMajorsBySchoolQuery({
+    variables: { schoolId },
+    skip: !schoolId,
+  });
+
+  // Reset selection when schoolId changes
+  useEffect(() => {
+    onChange('');
+  }, [schoolId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const majors = data?.majorsBySchool ?? [];
+  const isDisabled = !schoolId;
+
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Jurusan</label>
+      <div className="relative">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          {loading ? <Loader2 className="h-4 w-4 animate-spin text-gray-400" /> : <GraduationCap className="h-4 w-4 text-gray-400" />}
+        </div>
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          disabled={isDisabled}
+          required
+          className={`w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 transition-all appearance-none ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          <option value="">
+            {isDisabled ? 'Pilih sekolah terlebih dahulu' : loading ? 'Memuat jurusan...' : 'Pilih jurusan'}
+          </option>
+          {majors.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.name}
+            </option>
+          ))}
+        </select>
+        {!isDisabled && !loading && majors.length === 0 && schoolId && (
+          <p className="text-xs text-amber-500 mt-1">Belum ada jurusan terdaftar untuk sekolah ini.</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function RegisterWizard() {
   const [step, setStep] = useState(1);
   const { handleRegister, isLoading, error } = useRegister();
+  const [selectedSchool, setSelectedSchool] = useState<{ id: string; name: string } | null>(null);
 
   const [formData, setFormData] = useState<RegisterPayload>({
     email: '',
@@ -90,7 +147,7 @@ export default function RegisterWizard() {
     username: '',
     displayName: '',
     schoolId: '',
-    major: '',
+    majorId: '',
   });
 
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -196,20 +253,18 @@ export default function RegisterWizard() {
             </div>
             
             <SchoolAutocomplete
-              value={formData.schoolId}
-              onChange={(schoolId) => setFormData({ ...formData, schoolId })}
+              value={selectedSchool}
+              onChange={(school) => {
+                setSelectedSchool(school);
+                setFormData({ ...formData, schoolId: school?.id || '', majorId: '' });
+              }}
             />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Jurusan</label>
-              <input
-                type="text"
-                value={formData.major}
-                onChange={(e) => setFormData({ ...formData, major: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 transition-all"
-                required
-              />
-            </div>
+            <MajorSelect
+              schoolId={formData.schoolId}
+              value={formData.majorId}
+              onChange={(majorId) => setFormData({ ...formData, majorId })}
+            />
           </div>
         )}
 

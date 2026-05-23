@@ -4,3 +4,10 @@ query SearchSchools($query: String!) {
     name
   }
 }
+
+query MajorsBySchool($schoolId: ID!) {
+  majorsBySchool(schoolId: $schoolId) {
+    id
+    name
+  }
+}

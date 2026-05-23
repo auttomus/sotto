@@ -32,6 +32,41 @@ async function main() {
   });
   console.log(`[OK] Sekolah: ${school2.name}`);
 
+  // ── 1b. Jurusan (Majors) ────────────────────────────
+  const majorRpl = await prisma.major.upsert({
+    where: {
+      schoolId_name: { schoolId: school1.id, name: 'Rekayasa Perangkat Lunak' },
+    },
+    update: {},
+    create: {
+      name: 'Rekayasa Perangkat Lunak',
+      schoolId: school1.id,
+    },
+  });
+  console.log(`[OK] Jurusan: ${majorRpl.name} (${school1.name})`);
+
+  const majorDkv = await prisma.major.upsert({
+    where: {
+      schoolId_name: { schoolId: school1.id, name: 'Desain Komunikasi Visual' },
+    },
+    update: {},
+    create: {
+      name: 'Desain Komunikasi Visual',
+      schoolId: school1.id,
+    },
+  });
+  console.log(`[OK] Jurusan: ${majorDkv.name} (${school1.name})`);
+
+  const majorMm = await prisma.major.upsert({
+    where: { schoolId_name: { schoolId: school2.id, name: 'Multimedia' } },
+    update: {},
+    create: {
+      name: 'Multimedia',
+      schoolId: school2.id,
+    },
+  });
+  console.log(`[OK] Jurusan: ${majorMm.name} (${school2.name})`);
+
   // ── 2. Kategori Tag (Dimensi Vektor Synergy Engine) ─
   const categoryTags = [
     'Frontend',
@@ -57,7 +92,7 @@ async function main() {
       username: 'arya_pranata',
       displayName: 'Agus Arya Pranata',
       schoolId: school1.id,
-      major: 'Rekayasa Perangkat Lunak',
+      majorId: majorRpl.id,
       note: 'Fullstack Developer. Siap menerima project web.',
       trustScore: 5.0,
     },
@@ -82,7 +117,7 @@ async function main() {
       username: 'client_dummy',
       displayName: 'Dummy Client',
       schoolId: school1.id,
-      major: 'Desain Komunikasi Visual',
+      majorId: majorDkv.id,
       note: 'Sedang mencari developer untuk project akhir.',
       trustScore: 4.8,
     },
@@ -107,7 +142,7 @@ async function main() {
       username: 'rina_designer',
       displayName: 'Rina Amelia',
       schoolId: school2.id,
-      major: 'Multimedia',
+      majorId: majorMm.id,
       note: 'UI/UX designer. Open for freelance.',
       trustScore: 4.5,
     },

@@ -33,7 +33,7 @@ type ListingWithAccount = Prisma.ListingGetPayload<{
     account: {
       select: {
         displayName: true;
-        major: true;
+        major: { select: { name: true } };
         trustScore: true;
         username: true;
       };
@@ -65,7 +65,7 @@ export class ListingsService {
       account: listing.account
         ? {
             displayName: listing.account.displayName,
-            major: listing.account.major,
+            major: listing.account.major?.name ?? null,
             trustScore: Number(listing.account.trustScore),
             username: listing.account.username,
           }
@@ -94,7 +94,7 @@ export class ListingsService {
         account: {
           select: {
             displayName: true,
-            major: true,
+            major: { select: { name: true } },
             trustScore: true,
             username: true,
           },
@@ -133,7 +133,7 @@ export class ListingsService {
         account: {
           select: {
             displayName: true,
-            major: true,
+            major: { select: { name: true } },
             trustScore: true,
             username: true,
           },
@@ -165,7 +165,7 @@ export class ListingsService {
         account: {
           select: {
             displayName: true,
-            major: true,
+            major: { select: { name: true } },
             trustScore: true,
             username: true,
           },
@@ -200,7 +200,7 @@ export class ListingsService {
         account: {
           select: {
             displayName: true,
-            major: true,
+            major: { select: { name: true } },
             trustScore: true,
             username: true,
           },
@@ -218,7 +218,7 @@ export class ListingsService {
         account: {
           select: {
             displayName: true,
-            major: true,
+            major: { select: { name: true } },
             trustScore: true,
             username: true,
           },
@@ -236,7 +236,7 @@ export class ListingsService {
         account: {
           select: {
             displayName: true,
-            major: true,
+            major: { select: { name: true } },
             trustScore: true,
             username: true,
           },

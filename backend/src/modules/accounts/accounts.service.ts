@@ -10,7 +10,10 @@ export class AccountsService {
   async getProfileByUsername(username: string) {
     const account = await this.prisma.account.findUnique({
       where: { username },
-      include: { school: { select: { name: true } } },
+      include: {
+        school: { select: { name: true } },
+        major: { select: { name: true } },
+      },
     });
     if (!account) throw new NotFoundException('Akun tidak ditemukan.');
     return account;
@@ -20,7 +23,10 @@ export class AccountsService {
   async getProfileById(accountId: string) {
     const account = await this.prisma.account.findUnique({
       where: { id: accountId },
-      include: { school: { select: { name: true } } },
+      include: {
+        school: { select: { name: true } },
+        major: { select: { name: true } },
+      },
     });
     if (!account) throw new NotFoundException('Akun tidak ditemukan.');
     return account;
@@ -35,12 +41,14 @@ export class AccountsService {
           displayName: input.displayName,
         }),
         ...(input.note !== undefined && { note: input.note }),
-        ...(input.major !== undefined && { major: input.major }),
         ...(input.avatarObjectKey !== undefined && {
           avatarObjectKey: input.avatarObjectKey,
         }),
       },
-      include: { school: { select: { name: true } } },
+      include: {
+        school: { select: { name: true } },
+        major: { select: { name: true } },
+      },
     });
   }
 

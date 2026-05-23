@@ -8,7 +8,9 @@ query GetMyProfile {
     avatarUrl
     trustScore
     schoolName
+    schoolId
     major
+    majorId
     followersCount
     followingCount
   }
@@ -68,5 +70,6 @@ mutation UpdateProfile($input: UpdateProfileInput!) {
     avatarObjectKey
     avatarUrl
     major
+    majorId
   }
 }
