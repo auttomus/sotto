@@ -83,7 +83,7 @@ export function PostWizard() {
 
       addToast('success', 'Postingan berhasil dibagikan');
       reset();
-      navigate('/');
+      navigate('/home');
     } catch (error: any) {
       addToast('error', error.message || 'Gagal membuat postingan');
     } finally {

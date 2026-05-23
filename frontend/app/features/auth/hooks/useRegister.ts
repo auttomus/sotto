@@ -22,7 +22,10 @@ export function useRegister() {
     setIsLoading(true);
     setError(null);
     try {
-      const baseUrl = import.meta.env.VITE_IAM_BASE_URL || 'http://localhost:3000/iam';
+      const isDockerOrProd = typeof window !== 'undefined' && (window.location.port === '8080' || !window.location.port);
+      const baseUrl = isDockerOrProd
+        ? `${window.location.origin}/iam`
+        : import.meta.env.VITE_IAM_BASE_URL || 'http://localhost:3000/iam';
       const res = await fetch(`${baseUrl}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -1,3 +1,5 @@
 node_modules
+qdrant_storage
 .agents
-skills-lock.json
+.kilo
+qdrant_storage

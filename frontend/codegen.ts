@@ -28,6 +28,7 @@ const config: CodegenConfig = {
       config: {
         withHooks: true,
         withSuspense: false,
+        reactApolloVersion: 3,
         apolloReactHooksImportFrom: '@apollo/client/react',
         importSchemaTypesFrom: './base-types',
         scalars: {

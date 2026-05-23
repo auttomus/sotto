@@ -2,87 +2,25 @@ import * as React from "react";
 import { ArrowLeft, MoreVertical, Paperclip, Send, Check, Loader2 } from "lucide-react";
 import { Link, useParams } from "react-router";
 import { Avatar } from "../components/ui/Avatar";
-import { useGetMessagesQuery, useGetConversationsQuery } from "~/core/apollo/generated";
-import { useAuthStore } from "~/core/store/useAuthStore";
 import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
-import { useChatSocket } from "~/core/hooks/useChatSocket";
+import { useChatRoom } from "~/features/chat/hooks/useChatRoom";
 
 export default function ChatRoute() {
   const { conversationId } = useParams();
-  const { user } = useAuthStore();
-  const [inputText, setInputText] = React.useState("");
-  const [localMessages, setLocalMessages] = React.useState<any[]>([]);
-  const messagesEndRef = React.useRef<HTMLDivElement>(null);
+  
+  const {
+    inputText,
+    messagesEndRef,
+    allMessages,
+    loading,
+    recipient,
+    user,
+    handleSend,
+    handleKeyDown,
+    handleInputChange,
+  } = useChatRoom({ conversationId: conversationId as string });
 
-  const { data, loading } = useGetMessagesQuery({
-    variables: { conversationId: conversationId as string, limit: 50 },
-    skip: !conversationId,
-    fetchPolicy: "cache-and-network"
-  });
-
-  const { data: convData } = useGetConversationsQuery({
-    fetchPolicy: "cache-first"
-  });
-
-  const conversation = convData?.conversations?.find((c: any) => c.id === conversationId);
-  const recipient = conversation?.participants?.find((p: any) => p.accountId !== user?.accountId);
-
-  // Real-time messaging via Socket.io
-  const { sendMessage: socketSendMessage, sendTyping } = useChatSocket({
-    conversationId: conversationId as string,
-    onNewMessage: (message) => {
-      // Only add if not from us (our own messages are added optimistically)
-      if (message.senderId !== user?.accountId) {
-        setLocalMessages(prev => [...prev, message]);
-      }
-    },
-  });
-
-  const allMessages = React.useMemo(() => {
-    const serverMessages = data?.messages || [];
-    return [...serverMessages].reverse().concat(localMessages);
-  }, [data, localMessages]);
-
-  // Auto-scroll to bottom on new messages
-  React.useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [allMessages.length]);
-
-  const handleSend = () => {
-    if (!inputText.trim()) return;
-    
-    const content = inputText.trim();
-    
-    // Optimistic UI update
-    const newMsg = {
-      messageId: `local-${Date.now()}`,
-      senderId: user?.accountId,
-      content,
-      createdAt: new Date().toISOString(),
-      media: []
-    };
-    
-    setLocalMessages(prev => [...prev, newMsg]);
-    setInputText("");
-
-    // Send via WebSocket
-    socketSendMessage(content);
-    sendTyping(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputText(e.target.value);
-    sendTyping(e.target.value.length > 0);
-  };
-
-  if (loading && !data) {
+  if (loading && !allMessages.length) {
     return (
       <div className="flex flex-col h-[100dvh] bg-gray-50 dark:bg-gray-950 w-full max-w-lg mx-auto border-x border-gray-100 dark:border-gray-800 justify-center items-center">
         <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />

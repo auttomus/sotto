@@ -2,7 +2,10 @@ import { useEffect, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuthStore } from '~/core/store/useAuthStore';
 
-const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:3000';
+const isDockerOrProd = typeof window !== 'undefined' && (window.location.port === '8080' || !window.location.port);
+const WS_URL = isDockerOrProd
+  ? window.location.origin
+  : import.meta.env.VITE_WS_URL || 'http://localhost:3000';
 
 interface ChatMessage {
   messageId: string;

@@ -2,12 +2,12 @@ import * as React from "react";
 import { Star, MapPin, Link as LinkIcon, Settings, Calendar, Briefcase, Loader2, X, Check } from "lucide-react";
 import { Avatar } from "~/components/ui/Avatar";
 import { Button } from "~/components/ui/Button";
-import { useFollowAccountMutation, useUnfollowAccountMutation, useUpdateProfileMutation, type GetMyProfileQuery, type GetListingsByAccountQuery } from "~/core/apollo/generated";
+import { type GetMyProfileQuery, type GetListingsByAccountQuery } from "~/core/apollo/generated";
 import { formatDate } from "~/core/utils/formatDate";
 import { useNavigate } from "react-router";
-import { useToastStore } from "~/core/store/useToastStore";
 import { EditProfileForm } from "./EditProfileForm";
 import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
+import { useProfileLayout } from "~/features/profile/hooks/useProfileLayout";
 
 interface ProfileLayoutProps {
   profile: any; // Using any or extended type since it can be myProfile or userProfile
@@ -16,49 +16,16 @@ interface ProfileLayoutProps {
 }
 
 export function ProfileLayout({ profile, listings, isOwnProfile = false }: ProfileLayoutProps) {
-  const [activeTab, setActiveTab] = React.useState<"penawaran" | "pengalaman">("penawaran");
-  const [isEditing, setIsEditing] = React.useState(false);
-
   const navigate = useNavigate();
-  const addToast = useToastStore(s => s.addToast);
-
-  const [followMutation, { loading: followLoading }] = useFollowAccountMutation({
-    onCompleted: () => addToast('success', `Berhasil mengikuti ${profile.displayName}`),
-    onError: (e: any) => addToast('error', e.message),
-    update: (cache: any) => {
-      cache.modify({
-        id: cache.identify(profile),
-        fields: {
-          isFollowing: () => true,
-          followersCount: (prev: number = 0) => prev + 1
-        }
-      });
-    }
-  });
-
-  const [unfollowMutation, { loading: unfollowLoading }] = useUnfollowAccountMutation({
-    onCompleted: () => addToast('success', `Berhenti mengikuti ${profile.displayName}`),
-    onError: (e: any) => addToast('error', e.message),
-    update: (cache: any) => {
-      cache.modify({
-        id: cache.identify(profile),
-        fields: {
-          isFollowing: () => false,
-          followersCount: (prev: number = 1) => prev - 1
-        }
-      });
-    }
-  });
-
-  const handleFollowToggle = () => {
-    if (profile.isFollowing) {
-      unfollowMutation({ variables: { targetAccountId: profile.id } });
-    } else {
-      followMutation({ variables: { targetAccountId: profile.id } });
-    }
-  };
-
-  const isFollowLoading = followLoading || unfollowLoading;
+  
+  const {
+    activeTab,
+    setActiveTab,
+    isEditing,
+    setIsEditing,
+    handleFollowToggle,
+    isFollowLoading
+  } = useProfileLayout({ profile });
 
   return (
     <div className="pb-20 relative bg-white dark:bg-gray-950 min-h-screen">

@@ -8,7 +8,7 @@ export default function TopHeader() {
   return (
     <header className="sticky top-0 z-50 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800">
       <div className="flex items-center justify-between px-4 h-16 w-full max-w-lg mx-auto md:max-w-none md:px-6">
-        <Link to="/" className="text-xl font-bold tracking-tight text-indigo-600 dark:text-indigo-400 font-serif italic">
+        <Link to="/home" className="text-xl font-bold tracking-tight text-indigo-600 dark:text-indigo-400 font-serif italic">
           Sotto
         </Link>
         <div className="flex flex-1 items-center justify-end gap-3 ml-4">
