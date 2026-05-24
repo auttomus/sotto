@@ -26,7 +26,7 @@ export function PostCard({ post: rawPost }: PostCardProps) {
   const avatarUrl = resolveMediaUrl(post.authorAvatarObjectKey);
 
   return (
-    <article className="bg-white dark:bg-gray-900 p-4 border-b border-gray-100 dark:border-gray-800 transition-colors">
+    <article className="bg-white dark:bg-gray-900 p-5 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50/30 dark:hover:bg-gray-800/10 transition-all duration-200">
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <Link
@@ -61,7 +61,7 @@ export function PostCard({ post: rawPost }: PostCardProps) {
 
       {/* Body */}
       <div className="mb-3">
-        <p className="text-gray-800 dark:text-gray-200 text-sm leading-relaxed mb-2 whitespace-pre-wrap line-clamp-6">
+        <p className="text-gray-800 dark:text-gray-100 text-[15px] leading-relaxed mb-3 whitespace-pre-wrap line-clamp-6">
           {post.content}
         </p>
 
@@ -74,10 +74,10 @@ export function PostCard({ post: rawPost }: PostCardProps) {
         {post.linkedServiceId && (
           <Link
             to={ROUTES.LISTING_DETAIL(post.linkedServiceId)}
-            className="mt-3 flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group"
+            className="mt-3 flex items-center gap-3 p-3.5 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/25 hover:bg-gray-100/50 dark:hover:bg-gray-800/40 hover:border-gray-200 dark:hover:border-gray-700 transition-all duration-200 group shadow-sm"
           >
-            <div className="h-12 w-12 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center shrink-0">
-              <span className="text-indigo-600 dark:text-indigo-400 text-lg">🛠</span>
+            <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-indigo-500/15 to-purple-500/15 dark:from-indigo-500/25 dark:to-purple-500/25 border border-indigo-100/50 dark:border-indigo-500/20 flex items-center justify-center shrink-0 shadow-sm">
+              <span className="text-indigo-600 dark:text-indigo-400 text-base">🛠</span>
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
