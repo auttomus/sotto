@@ -260,6 +260,7 @@ type PostModel {
   linkedServiceId: String
   media: [MediaAttachmentModel!]
   postId: ID!
+  repliesCount: Int!
   tags: [TagModel!]
 }
 
@@ -289,6 +290,7 @@ type Query {
   schools: [SchoolModel!]!
   searchAccounts(query: String!): [AccountModel!]!
   searchListings(query: String!, tagIds: [ID!]): [ListingModel!]!
+  searchPosts(query: String!, tagIds: [ID!]): [PostModel!]!
   searchSchools(query: String!): [SchoolModel!]!
   searchTags(query: String!): [TagModel!]!
   tags: [TagModel!]!

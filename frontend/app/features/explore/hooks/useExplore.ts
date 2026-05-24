@@ -1,13 +1,24 @@
 import { useState } from "react";
-import { useSearchAccountsQuery, useSearchListingsQuery } from "~/core/apollo/generated";
+import { 
+  useSearchAccountsQuery, 
+  useSearchListingsQuery,
+  useSearchPostsQuery,
+  useSearchTagsQuery,
+  useGetMyProfileQuery
+} from "~/core/apollo/generated";
 import { useDebounce } from "~/core/hooks/useDebounce";
 
 export function useExplore() {
-  const [activeCategory, setActiveCategory] = useState("Semua");
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedQuery = useDebounce(searchQuery, 500);
 
   const isSearching = debouncedQuery.length > 0;
+
+  // Profil user saat ini untuk menyembunyikan akun sendiri dari rekomendasi
+  const { data: myProfileData } = useGetMyProfileQuery({
+    fetchPolicy: "cache-first"
+  });
+  const myAccountId = myProfileData?.myProfile?.id;
 
   // Real-time search queries
   const { 
@@ -30,7 +41,27 @@ export function useExplore() {
     fetchPolicy: "cache-and-network"
   });
 
-  // Default queries when not searching (fetch all/recommended)
+  const {
+    data: postsData,
+    loading: postsLoading,
+    error: postsError
+  } = useSearchPostsQuery({
+    variables: { query: debouncedQuery },
+    skip: !isSearching,
+    fetchPolicy: "cache-and-network"
+  });
+
+  const {
+    data: tagsData,
+    loading: tagsLoading,
+    error: tagsError
+  } = useSearchTagsQuery({
+    variables: { query: debouncedQuery },
+    skip: !isSearching,
+    fetchPolicy: "cache-and-network"
+  });
+
+  // Default queries ketika tidak melakukan pencarian (rekomendasi)
   const { 
     data: defaultAccountsData, 
     loading: defaultAccountsLoading,
@@ -51,26 +82,50 @@ export function useExplore() {
     fetchPolicy: "cache-first"
   });
 
+  const {
+    data: defaultPostsData,
+    loading: defaultPostsLoading,
+    error: defaultPostsError
+  } = useSearchPostsQuery({
+    variables: { query: "" },
+    skip: isSearching,
+    fetchPolicy: "cache-first"
+  });
+
+  const {
+    data: defaultTagsData,
+    loading: defaultTagsLoading,
+    error: defaultTagsError
+  } = useSearchTagsQuery({
+    variables: { query: "" },
+    skip: isSearching,
+    fetchPolicy: "cache-first"
+  });
+
   const isLoading = isSearching 
-    ? (accountsLoading || listingsLoading) 
-    : (defaultAccountsLoading || defaultListingsLoading);
+    ? (accountsLoading || listingsLoading || postsLoading || tagsLoading) 
+    : (defaultAccountsLoading || defaultListingsLoading || defaultPostsLoading || defaultTagsLoading);
 
   const error = isSearching 
-    ? (accountsError || listingsError) 
-    : (defaultAccountsError || defaultListingsError);
+    ? (accountsError || listingsError || postsError || tagsError) 
+    : (defaultAccountsError || defaultListingsError || defaultPostsError || defaultTagsError);
 
   const searchResults = {
     accounts: isSearching 
       ? (accountsData?.searchAccounts || []) 
-      : (defaultAccountsData?.searchAccounts || []),
+      : (defaultAccountsData?.searchAccounts || []).filter(acc => acc.id !== myAccountId),
     listings: isSearching 
       ? (listingsData?.searchListings || []) 
       : (defaultListingsData?.searchListings || []),
+    posts: isSearching
+      ? (postsData?.searchPosts || [])
+      : (defaultPostsData?.searchPosts || []),
+    tags: isSearching
+      ? (tagsData?.searchTags || [])
+      : (defaultTagsData?.searchTags || []),
   };
 
   return {
-    activeCategory,
-    setActiveCategory,
     searchQuery,
     setSearchQuery,
     debouncedQuery,

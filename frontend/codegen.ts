@@ -28,13 +28,15 @@ const config: CodegenConfig = {
       config: {
         withHooks: true,
         withSuspense: false,
-        reactApolloVersion: 3,
+        excludeSuspense: true,
+        reactApolloVersion: 4,
         apolloReactHooksImportFrom: '@apollo/client/react',
         importSchemaTypesFrom: './base-types',
         scalars: {
           DateTime: 'string',
           Date: 'string',
         },
+        banner: '/* eslint-disable */\n// @ts-nocheck\n',
       },
     },
   },

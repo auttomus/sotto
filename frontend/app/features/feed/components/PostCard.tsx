@@ -183,7 +183,7 @@ export function PostCard({ post: rawPost }: PostCardProps) {
           <div className="p-1.5 rounded-full group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/20 transition-colors">
             <MessageCircle className="h-5 w-5" />
           </div>
-          <span className="text-xs font-medium">0</span>
+          <span className="text-xs font-medium">{post.repliesCount ?? 0}</span>
         </Link>
         <button className="flex items-center gap-1.5 text-gray-500 hover:text-green-500 dark:hover:text-green-400 transition-colors group ml-auto">
           <div className="p-1.5 rounded-full group-hover:bg-green-50 dark:group-hover:bg-green-900/20 transition-colors">

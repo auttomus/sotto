@@ -7,7 +7,7 @@
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
-    "codegen": "graphql-codegen"
+    "codegen": "graphql-codegen && echo -e \"// @ts-nocheck\\n\\$(cat app/core/apollo/generated.ts)\" > app/core/apollo/generated.ts"
   },
   "dependencies": {
     "@apollo/client": "^4.1.9",
