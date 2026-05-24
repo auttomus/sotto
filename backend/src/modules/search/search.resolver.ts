@@ -2,6 +2,7 @@ import { Resolver, Query, Args, ID } from '@nestjs/graphql';
 import { SearchService } from './search.service';
 import { ListingModel } from '../listings/models/listing.model';
 import { AccountModel } from '../accounts/models/account.model';
+import { PostModel } from '../feed/models/post.model';
 import { Public } from '../../common/decorators/public.decorator';
 
 @Resolver()
@@ -51,5 +52,14 @@ export class SearchResolver {
         .school?.name,
       createdAt: a.createdAt,
     }));
+  }
+
+  @Public()
+  @Query(() => [PostModel], { name: 'searchPosts' })
+  async searchPosts(
+    @Args('query') query: string,
+    @Args('tagIds', { type: () => [ID], nullable: true }) tagIds?: string[],
+  ) {
+    return this.searchService.searchPosts(query, tagIds);
   }
 }

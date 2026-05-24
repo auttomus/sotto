@@ -19,3 +19,40 @@ query SearchListings($query: String!) {
     }
   }
 }
+
+query SearchPosts($query: String!) {
+  searchPosts(query: $query) {
+    postId
+    content
+    createdAt
+    authorId
+    authorDisplayName
+    authorUsername
+    authorAvatarObjectKey
+    authorSchoolName
+    linkedServiceId
+    inReplyToPostId
+    likesCount
+    repliesCount
+    likedByMe
+    tags {
+      id
+      name
+    }
+    media {
+      id
+      fileName
+      contentType
+      url
+      objectKey
+    }
+  }
+}
+
+query SearchTags($query: String!) {
+  searchTags(query: $query) {
+    id
+    name
+    isUsable
+  }
+}

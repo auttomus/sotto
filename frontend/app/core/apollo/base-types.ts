@@ -396,6 +396,7 @@ export type PostModel = {
   linkedServiceId?: Maybe<Scalars['String']['output']>;
   media?: Maybe<Array<MediaAttachmentModel>>;
   postId: Scalars['ID']['output'];
+  repliesCount: Scalars['Int']['output'];
   tags?: Maybe<Array<TagModel>>;
 };
 
@@ -427,6 +428,7 @@ export type Query = {
   schools: Array<SchoolModel>;
   searchAccounts: Array<AccountModel>;
   searchListings: Array<ListingModel>;
+  searchPosts: Array<PostModel>;
   searchSchools: Array<SchoolModel>;
   searchTags: Array<TagModel>;
   tags: Array<TagModel>;
@@ -514,6 +516,12 @@ export type QuerySearchAccountsArgs = {
 
 
 export type QuerySearchListingsArgs = {
+  query: Scalars['String']['input'];
+  tagIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+};
+
+
+export type QuerySearchPostsArgs = {
   query: Scalars['String']['input'];
   tagIds?: InputMaybe<Array<Scalars['ID']['input']>>;
 };

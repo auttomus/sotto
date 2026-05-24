@@ -248,4 +248,27 @@ export class FeedService {
       };
     });
   }
+
+  /** Ambil jumlah reply/komentar untuk suatu post dari ScyllaDB */
+  async getRepliesCountForPost(postId: string): Promise<number> {
+    const postUuid = types.TimeUuid.fromString(postId);
+    const result = await this.scylla.execute(
+      `SELECT count(*) FROM posts WHERE in_reply_to_post_id = ?`,
+      [postUuid],
+    );
+    if (result.rows.length === 0) return 0;
+    const row = result.rows[0] as Record<
+      string,
+      { toString(): string } | number
+    >;
+    const firstKey = Object.keys(row)[0];
+    const countVal = row['count'] ?? (firstKey ? row[firstKey] : undefined);
+    if (typeof countVal === 'number') {
+      return countVal;
+    }
+    if (countVal !== null && countVal !== undefined) {
+      return parseInt(countVal.toString(), 10);
+    }
+    return 0;
+  }
 }

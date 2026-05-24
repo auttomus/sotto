@@ -1,15 +1,9 @@
-import { Search, Filter, TrendingUp, AlertCircle } from "lucide-react";
-import { Badge } from "../components/ui/Badge";
+import { Search, AlertCircle } from "lucide-react";
 import { SearchResults } from "~/features/explore/components/SearchResults";
 import { useExplore } from "~/features/explore/hooks/useExplore";
 
-const CATEGORIES = ["Semua", "UI/UX Design", "Web Dev", "Mobile App", "Logo", "Ilustrasi", "Copywriting"];
-const TRENDING_TAGS = ["#ReactJS", "#Figma", "#TailwindCSS", "#NodeJS", "#NextJS"];
-
 export default function ExploreRoute() {
   const {
-    activeCategory,
-    setActiveCategory,
     searchQuery,
     setSearchQuery,
     isSearching,
@@ -36,49 +30,10 @@ export default function ExploreRoute() {
               placeholder="Cari talenta, jasa, atau karya..."
             />
           </div>
-          <button className="p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition shadow-sm">
-            <Filter className="h-5 w-5" />
-          </button>
         </div>
       </div>
 
-      {!isSearching && (
-        <div className="shrink-0">
-          {/* Categories Scroll */}
-          <div className="bg-white dark:bg-gray-900 py-3 border-b border-gray-100 dark:border-gray-800">
-            <div className="flex overflow-x-auto hide-scrollbar px-4 gap-2 pb-1">
-              {CATEGORIES.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setActiveCategory(category)}
-                  className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-colors border ${
-                    activeCategory === category
-                      ? "bg-indigo-600 text-white border-indigo-600"
-                      : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
-          </div>
 
-          {/* Trending Tags */}
-          <div className="px-4 py-5">
-            <div className="flex items-center gap-2 mb-3">
-              <TrendingUp className="h-5 w-5 text-indigo-500" />
-              <h2 className="text-sm font-bold text-gray-900 dark:text-gray-100">Topik Sedang Tren</h2>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {TRENDING_TAGS.map((tag) => (
-                <Badge key={tag} variant="secondary" onClick={() => setSearchQuery(tag.replace('#', ''))} className="px-3 py-1 text-sm font-medium cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Main Content Area */}
       <div className="px-4 flex-1">
@@ -96,7 +51,10 @@ export default function ExploreRoute() {
             isLoading={isLoading}
             accounts={searchResults.accounts}
             listings={searchResults.listings}
+            posts={searchResults.posts}
+            tags={searchResults.tags}
             searchQuery={searchQuery}
+            onTagClick={(tag) => setSearchQuery(tag)}
           />
         )}
       </div>

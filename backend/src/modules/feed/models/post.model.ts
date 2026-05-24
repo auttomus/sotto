@@ -44,6 +44,9 @@ export class PostModel {
   @Field(() => Int)
   likesCount?: number;
 
+  @Field(() => Int)
+  repliesCount?: number;
+
   @Field(() => Boolean)
   likedByMe?: boolean;
 }

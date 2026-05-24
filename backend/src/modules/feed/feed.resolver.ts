@@ -198,6 +198,11 @@ export class FeedResolver {
     return this.feedService.getLikesCountForPost(post.postId);
   }
 
+  @ResolveField(() => Int)
+  async repliesCount(@Parent() post: PostModel): Promise<number> {
+    return this.feedService.getRepliesCountForPost(post.postId);
+  }
+
   @ResolveField(() => Boolean)
   async likedByMe(
     @Parent() post: PostModel,

@@ -11,6 +11,7 @@ query GetFeed($limit: Int) {
     linkedServiceId
     inReplyToPostId
     likesCount
+    repliesCount
     likedByMe
     tags {
       id
@@ -64,6 +65,7 @@ query GetPost($postId: String!) {
     linkedServiceId
     inReplyToPostId
     likesCount
+    repliesCount
     likedByMe
     tags {
       id
@@ -92,6 +94,7 @@ query GetReplies($postId: String!) {
     linkedServiceId
     inReplyToPostId
     likesCount
+    repliesCount
     likedByMe
     tags {
       id
