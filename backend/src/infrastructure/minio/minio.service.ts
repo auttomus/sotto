@@ -25,7 +25,7 @@ export class MinioService implements OnModuleInit {
     this.client = new Minio.Client({
       endPoint: endpoint,
       useSSL,
-      ...(portVal ? { port: Number(portVal) } : (useSSL ? {} : { port: 9000 })),
+      ...(portVal ? { port: Number(portVal) } : useSSL ? {} : { port: 9000 }),
       accessKey: this.config.get('MINIO_ACCESS_KEY', 'admin_minio'),
       secretKey: this.config.get(
         'MINIO_SECRET_KEY',
@@ -83,7 +83,17 @@ export class MinioService implements OnModuleInit {
   getPublicUrl(objectKey: string): string {
     const publicUrlPrefix = this.config.get<string>('MINIO_PUBLIC_URL');
     if (publicUrlPrefix) {
-      const cleanBase = publicUrlPrefix.endsWith('/') ? publicUrlPrefix.slice(0, -1) : publicUrlPrefix;
+      const cleanBase = publicUrlPrefix.endsWith('/')
+        ? publicUrlPrefix.slice(0, -1)
+        : publicUrlPrefix;
+
+      const useSSL =
+        this.config.get<string>('MINIO_USE_SSL', 'false') === 'true';
+      if (useSSL) {
+        // Pada Cloudflare R2 / S3 awan, URL subdomain publik sudah mengarah langsung ke root bucket
+        return `${cleanBase}/${objectKey}`;
+      }
+      // Pada MinIO lokal, kita butuh nama bucket di path karena host-nya bersifat global (localhost:9000)
       return `${cleanBase}/${this.bucketPublic}/${objectKey}`;
     }
 
@@ -96,26 +106,35 @@ export class MinioService implements OnModuleInit {
   }
 
   private async ensureBucket(name: string, isPublic = false) {
-    const exists = await this.client.bucketExists(name);
-    if (!exists) {
-      await this.client.makeBucket(name);
-      this.logger.log(`Bucket "${name}" dibuat`);
-    }
+    try {
+      const exists = await this.client.bucketExists(name);
+      if (!exists) {
+        await this.client.makeBucket(name);
+        this.logger.log(`Bucket "${name}" dibuat`);
+      }
 
-    if (isPublic) {
-      const policy = {
-        Version: '2012-10-17',
-        Statement: [
-          {
-            Effect: 'Allow',
-            Principal: { AWS: ['*'] },
-            Action: ['s3:GetObject'],
-            Resource: [`arn:aws:s3:::${name}/*`],
-          },
-        ],
-      };
-      await this.client.setBucketPolicy(name, JSON.stringify(policy));
-      this.logger.log(`Bucket policy "${name}" diset menjadi public read`);
+      if (isPublic) {
+        const policy = {
+          Version: '2012-10-17',
+          Statement: [
+            {
+              Effect: 'Allow',
+              Principal: { AWS: ['*'] },
+              Action: ['s3:GetObject'],
+              Resource: [`arn:aws:s3:::${name}/*`],
+            },
+          ],
+        };
+        await this.client.setBucketPolicy(name, JSON.stringify(policy));
+        this.logger.log(`Bucket policy "${name}" diset menjadi public read`);
+      }
+    } catch (error) {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      this.logger.warn(
+        `Gagal memverifikasi/mengatur kebijakan bucket "${name}". ` +
+          `Aplikasi akan tetap berjalan dengan asumsi bucket sudah dikonfigurasi melalui IaC/DevOps. ` +
+          `Error: ${errMsg}`,
+      );
     }
   }
 }
