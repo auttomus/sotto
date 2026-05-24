@@ -1,5 +1,6 @@
-import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
 import { MediaAttachmentModel } from '../../media/models/media-attachment.model';
+import { TagModel } from '../../tags/models/tag.model';
 
 @ObjectType()
 export class PostModel {
@@ -36,4 +37,13 @@ export class PostModel {
 
   @Field(() => [MediaAttachmentModel], { nullable: true })
   media?: MediaAttachmentModel[];
+
+  @Field(() => [TagModel], { nullable: true })
+  tags?: TagModel[];
+
+  @Field(() => Int)
+  likesCount?: number;
+
+  @Field(() => Boolean)
+  likedByMe?: boolean;
 }

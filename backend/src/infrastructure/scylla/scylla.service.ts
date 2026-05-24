@@ -95,6 +95,17 @@ export class ScyllaService implements OnModuleInit, OnModuleDestroy {
         PRIMARY KEY (post_id)
       )`,
 
+      // Index untuk reply/komentar
+      `CREATE INDEX IF NOT EXISTS posts_in_reply_to_idx ON posts (in_reply_to_post_id)`,
+
+      // Tabel post_likes (Likes interaksi)
+      `CREATE TABLE IF NOT EXISTS post_likes (
+        post_id timeuuid,
+        user_id uuid,
+        created_at timestamp,
+        PRIMARY KEY (post_id, user_id)
+      )`,
+
       // Tabel messages (Chat payload)
       `CREATE TABLE IF NOT EXISTS messages (
         conversation_id uuid,

@@ -58,6 +58,22 @@ export class MinioService implements OnModuleInit {
   }
 
   /**
+   * Mengunggah buffer data langsung dari backend ke bucket.
+   * Digunakan untuk aset internal atau inisiasi gambar bawaan (default avatar).
+   */
+  async uploadBuffer(
+    objectKey: string,
+    buffer: Buffer,
+    contentType: string,
+    isPrivate = false,
+  ): Promise<void> {
+    const bucket = isPrivate ? this.bucketPrivate : this.bucketPublic;
+    await this.client.putObject(bucket, objectKey, buffer, buffer.length, {
+      'content-type': contentType,
+    });
+  }
+
+  /**
    * Generate presigned URL untuk download (GET).
    * Digunakan untuk file private (produk digital, attachment).
    */

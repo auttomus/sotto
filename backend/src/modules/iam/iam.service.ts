@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -9,12 +10,17 @@ import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
+import { MinioService } from '../../infrastructure/minio/minio.service';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class IamService {
+  private readonly logger = new Logger(IamService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly minio: MinioService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -53,6 +59,10 @@ export class IamService {
     // 2. Enkripsi Kata Sandi
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
+    // Generate key avatar default sebelum disimpan ke DB
+    const avatarUuid = randomUUID();
+    const avatarObjectKey = `avatar/${avatarUuid}.svg`;
+
     // 3. Transaksi Database (Atomic)
     const result = await this.prisma.$transaction(async (tx) => {
       const account = await tx.account.create({
@@ -61,6 +71,7 @@ export class IamService {
           displayName: dto.displayName,
           schoolId: dto.schoolId,
           majorId: dto.majorId,
+          avatarObjectKey: avatarObjectKey,
         },
       });
 
@@ -74,6 +85,21 @@ export class IamService {
 
       return { user, account };
     });
+
+    // 4. Unggah default SVG avatar ke Cloudflare R2 secara background/async
+    try {
+      const svg = generateSvgAvatar(dto.displayName);
+      await this.minio.uploadBuffer(
+        avatarObjectKey,
+        Buffer.from(svg),
+        'image/svg+xml',
+      );
+    } catch (error) {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Gagal mengunggah avatar bawaan untuk ${dto.username}: ${errMsg}`,
+      );
+    }
 
     const payload = {
       sub: result.user.id,
@@ -122,4 +148,42 @@ export class IamService {
       },
     };
   }
+}
+
+/**
+ * Membuat inisial nama dengan desain premium & gradasi warna yang dinamis
+ */
+function generateSvgAvatar(name: string): string {
+  const initial = name ? name.trim().charAt(0).toUpperCase() : '?';
+
+  // Daftar warna gradasi premium yang modern dan estetis
+  const gradients = [
+    { start: '#6366F1', end: '#A855F7' }, // Indigo ke Violet
+    { start: '#0D9488', end: '#10B981' }, // Teal ke Emerald
+    { start: '#F43F5E', end: '#FB923C' }, // Rose ke Orange
+    { start: '#2563EB', end: '#06B6D4' }, // Blue ke Cyan
+    { start: '#7C3AED', end: '#D946EF' }, // Violet ke Fuchsia
+    { start: '#EA580C', end: '#FACC15' }, // Orange ke Yellow
+  ];
+
+  // Hitung hash deterministik dari nama agar pengguna yang sama selalu mendapat gradasi warna yang sama
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % gradients.length;
+  const { start, end } = gradients[index];
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
+  <defs>
+    <linearGradient id="avatar-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="${start}"/>
+      <stop offset="100%" stop-color="${end}"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" fill="url(#avatar-grad)"/>
+  <text x="50%" y="54%" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="bold" font-size="64" fill="#FFFFFF" text-anchor="middle" dominant-baseline="middle">
+    ${initial}
+  </text>
+</svg>`;
 }

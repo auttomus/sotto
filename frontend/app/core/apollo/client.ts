@@ -30,6 +30,9 @@ export const apolloClient = new ApolloClient({
   link: ApolloLink.from([authLink, httpLink]),
   cache: new InMemoryCache({
     typePolicies: {
+      PostModel: {
+        keyFields: ['postId'],
+      },
       Query: {
         fields: {
           feed: {

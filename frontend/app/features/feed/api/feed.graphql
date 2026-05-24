@@ -10,6 +10,12 @@ query GetFeed($limit: Int) {
     authorSchoolName
     linkedServiceId
     inReplyToPostId
+    likesCount
+    likedByMe
+    tags {
+      id
+      name
+    }
     media {
       id
       fileName
@@ -31,6 +37,66 @@ mutation CreatePost($input: CreatePostInput!) {
     authorAvatarObjectKey
     authorSchoolName
     linkedServiceId
+    media {
+      id
+      fileName
+      contentType
+      url
+      objectKey
+    }
+  }
+}
+
+mutation ToggleLikePost($postId: String!) {
+  toggleLikePost(postId: $postId)
+}
+
+query GetPost($postId: String!) {
+  post(postId: $postId) {
+    postId
+    content
+    createdAt
+    authorId
+    authorDisplayName
+    authorUsername
+    authorAvatarObjectKey
+    authorSchoolName
+    linkedServiceId
+    inReplyToPostId
+    likesCount
+    likedByMe
+    tags {
+      id
+      name
+    }
+    media {
+      id
+      fileName
+      contentType
+      url
+      objectKey
+    }
+  }
+}
+
+query GetReplies($postId: String!) {
+  replies(postId: $postId) {
+    postId
+    content
+    createdAt
+    authorId
+    authorDisplayName
+    authorUsername
+    authorAvatarObjectKey
+    authorSchoolName
+    linkedServiceId
+    inReplyToPostId
+    likesCount
+    likedByMe
+    tags {
+      id
+      name
+    }
     media {
       id
       fileName

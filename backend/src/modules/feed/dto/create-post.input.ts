@@ -20,4 +20,8 @@ export class CreatePostInput {
   @Field(() => [ID], { nullable: true })
   @IsOptional()
   mediaIds?: string[];
+
+  @Field(() => ID, { nullable: true })
+  @IsOptional()
+  inReplyToPostId?: string;
 }

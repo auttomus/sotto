@@ -98,6 +98,7 @@ export type CreateOrderInput = {
 
 export type CreatePostInput = {
   content: Scalars['String']['input'];
+  inReplyToPostId?: InputMaybe<Scalars['ID']['input']>;
   linkedServiceId?: InputMaybe<Scalars['ID']['input']>;
   mediaIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   tagIds?: InputMaybe<Array<Scalars['ID']['input']>>;
@@ -204,6 +205,7 @@ export type Mutation = {
   markNotificationAsRead: Scalars['Boolean']['output'];
   rejectOffer: CustomOfferModel;
   requestUploadUrl: PresignedUploadResult;
+  toggleLikePost: Scalars['Boolean']['output'];
   /** Catat interaksi user (view, click, like) */
   trackEvent: Scalars['Boolean']['output'];
   unfollow: Scalars['Boolean']['output'];
@@ -301,6 +303,11 @@ export type MutationRequestUploadUrlArgs = {
 };
 
 
+export type MutationToggleLikePostArgs = {
+  postId: Scalars['String']['input'];
+};
+
+
 export type MutationTrackEventArgs = {
   actionType: Scalars['String']['input'];
   targetId: Scalars['String']['input'];
@@ -384,9 +391,12 @@ export type PostModel = {
   content: Scalars['String']['output'];
   createdAt: Scalars['DateTime']['output'];
   inReplyToPostId?: Maybe<Scalars['String']['output']>;
+  likedByMe: Scalars['Boolean']['output'];
+  likesCount: Scalars['Int']['output'];
   linkedServiceId?: Maybe<Scalars['String']['output']>;
   media?: Maybe<Array<MediaAttachmentModel>>;
   postId: Scalars['ID']['output'];
+  tags?: Maybe<Array<TagModel>>;
 };
 
 export type PresignedUploadResult = {
@@ -410,7 +420,9 @@ export type Query = {
   notifications: Array<NotificationModel>;
   offersForConversation: Array<CustomOfferModel>;
   order?: Maybe<OrderModel>;
+  post?: Maybe<PostModel>;
   profile?: Maybe<AccountModel>;
+  replies: Array<PostModel>;
   school?: Maybe<SchoolModel>;
   schools: Array<SchoolModel>;
   searchAccounts: Array<AccountModel>;
@@ -476,8 +488,18 @@ export type QueryOrderArgs = {
 };
 
 
+export type QueryPostArgs = {
+  postId: Scalars['String']['input'];
+};
+
+
 export type QueryProfileArgs = {
   username: Scalars['String']['input'];
+};
+
+
+export type QueryRepliesArgs = {
+  postId: Scalars['String']['input'];
 };
 
 

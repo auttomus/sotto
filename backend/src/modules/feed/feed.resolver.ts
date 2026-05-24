@@ -18,6 +18,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { TagsService } from '../tags/tags.service';
 import { MediaService } from '../media/media.service';
 import { MediaAttachmentModel } from '../media/models/media-attachment.model';
+import { TagModel } from '../tags/models/tag.model';
 
 @Resolver(() => PostModel)
 export class FeedResolver {
@@ -34,11 +35,17 @@ export class FeedResolver {
     @Args('input') input: CreatePostInput,
   ) {
     const accountId = user.accountId;
-    const post = await this.feedService.createPost(
-      accountId,
-      input.content,
-      input.linkedServiceId ? input.linkedServiceId : undefined,
-    );
+    const post = input.inReplyToPostId
+      ? await this.feedService.createComment(
+          accountId,
+          input.inReplyToPostId,
+          input.content,
+        )
+      : await this.feedService.createPost(
+          accountId,
+          input.content,
+          input.linkedServiceId ? input.linkedServiceId : undefined,
+        );
 
     // Tag association (polymorphic)
     if (input.tagIds?.length) {
@@ -72,6 +79,66 @@ export class FeedResolver {
     );
 
     return post;
+  }
+
+  @Query(() => PostModel, { name: 'post', nullable: true })
+  async getPost(
+    @Args('postId', { type: () => String }) postId: string,
+  ): Promise<PostModel | null> {
+    const posts = await this.feedService.getPostsByIds([postId]);
+    if (posts.length === 0) return null;
+
+    const post = posts[0];
+    const author = await this.prisma.account.findUnique({
+      where: { id: post.authorId },
+      select: {
+        id: true,
+        username: true,
+        displayName: true,
+        avatarObjectKey: true,
+        school: { select: { name: true } },
+      },
+    });
+
+    return {
+      ...post,
+      authorDisplayName: author?.displayName,
+      authorUsername: author?.username,
+      authorAvatarObjectKey: author?.avatarObjectKey,
+      authorSchoolName: author?.school?.name,
+    };
+  }
+
+  @Query(() => [PostModel], { name: 'replies' })
+  async getReplies(
+    @Args('postId', { type: () => String }) postId: string,
+  ): Promise<PostModel[]> {
+    const replies = await this.feedService.getRepliesForPost(postId);
+    if (replies.length === 0) return [];
+
+    const authorIds = [...new Set(replies.map((r) => r.authorId))];
+    const authors = await this.prisma.account.findMany({
+      where: { id: { in: authorIds } },
+      select: {
+        id: true,
+        username: true,
+        displayName: true,
+        avatarObjectKey: true,
+        school: { select: { name: true } },
+      },
+    });
+    const authorMap = new Map(authors.map((a) => [a.id, a]));
+
+    return replies.map((reply) => {
+      const author = authorMap.get(reply.authorId);
+      return {
+        ...reply,
+        authorDisplayName: author?.displayName,
+        authorUsername: author?.username,
+        authorAvatarObjectKey: author?.avatarObjectKey,
+        authorSchoolName: author?.school?.name,
+      };
+    });
   }
 
   @Query(() => [PostModel], { name: 'feed' })
@@ -119,5 +186,32 @@ export class FeedResolver {
   @ResolveField(() => [MediaAttachmentModel])
   async media(@Parent() post: PostModel) {
     return this.mediaService.getMediaForObject('ScyllaPost', post.postId);
+  }
+
+  @ResolveField(() => [TagModel])
+  async tags(@Parent() post: PostModel) {
+    return this.tagsService.getTagsForObject(post.postId, 'ScyllaPost');
+  }
+
+  @ResolveField(() => Int)
+  async likesCount(@Parent() post: PostModel): Promise<number> {
+    return this.feedService.getLikesCountForPost(post.postId);
+  }
+
+  @ResolveField(() => Boolean)
+  async likedByMe(
+    @Parent() post: PostModel,
+    @CurrentUser() user: CurrentUserPayload,
+  ): Promise<boolean> {
+    if (!user) return false;
+    return this.feedService.isLikedByMe(user.accountId, post.postId);
+  }
+
+  @Mutation(() => Boolean)
+  async toggleLikePost(
+    @CurrentUser() user: CurrentUserPayload,
+    @Args('postId') postId: string,
+  ): Promise<boolean> {
+    return this.feedService.toggleLikePost(user.accountId, postId);
   }
 }

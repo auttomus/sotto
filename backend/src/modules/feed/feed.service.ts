@@ -164,4 +164,88 @@ export class FeedService {
       };
     });
   }
+
+  /** Toggle like status for a post in ScyllaDB */
+  async toggleLikePost(accountId: string, postId: string): Promise<boolean> {
+    const postUuid = types.TimeUuid.fromString(postId);
+    const userUuid = types.Uuid.fromString(accountId);
+
+    const checkResult = await this.scylla.execute(
+      `SELECT * FROM post_likes WHERE post_id = ? AND user_id = ?`,
+      [postUuid, userUuid],
+    );
+
+    if (checkResult.rows.length > 0) {
+      await this.scylla.execute(
+        `DELETE FROM post_likes WHERE post_id = ? AND user_id = ?`,
+        [postUuid, userUuid],
+      );
+      return false;
+    } else {
+      await this.scylla.execute(
+        `INSERT INTO post_likes (post_id, user_id, created_at) VALUES (?, ?, ?)`,
+        [postUuid, userUuid, new Date()],
+      );
+      return true;
+    }
+  }
+
+  /** Get total like count for a post from ScyllaDB */
+  async getLikesCountForPost(postId: string): Promise<number> {
+    const postUuid = types.TimeUuid.fromString(postId);
+    const result = await this.scylla.execute(
+      `SELECT COUNT(*) FROM post_likes WHERE post_id = ?`,
+      [postUuid],
+    );
+    if (result.rows.length === 0) return 0;
+    const row = result.rows[0] as Record<string, unknown>;
+    const firstKey = Object.keys(row)[0];
+    const countVal = row['count'] ?? (firstKey ? row[firstKey] : undefined);
+    if (typeof countVal === 'number') {
+      return countVal;
+    }
+    if (countVal !== null && countVal !== undefined) {
+      return parseInt((countVal as { toString(): string }).toString(), 10);
+    }
+    return 0;
+  }
+
+  /** Check if a specific user liked a post */
+  async isLikedByMe(accountId: string, postId: string): Promise<boolean> {
+    if (!accountId) return false;
+    const postUuid = types.TimeUuid.fromString(postId);
+    const userUuid = types.Uuid.fromString(accountId);
+    const result = await this.scylla.execute(
+      `SELECT * FROM post_likes WHERE post_id = ? AND user_id = ?`,
+      [postUuid, userUuid],
+    );
+    return result.rows.length > 0;
+  }
+
+  /** Ambil reply/komentar untuk suatu post dari ScyllaDB */
+  async getRepliesForPost(postId: string) {
+    const postUuid = types.TimeUuid.fromString(postId);
+    const result = await this.scylla.execute(
+      `SELECT * FROM posts WHERE in_reply_to_post_id = ?`,
+      [postUuid],
+    );
+    return result.rows.map((row) => {
+      const r = row as unknown as {
+        post_id: { toString(): string };
+        author_id: { toString(): string };
+        in_reply_to_post_id?: { toString(): string } | null;
+        content: string;
+        linked_service_id?: { toString(): string } | null;
+        created_at: Date;
+      };
+      return {
+        postId: r.post_id.toString(),
+        authorId: r.author_id.toString(),
+        inReplyToPostId: r.in_reply_to_post_id?.toString() ?? null,
+        content: r.content,
+        linkedServiceId: r.linked_service_id?.toString() ?? null,
+        createdAt: r.created_at,
+      };
+    });
+  }
 }
