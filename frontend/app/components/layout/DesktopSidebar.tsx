@@ -14,7 +14,7 @@ export default function DesktopSidebar() {
   ];
 
   return (
-    <aside className="hidden md:flex flex-col w-64 lg:w-72 h-screen fixed left-0 top-0 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 px-4 py-8 z-50">
+    <aside className="hidden md:flex flex-col w-64 lg:w-72 h-screen sticky top-0 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 px-4 py-8 z-40">
       <Link to="/home" className="flex items-center gap-2 mb-10 px-2">
         <span className="text-2xl font-bold tracking-tight text-indigo-600 dark:text-indigo-400 font-serif italic">
           Sotto
