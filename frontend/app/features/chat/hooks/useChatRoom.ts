@@ -2,6 +2,7 @@ import * as React from "react";
 import { useGetMessagesQuery, useGetConversationsQuery } from "~/core/apollo/generated";
 import { useAuthStore } from "~/core/store/useAuthStore";
 import { useChatSocket } from "~/core/hooks/useChatSocket";
+import { useUpload } from "~/core/hooks/useUpload";
 
 interface UseChatRoomOptions {
   conversationId: string;
@@ -9,8 +10,12 @@ interface UseChatRoomOptions {
 
 export function useChatRoom({ conversationId }: UseChatRoomOptions) {
   const { user } = useAuthStore();
+  const { uploadFile } = useUpload();
   const [inputText, setInputText] = React.useState("");
   const [localMessages, setLocalMessages] = React.useState<any[]>([]);
+  const [selectedImages, setSelectedImages] = React.useState<File[]>([]);
+  const [selectedListing, setSelectedListing] = React.useState<any | null>(null);
+  const [isUploading, setIsUploading] = React.useState(false);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
   const { data, loading, error } = useGetMessagesQuery({
@@ -47,26 +52,55 @@ export function useChatRoom({ conversationId }: UseChatRoomOptions) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [allMessages.length]);
 
-  const handleSend = () => {
-    if (!inputText.trim()) return;
+  const handleSend = async () => {
+    if (!inputText.trim() && selectedImages.length === 0 && !selectedListing) return;
     
-    const content = inputText.trim();
-    
-    // Optimistic UI update
-    const newMsg = {
-      messageId: `local-${Date.now()}`,
-      senderId: user?.accountId,
-      content,
-      createdAt: new Date().toISOString(),
-      media: []
-    };
-    
-    setLocalMessages((prev) => [...prev, newMsg]);
-    setInputText("");
+    let content = inputText.trim();
+    if (selectedListing) {
+      const spacing = content.length > 0 ? "\n" : "";
+      content = `${content}${spacing}/listing/${selectedListing.id}`;
+    }
 
-    // Send via WebSocket
-    socketSendMessage(content);
-    sendTyping(false);
+    setIsUploading(true);
+
+    try {
+      const mediaIds: string[] = [];
+      const mediaListForOptimistic: any[] = [];
+
+      for (const file of selectedImages) {
+        const result = await uploadFile(file, 'ScyllaMessage');
+        mediaIds.push(result.id);
+        mediaListForOptimistic.push({
+          id: result.id,
+          fileName: result.fileName,
+          contentType: result.contentType,
+          objectKey: result.objectKey,
+          url: result.url,
+        });
+      }
+
+      // Optimistic UI update
+      const newMsg = {
+        messageId: `local-${Date.now()}`,
+        senderId: user?.accountId,
+        content,
+        createdAt: new Date().toISOString(),
+        media: mediaListForOptimistic
+      };
+
+      setLocalMessages((prev) => [...prev, newMsg]);
+      setInputText("");
+      setSelectedImages([]);
+      setSelectedListing(null);
+
+      // Send via WebSocket
+      socketSendMessage(content, mediaIds);
+      sendTyping(false);
+    } catch (err) {
+      console.error("Gagal mengirim pesan / gambar", err);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -81,6 +115,14 @@ export function useChatRoom({ conversationId }: UseChatRoomOptions) {
     sendTyping(e.target.value.length > 0);
   };
 
+  const selectListing = (listing: any) => {
+    setSelectedListing(listing);
+  };
+
+  const cancelListing = () => {
+    setSelectedListing(null);
+  };
+
   return {
     inputText,
     setInputText,
@@ -92,6 +134,13 @@ export function useChatRoom({ conversationId }: UseChatRoomOptions) {
     recipient,
     conversation,
     user,
+    selectedImages,
+    setSelectedImages,
+    selectedListing,
+    setSelectedListing,
+    isUploading,
+    selectListing,
+    cancelListing,
     handleSend,
     handleKeyDown,
     handleInputChange,

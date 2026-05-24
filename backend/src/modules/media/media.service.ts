@@ -38,7 +38,7 @@ export class MediaService {
     objectKey: string,
     input: RequestUploadInput,
   ) {
-    return this.prisma.mediaAttachment.create({
+    const media = await this.prisma.mediaAttachment.create({
       data: {
         accountId: accountId,
         attachedType: input.attachedType,
@@ -51,6 +51,15 @@ export class MediaService {
         bucketName: input.isPrivate ? 'private-assets' : 'public-assets',
       },
     });
+
+    const url = media.isPrivate
+      ? await this.minio.getPresignedDownloadUrl(media.objectKey, true)
+      : this.minio.getPublicUrl(media.objectKey);
+
+    return {
+      ...media,
+      url,
+    };
   }
 
   /** Ambil semua media untuk sebuah objek (post, listing, dll.) */
