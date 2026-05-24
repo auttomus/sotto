@@ -109,3 +109,33 @@ query GetReplies($postId: String!) {
     }
   }
 }
+
+query GetGlobalFeed($limit: Int) {
+  globalFeed(limit: $limit) {
+    postId
+    content
+    createdAt
+    authorId
+    authorDisplayName
+    authorUsername
+    authorAvatarObjectKey
+    authorSchoolName
+    linkedServiceId
+    inReplyToPostId
+    likesCount
+    repliesCount
+    likedByMe
+    tags {
+      id
+      name
+    }
+    media {
+      id
+      fileName
+      contentType
+      url
+      objectKey
+    }
+  }
+}
+

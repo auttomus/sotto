@@ -136,7 +136,7 @@ export function ListingWizard() {
             variant="primary" 
             className="w-full h-12 text-base font-bold rounded-xl shadow-lg shadow-indigo-500/20"
             onClick={() => submitListing(listingData, files)}
-            disabled={isSubmitting || files.length === 0}
+            disabled={isSubmitting}
           >
             {isSubmitting ? (
               <span className="flex items-center gap-2"><Loader2 className="h-5 w-5 animate-spin" /> Mengunggah...</span>

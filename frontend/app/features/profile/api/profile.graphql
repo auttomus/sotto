@@ -73,3 +73,61 @@ mutation UpdateProfile($input: UpdateProfileInput!) {
     majorId
   }
 }
+
+query GetPostsByAccount($accountId: String!) {
+  postsByAccount(accountId: $accountId) {
+    postId
+    content
+    createdAt
+    authorId
+    authorDisplayName
+    authorUsername
+    authorAvatarObjectKey
+    authorSchoolName
+    linkedServiceId
+    inReplyToPostId
+    likesCount
+    repliesCount
+    likedByMe
+    tags {
+      id
+      name
+    }
+    media {
+      id
+      fileName
+      contentType
+      url
+      objectKey
+    }
+  }
+}
+
+query GetRepliesByAccount($accountId: String!) {
+  repliesByAccount(accountId: $accountId) {
+    postId
+    content
+    createdAt
+    authorId
+    authorDisplayName
+    authorUsername
+    authorAvatarObjectKey
+    authorSchoolName
+    linkedServiceId
+    inReplyToPostId
+    likesCount
+    repliesCount
+    likedByMe
+    tags {
+      id
+      name
+    }
+    media {
+      id
+      fileName
+      contentType
+      url
+      objectKey
+    }
+  }
+}

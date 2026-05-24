@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Loader2 } from "lucide-react";
 import { PostCard } from "~/features/feed/components/PostCard";
 import { FeedEmptyState } from "~/features/feed/components/FeedEmptyState";
@@ -7,8 +7,13 @@ import { PostCardSkeleton } from "~/components/ui/Skeleton";
 import { useToastStore } from "~/core/store/useToastStore";
 import { useInfiniteFeed } from "~/features/feed/hooks/useInfiniteFeed";
 import { ROUTES } from "~/core/constants/ROUTES";
+import { useScrollDirection } from "~/core/hooks/useScrollDirection";
+import { useInfiniteScroll } from "~/core/hooks/useInfiniteScroll";
 
 export default function FeedTimelineRoute() {
+  const [activeTab, setActiveTab] = useState<"for-you" | "following">("for-you");
+  const { showHeader } = useScrollDirection();
+
   const {
     posts,
     isInitialLoad,
@@ -16,10 +21,15 @@ export default function FeedTimelineRoute() {
     error,
     hasMore,
     loadMore,
-  } = useInfiniteFeed();
+  } = useInfiniteFeed(activeTab);
 
   const addToast = useToastStore((s) => s.addToast);
-  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  const { sentinelRef } = useInfiniteScroll({
+    hasMore,
+    isLoadingMore,
+    onLoadMore: loadMore,
+  });
 
   // Error toast
   useEffect(() => {
@@ -27,29 +37,6 @@ export default function FeedTimelineRoute() {
       addToast("error", `Gagal memuat feed: ${error.message}`);
     }
   }, [error, addToast]);
-
-  // Intersection Observer for infinite scroll
-  const handleObserver = useCallback(
-    (entries: IntersectionObserverEntry[]) => {
-      const [entry] = entries;
-      if (entry.isIntersecting && hasMore && !isLoadingMore) {
-        loadMore();
-      }
-    },
-    [hasMore, isLoadingMore, loadMore]
-  );
-
-  useEffect(() => {
-    const node = sentinelRef.current;
-    if (!node) return;
-
-    const observer = new IntersectionObserver(handleObserver, {
-      rootMargin: "200px",
-    });
-    observer.observe(node);
-
-    return () => observer.disconnect();
-  }, [handleObserver]);
 
   // Initial skeleton
   if (isInitialLoad) {
@@ -65,20 +52,40 @@ export default function FeedTimelineRoute() {
   return (
     <div className="pb-20 relative min-h-screen">
       {/* Sticky Premium Header */}
-      <header className="sticky top-16 md:top-0 z-30 bg-white/85 dark:bg-gray-900/85 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 transition-colors duration-300">
+      <header
+        className={`sticky z-30 bg-white/85 dark:bg-gray-900/85 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 transition-all duration-300 ${
+          showHeader
+            ? "top-16 translate-y-0"
+            : "top-0 max-md:-translate-y-full"
+        } md:top-0`}
+      >
         <div className="flex flex-col">
           <div className="hidden md:flex items-center justify-between px-6 pt-4 pb-2">
             <h1 className="text-xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
               Beranda
             </h1>
           </div>
-          
+
           {/* Tabs selector */}
           <div className="flex w-full border-t border-gray-50 dark:border-gray-800/40 md:border-t-0">
-            <button className="flex-1 py-3.5 text-center text-sm font-bold text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 transition-colors">
+            <button
+              onClick={() => setActiveTab("for-you")}
+              className={`flex-1 py-3.5 text-center text-sm transition-all duration-200 ${
+                activeTab === "for-you"
+                  ? "font-bold text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400"
+                  : "font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50/50 dark:hover:bg-gray-800/20"
+              }`}
+            >
               Untuk Anda
             </button>
-            <button className="flex-1 py-3.5 text-center text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-all duration-200">
+            <button
+              onClick={() => setActiveTab("following")}
+              className={`flex-1 py-3.5 text-center text-sm transition-all duration-200 ${
+                activeTab === "following"
+                  ? "font-bold text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400"
+                  : "font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50/50 dark:hover:bg-gray-800/20"
+              }`}
+            >
               Mengikuti
             </button>
           </div>

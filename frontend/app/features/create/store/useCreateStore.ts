@@ -15,6 +15,7 @@ export interface CreateState {
   postContent: string;
   postFiles: File[];
   postTags: TagObject[];
+  linkedServiceId: string | null;
   
   // Listing/Penawaran state
   listingData: {
@@ -24,6 +25,7 @@ export interface CreateState {
     type: 'SERVICE' | 'DIGITAL_PRODUCT';
     isUnlimited: boolean;
     deliveryTimeDays: number;
+    maxActiveOrders: number | null;
   };
   listingFiles: File[];
 
@@ -37,6 +39,7 @@ export interface CreateState {
   setPostFiles: (files: File[]) => void;
   addPostTag: (tag: TagObject) => void;
   removePostTag: (tagId: string) => void;
+  setLinkedServiceId: (id: string | null) => void;
   
   updateListingData: (data: Partial<CreateState['listingData']>) => void;
   setListingFiles: (files: File[]) => void;
@@ -50,6 +53,7 @@ const initialListingData = {
   type: 'SERVICE' as const,
   isUnlimited: false,
   deliveryTimeDays: 1,
+  maxActiveOrders: 5,
 };
 
 export const useCreateStore = create<CreateState>((set) => ({
@@ -59,6 +63,7 @@ export const useCreateStore = create<CreateState>((set) => ({
   postContent: "",
   postFiles: [],
   postTags: [],
+  linkedServiceId: null,
   
   listingData: { ...initialListingData },
   listingFiles: [],
@@ -75,6 +80,7 @@ export const useCreateStore = create<CreateState>((set) => ({
     return { postTags: [...state.postTags, tag] };
   }),
   removePostTag: (tagId) => set((state) => ({ postTags: state.postTags.filter(t => t.id !== tagId) })),
+  setLinkedServiceId: (linkedServiceId) => set({ linkedServiceId }),
   
   updateListingData: (data) => set((state) => ({ 
     listingData: { ...state.listingData, ...data } 
@@ -87,6 +93,7 @@ export const useCreateStore = create<CreateState>((set) => ({
     postContent: "",
     postFiles: [],
     postTags: [],
+    linkedServiceId: null,
     listingData: { ...initialListingData },
     listingFiles: [],
   })

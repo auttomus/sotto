@@ -3,12 +3,13 @@ import { useNavigate } from "react-router";
 import { useUpload } from "~/core/hooks/useUpload";
 import { useToastStore } from "~/core/store/useToastStore";
 import { useCreatePostMutation, useSearchTagsQuery, useCreateTagMutation } from "~/core/apollo/generated";
-import type { TagObject } from "../../create/store/useCreateStore";
+import { useCreateStore, type TagObject } from "../../create/store/useCreateStore";
 
 export function useCreatePostLogic(resetStore: () => void) {
   const navigate = useNavigate();
   const { uploadFile } = useUpload();
   const addToast = useToastStore(s => s.addToast);
+  const linkedServiceId = useCreateStore(s => s.linkedServiceId);
   
   const [createPost, { loading: isCreatingPost }] = useCreatePostMutation();
   const [createTag, { loading: isCreatingTag }] = useCreateTagMutation();
@@ -36,7 +37,8 @@ export function useCreatePostLogic(resetStore: () => void) {
           input: {
             content,
             mediaIds: mediaIds.length > 0 ? mediaIds : undefined,
-            tagIds: tags.length > 0 ? tags.map(t => t.id) : undefined
+            tagIds: tags.length > 0 ? tags.map(t => t.id) : undefined,
+            linkedServiceId: linkedServiceId || undefined,
           }
         },
         refetchQueries: ['GetFeed']

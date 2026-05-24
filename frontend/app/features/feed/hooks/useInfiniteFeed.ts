@@ -1,5 +1,10 @@
-import { useState, useCallback } from "react";
-import { useGetFeedQuery, type GetFeedQuery } from "~/core/apollo/generated";
+import { useState, useCallback, useEffect } from "react";
+import { 
+  useGetFeedQuery, 
+  useGetGlobalFeedQuery, 
+  type GetFeedQuery, 
+  type GetGlobalFeedQuery 
+} from "~/core/apollo/generated";
 
 const PAGE_SIZE = 10;
 
@@ -7,19 +12,35 @@ export type FeedPost = GetFeedQuery["feed"][0];
 
 /**
  * Hook for infinite feed loading.
- * Backend feed(limit) returns first N posts.
- * "Load more" increases limit by PAGE_SIZE.
+ * Supports "for-you" (global posts) and "following" (followed accounts).
  */
-export function useInfiniteFeed() {
+export function useInfiniteFeed(type: "for-you" | "following" = "for-you") {
   const [limit, setLimit] = useState(PAGE_SIZE);
 
-  const { data, loading, error, refetch } = useGetFeedQuery({
+  // Reset limit when type changes
+  useEffect(() => {
+    setLimit(PAGE_SIZE);
+  }, [type]);
+
+  const followingResult = useGetFeedQuery({
     variables: { limit },
     fetchPolicy: "cache-and-network",
     notifyOnNetworkStatusChange: true,
+    skip: type !== "following",
   });
 
-  const posts: FeedPost[] = data?.feed ?? [];
+  const globalResult = useGetGlobalFeedQuery({
+    variables: { limit },
+    fetchPolicy: "cache-and-network",
+    notifyOnNetworkStatusChange: true,
+    skip: type !== "for-you",
+  });
+
+  const activeResult = type === "following" ? followingResult : globalResult;
+  const posts = (type === "following" ? followingResult.data?.feed : globalResult.data?.globalFeed) ?? [];
+
+  const loading = activeResult.loading;
+  const error = activeResult.error;
   const hasMore = posts.length >= limit;
   const isInitialLoad = loading && posts.length === 0;
   const isLoadingMore = loading && posts.length > 0;
@@ -32,8 +53,8 @@ export function useInfiniteFeed() {
 
   const refresh = useCallback(() => {
     setLimit(PAGE_SIZE);
-    return refetch({ limit: PAGE_SIZE });
-  }, [refetch]);
+    return activeResult.refetch({ limit: PAGE_SIZE });
+  }, [activeResult]);
 
   return {
     posts,

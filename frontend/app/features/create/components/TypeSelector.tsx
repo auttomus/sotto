@@ -27,8 +27,8 @@ export function TypeSelector() {
             <ImageIcon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
           </div>
           <div className="flex-1">
-            <h3 className="font-bold text-gray-900 dark:text-gray-100">Karya / Portofolio</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Unggah hasil kerjamu, desain, atau screenshot kode ke feed.</p>
+            <h3 className="font-bold text-gray-900 dark:text-gray-100">Karya, Portofolio & Pengalaman</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Unggah hasil kerjamu, desain, screenshot kode, atau ceritakan perjalanan karir & tips.</p>
           </div>
           <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-indigo-500 transition-colors" />
         </button>
@@ -45,20 +45,6 @@ export function TypeSelector() {
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Tawarkan jasa pengerjaan atau jual produk digital instan.</p>
           </div>
           <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
-        </button>
-
-        <button 
-          onClick={() => setSelectedType("pengalaman")}
-          className="w-full bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-200 dark:border-gray-800 flex items-center gap-4 hover:border-indigo-500 hover:ring-1 hover:ring-indigo-500/50 transition-all text-left shadow-sm group mt-3"
-        >
-          <div className="h-12 w-12 rounded-full bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center shrink-0">
-            <FileCode2 className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-bold text-gray-900 dark:text-gray-100">Berbagi Pengalaman</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Ceritakan perjalanan karir, pengalaman project, atau tips.</p>
-          </div>
-          <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-purple-500 transition-colors" />
         </button>
       </div>
     </div>

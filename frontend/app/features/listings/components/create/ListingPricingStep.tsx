@@ -61,6 +61,22 @@ export function ListingPricingStep() {
             </div>
           </label>
         </div>
+
+        {!listingData.isUnlimited && (
+          <div className="pt-2 animate-in fade-in slide-in-from-top-2 duration-200">
+            <label className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5 block">Batas Order Aktif</label>
+            <div className="flex items-center gap-3">
+              <input 
+                type="number" 
+                value={listingData.maxActiveOrders || ''}
+                onChange={(e) => updateListingData({ maxActiveOrders: parseInt(e.target.value) || 1 })}
+                min="1"
+                className="w-24 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-3.5 text-center font-bold focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
+              />
+              <span className="text-xs text-gray-500 font-medium">Batas maksimal pesanan aktif yang dapat dikerjakan secara bersamaan.</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
