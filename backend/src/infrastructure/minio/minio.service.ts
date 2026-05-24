@@ -18,10 +18,14 @@ export class MinioService implements OnModuleInit {
       'private-assets',
     );
 
+    const endpoint = this.config.get<string>('MINIO_ENDPOINT', 'localhost');
+    const portVal = this.config.get<string>('MINIO_PORT', '');
+    const useSSL = this.config.get<string>('MINIO_USE_SSL', 'false') === 'true';
+
     this.client = new Minio.Client({
-      endPoint: this.config.get('MINIO_ENDPOINT', 'localhost'),
-      port: Number(this.config.get('MINIO_PORT', '9000')),
-      useSSL: this.config.get('MINIO_USE_SSL', 'false') === 'true',
+      endPoint: endpoint,
+      useSSL,
+      ...(portVal ? { port: Number(portVal) } : useSSL ? {} : { port: 9000 }),
       accessKey: this.config.get('MINIO_ACCESS_KEY', 'admin_minio'),
       secretKey: this.config.get(
         'MINIO_SECRET_KEY',
@@ -30,8 +34,8 @@ export class MinioService implements OnModuleInit {
     });
 
     // Pastikan bucket ada
-    await this.ensureBucket(this.bucketPublic);
-    await this.ensureBucket(this.bucketPrivate);
+    await this.ensureBucket(this.bucketPublic, true);
+    await this.ensureBucket(this.bucketPrivate, false);
     this.logger.log('MinIO terhubung, bucket siap');
   }
 
@@ -77,18 +81,60 @@ export class MinioService implements OnModuleInit {
    * Contoh: avatar, thumbnail listing.
    */
   getPublicUrl(objectKey: string): string {
+    const publicUrlPrefix = this.config.get<string>('MINIO_PUBLIC_URL');
+    if (publicUrlPrefix) {
+      const cleanBase = publicUrlPrefix.endsWith('/')
+        ? publicUrlPrefix.slice(0, -1)
+        : publicUrlPrefix;
+
+      const useSSL =
+        this.config.get<string>('MINIO_USE_SSL', 'false') === 'true';
+      if (useSSL) {
+        // Pada Cloudflare R2 / S3 awan, URL subdomain publik sudah mengarah langsung ke root bucket
+        return `${cleanBase}/${objectKey}`;
+      }
+      // Pada MinIO lokal, kita butuh nama bucket di path karena host-nya bersifat global (localhost:9000)
+      return `${cleanBase}/${this.bucketPublic}/${objectKey}`;
+    }
+
     const endpoint = this.config.get<string>('MINIO_ENDPOINT', 'localhost');
     const port = this.config.get<string>('MINIO_PORT', '9000');
     const ssl = this.config.get<string>('MINIO_USE_SSL', 'false') === 'true';
     const protocol = ssl ? 'https' : 'http';
-    return `${protocol}://${endpoint}:${port}/${this.bucketPublic}/${objectKey}`;
+    const portSuffix = port ? `:${port}` : '';
+    return `${protocol}://${endpoint}${portSuffix}/${this.bucketPublic}/${objectKey}`;
   }
 
-  private async ensureBucket(name: string) {
-    const exists = await this.client.bucketExists(name);
-    if (!exists) {
-      await this.client.makeBucket(name);
-      this.logger.log(`Bucket "${name}" dibuat`);
+  private async ensureBucket(name: string, isPublic = false) {
+    try {
+      const exists = await this.client.bucketExists(name);
+      if (!exists) {
+        await this.client.makeBucket(name);
+        this.logger.log(`Bucket "${name}" dibuat`);
+      }
+
+      if (isPublic) {
+        const policy = {
+          Version: '2012-10-17',
+          Statement: [
+            {
+              Effect: 'Allow',
+              Principal: { AWS: ['*'] },
+              Action: ['s3:GetObject'],
+              Resource: [`arn:aws:s3:::${name}/*`],
+            },
+          ],
+        };
+        await this.client.setBucketPolicy(name, JSON.stringify(policy));
+        this.logger.log(`Bucket policy "${name}" diset menjadi public read`);
+      }
+    } catch (error) {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      this.logger.warn(
+        `Gagal memverifikasi/mengatur kebijakan bucket "${name}". ` +
+          `Aplikasi akan tetap berjalan dengan asumsi bucket sudah dikonfigurasi melalui IaC/DevOps. ` +
+          `Error: ${errMsg}`,
+      );
     }
   }
 }

@@ -6,8 +6,10 @@
 export function resolveMediaUrl(objectKeyOrUrl: string | null | undefined): string | undefined {
   if (!objectKeyOrUrl) return undefined;
 
-  // Already a full URL
   if (objectKeyOrUrl.startsWith('http://') || objectKeyOrUrl.startsWith('https://')) {
+    if (typeof window !== 'undefined' && objectKeyOrUrl.startsWith('http://minio:9000')) {
+      return objectKeyOrUrl.replace('http://minio:9000', '');
+    }
     return objectKeyOrUrl;
   }
 

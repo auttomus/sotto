@@ -1,45 +1,28 @@
 import * as React from "react";
-import { ArrowLeft, ArrowRight, Loader2, Image as ImageIcon, X } from "lucide-react";
-import { useNavigate } from "react-router";
+import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "~/components/ui/Button";
-import { useCreateStore } from "../store/useCreateStore";
-import { useUpload } from "~/core/hooks/useUpload";
+import { useCreateStore } from "../../../create/store/useCreateStore";
 import { useToastStore } from "~/core/store/useToastStore";
-import { gql } from "@apollo/client";
-import { useMutation } from "@apollo/client/react";
-import { ListingBasicStep } from "./wizard-steps/ListingBasicStep";
-import { ListingPricingStep } from "./wizard-steps/ListingPricingStep";
-import { ListingMediaStep } from "./wizard-steps/ListingMediaStep";
-
-const CREATE_LISTING_MUTATION = gql`
-  mutation CreateListing($input: CreateListingInput!) {
-    createListing(input: $input) {
-      id
-      title
-    }
-  }
-`;
+import { ListingBasicStep } from "./ListingBasicStep";
+import { ListingPricingStep } from "./ListingPricingStep";
+import { ListingMediaStep } from "./ListingMediaStep";
+import { useCreateListingLogic } from "../../hooks/useCreateListing";
 
 export function ListingWizard() {
-  const navigate = useNavigate();
   const { 
     step,
-    setStep,
     nextStep,
     prevStep,
     listingData, 
-    updateListingData,
-    files,
-    setFiles,
+    listingFiles: files,
+    setListingFiles: setFiles,
     setSelectedType,
     reset
   } = useCreateStore();
   
-  const { uploadFile } = useUpload();
   const addToast = useToastStore(s => s.addToast);
-  const [createListing, { loading }] = useMutation(CREATE_LISTING_MUTATION);
-  const [isUploading, setIsUploading] = React.useState(false);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [showDraftDialog, setShowDraftDialog] = React.useState(false);
+  const { submitListing, isSubmitting } = useCreateListingLogic(reset);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -60,50 +43,44 @@ export function ListingWizard() {
     if (step > 1) {
       prevStep();
     } else {
-      setSelectedType(null);
-    }
-  };
-
-  const handleSubmit = async () => {
-    try {
-      setIsUploading(true);
-      const mediaIds: string[] = [];
-      
-      for (const file of files) {
-        const result = await uploadFile(file, 'LISTING');
-        mediaIds.push(result.id);
+      const hasContent = listingData.title.trim().length > 0 || listingData.description.trim().length > 0 || files.length > 0;
+      if (hasContent) {
+        setShowDraftDialog(true);
+      } else {
+        setSelectedType(null);
       }
-
-      await createListing({
-        variables: {
-          input: {
-            title: listingData.title,
-            description: listingData.description,
-            basePrice: listingData.price,
-            type: listingData.type,
-            isUnlimited: listingData.isUnlimited,
-            deliveryTimeDays: listingData.type === 'SERVICE' ? listingData.deliveryTimeDays : null,
-            mediaIds: mediaIds.length > 0 ? mediaIds : undefined
-          }
-        }
-      });
-
-      addToast('success', 'Penawaran berhasil dibuat');
-      reset();
-      navigate('/profile'); // Redirect to profile after creating listing
-    } catch (error: any) {
-      addToast('error', error.message || 'Gagal membuat penawaran');
-    } finally {
-      setIsUploading(false);
     }
   };
 
-  const isSubmitting = loading || isUploading;
+  const handleDiscard = () => {
+    reset();
+    setSelectedType(null);
+  };
+
+  const handleSaveDraft = () => {
+    setSelectedType(null);
+    addToast('success', 'Disimpan sebagai draft');
+  };
+
   const isStep1Valid = listingData.title.trim().length > 0 && listingData.description.trim().length > 0;
   const isStep2Valid = listingData.price > 0 && (listingData.type === 'DIGITAL_PRODUCT' || listingData.deliveryTimeDays > 0);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-950 w-full max-w-lg mx-auto border-x border-gray-100 dark:border-gray-800 relative">
+      {showDraftDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowDraftDialog(false)}>
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">Simpan sebagai Draft?</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Kamu memiliki perubahan yang belum disimpan. Ingin menyimpannya untuk dilanjutkan nanti?</p>
+            <div className="flex flex-col gap-2">
+              <Button variant="primary" onClick={handleSaveDraft} className="w-full">Simpan sebagai Draft</Button>
+              <Button variant="danger" onClick={handleDiscard} className="w-full">Hapus dan Keluar</Button>
+              <Button variant="ghost" onClick={() => setShowDraftDialog(false)} className="w-full mt-2">Batal</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 px-4 h-14 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-3">
           <button onClick={handleBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition">
@@ -158,7 +135,7 @@ export function ListingWizard() {
           <Button 
             variant="primary" 
             className="w-full h-12 text-base font-bold rounded-xl shadow-lg shadow-indigo-500/20"
-            onClick={handleSubmit}
+            onClick={() => submitListing(listingData, files)}
             disabled={isSubmitting || files.length === 0}
           >
             {isSubmitting ? (

@@ -2,15 +2,19 @@ import { create } from 'zustand';
 
 export type CreateType = "portfolio" | "penawaran" | "pengalaman" | null;
 
-interface CreateState {
-  // Common state
+export interface TagObject {
+  id: string;
+  name: string;
+}
+
+export interface CreateState {
   selectedType: CreateType;
   step: number;
   
   // Post/Portfolio state
-  content: string;
-  files: File[];
-  tags: string[];
+  postContent: string;
+  postFiles: File[];
+  postTags: TagObject[];
   
   // Listing/Penawaran state
   listingData: {
@@ -21,6 +25,7 @@ interface CreateState {
     isUnlimited: boolean;
     deliveryTimeDays: number;
   };
+  listingFiles: File[];
 
   // Actions
   setSelectedType: (type: CreateType) => void;
@@ -28,12 +33,13 @@ interface CreateState {
   nextStep: () => void;
   prevStep: () => void;
   
-  setContent: (content: string) => void;
-  setFiles: (files: File[]) => void;
-  addTag: (tag: string) => void;
-  removeTag: (tag: string) => void;
+  setPostContent: (content: string) => void;
+  setPostFiles: (files: File[]) => void;
+  addPostTag: (tag: TagObject) => void;
+  removePostTag: (tagId: string) => void;
   
   updateListingData: (data: Partial<CreateState['listingData']>) => void;
+  setListingFiles: (files: File[]) => void;
   reset: () => void;
 }
 
@@ -50,32 +56,38 @@ export const useCreateStore = create<CreateState>((set) => ({
   selectedType: null,
   step: 1,
   
-  content: "",
-  files: [],
-  tags: [],
+  postContent: "",
+  postFiles: [],
+  postTags: [],
   
   listingData: { ...initialListingData },
+  listingFiles: [],
 
   setSelectedType: (type) => set({ selectedType: type, step: 1 }),
   setStep: (step) => set({ step }),
   nextStep: () => set((state) => ({ step: state.step + 1 })),
   prevStep: () => set((state) => ({ step: Math.max(1, state.step - 1) })),
   
-  setContent: (content) => set({ content }),
-  setFiles: (files) => set({ files }),
-  addTag: (tag) => set((state) => ({ tags: [...state.tags, tag] })),
-  removeTag: (tag) => set((state) => ({ tags: state.tags.filter(t => t !== tag) })),
+  setPostContent: (postContent) => set({ postContent }),
+  setPostFiles: (postFiles) => set({ postFiles }),
+  addPostTag: (tag) => set((state) => {
+    if (state.postTags.some(t => t.id === tag.id)) return state;
+    return { postTags: [...state.postTags, tag] };
+  }),
+  removePostTag: (tagId) => set((state) => ({ postTags: state.postTags.filter(t => t.id !== tagId) })),
   
   updateListingData: (data) => set((state) => ({ 
     listingData: { ...state.listingData, ...data } 
   })),
+  setListingFiles: (listingFiles) => set({ listingFiles }),
   
   reset: () => set({
     selectedType: null,
     step: 1,
-    content: "",
-    files: [],
-    tags: [],
+    postContent: "",
+    postFiles: [],
+    postTags: [],
     listingData: { ...initialListingData },
+    listingFiles: [],
   })
 }));

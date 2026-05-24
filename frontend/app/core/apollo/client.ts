@@ -34,8 +34,8 @@ export const apolloClient = new ApolloClient({
         fields: {
           feed: {
             keyArgs: false,
-            merge(existing = [], incoming) {
-              return [...existing, ...incoming];
+            merge(existing, incoming) {
+              return incoming;
             },
           },
         },

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Image as ImageIcon, X } from "lucide-react";
-import { useCreateStore } from "../../store/useCreateStore";
+import { useCreateStore } from "../../../create/store/useCreateStore";
 
 interface ListingMediaStepProps {
   handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -8,7 +8,7 @@ interface ListingMediaStepProps {
 }
 
 export function ListingMediaStep({ handleFileSelect, removeFile }: ListingMediaStepProps) {
-  const { files } = useCreateStore();
+  const { listingFiles: files } = useCreateStore();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   return (
@@ -19,7 +19,7 @@ export function ListingMediaStep({ handleFileSelect, removeFile }: ListingMediaS
       </div>
 
       <div className="grid grid-cols-2 gap-3 pt-2">
-        {files.map((file, i) => (
+        {files.map((file: File, i: number) => (
           <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 group">
             <img src={URL.createObjectURL(file)} alt="preview" className="w-full h-full object-cover" />
             <button 

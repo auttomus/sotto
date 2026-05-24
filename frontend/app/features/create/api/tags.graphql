@@ -1,0 +1,15 @@
+query SearchTags($query: String!) {
+  searchTags(query: $query) {
+    id
+    name
+    isUsable
+  }
+}
+
+mutation CreateTag($name: String!) {
+  createTag(name: $name) {
+    id
+    name
+    isUsable
+  }
+}

@@ -42,6 +42,20 @@ export type CreateConversationMutationVariables = Exact<{
 
 export type CreateConversationMutation = { createConversation: { id: string, type: Types.ConversationType, createdAt: string } };
 
+export type SearchTagsQueryVariables = Exact<{
+  query: string;
+}>;
+
+
+export type SearchTagsQuery = { searchTags: Array<{ id: string, name: string, isUsable: boolean }> };
+
+export type CreateTagMutationVariables = Exact<{
+  name: string;
+}>;
+
+
+export type CreateTagMutation = { createTag: { id: string, name: string, isUsable: boolean } };
+
 export type SearchAccountsQueryVariables = Exact<{
   query: string;
 }>;
@@ -450,6 +464,86 @@ export function useCreateConversationMutation(baseOptions?: ApolloReactHooks.Mut
 export type CreateConversationMutationHookResult = ReturnType<typeof useCreateConversationMutation>;
 export type CreateConversationMutationResult = Apollo.MutationResult<CreateConversationMutation>;
 export type CreateConversationMutationOptions = Apollo.BaseMutationOptions<CreateConversationMutation, CreateConversationMutationVariables>;
+export const SearchTagsDocument = gql`
+    query SearchTags($query: String!) {
+  searchTags(query: $query) {
+    id
+    name
+    isUsable
+  }
+}
+    `;
+
+/**
+ * __useSearchTagsQuery__
+ *
+ * To run a query within a React component, call `useSearchTagsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSearchTagsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSearchTagsQuery({
+ *   variables: {
+ *      query: // value for 'query'
+ *   },
+ * });
+ */
+export function useSearchTagsQuery(baseOptions: ApolloReactHooks.QueryHookOptions<SearchTagsQuery, SearchTagsQueryVariables> & ({ variables: SearchTagsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<SearchTagsQuery, SearchTagsQueryVariables>(SearchTagsDocument, options);
+      }
+export function useSearchTagsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<SearchTagsQuery, SearchTagsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<SearchTagsQuery, SearchTagsQueryVariables>(SearchTagsDocument, options);
+        }
+// @ts-ignore
+export function useSearchTagsSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<SearchTagsQuery, SearchTagsQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<SearchTagsQuery, SearchTagsQueryVariables>;
+export function useSearchTagsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<SearchTagsQuery, SearchTagsQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<SearchTagsQuery | undefined, SearchTagsQueryVariables>;
+export function useSearchTagsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<SearchTagsQuery, SearchTagsQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<SearchTagsQuery, SearchTagsQueryVariables>(SearchTagsDocument, options);
+        }
+export type SearchTagsQueryHookResult = ReturnType<typeof useSearchTagsQuery>;
+export type SearchTagsLazyQueryHookResult = ReturnType<typeof useSearchTagsLazyQuery>;
+export type SearchTagsSuspenseQueryHookResult = ReturnType<typeof useSearchTagsSuspenseQuery>;
+export type SearchTagsQueryResult = Apollo.QueryResult<SearchTagsQuery, SearchTagsQueryVariables>;
+export const CreateTagDocument = gql`
+    mutation CreateTag($name: String!) {
+  createTag(name: $name) {
+    id
+    name
+    isUsable
+  }
+}
+    `;
+export type CreateTagMutationFn = Apollo.MutationFunction<CreateTagMutation, CreateTagMutationVariables>;
+
+/**
+ * __useCreateTagMutation__
+ *
+ * To run a mutation, you first call `useCreateTagMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateTagMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createTagMutation, { data, loading, error }] = useCreateTagMutation({
+ *   variables: {
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useCreateTagMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateTagMutation, CreateTagMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<CreateTagMutation, CreateTagMutationVariables>(CreateTagDocument, options);
+      }
+export type CreateTagMutationHookResult = ReturnType<typeof useCreateTagMutation>;
+export type CreateTagMutationResult = Apollo.MutationResult<CreateTagMutation>;
+export type CreateTagMutationOptions = Apollo.BaseMutationOptions<CreateTagMutation, CreateTagMutationVariables>;
 export const SearchAccountsDocument = gql`
     query SearchAccounts($query: String!) {
   searchAccounts(query: $query) {

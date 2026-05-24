@@ -1,8 +1,8 @@
 import * as React from "react";
 import { useCreateStore } from "~/features/create/store/useCreateStore";
 import { TypeSelector } from "~/features/create/components/TypeSelector";
-import { PostWizard } from "~/features/create/components/PostWizard";
-import { ListingWizard } from "~/features/create/components/ListingWizard";
+import { PostWizard } from "~/features/feed/components/create/PostWizard";
+import { ListingWizard } from "~/features/listings/components/create/ListingWizard";
 
 export default function CreateWizardRoute() {
   const selectedType = useCreateStore(s => s.selectedType);
