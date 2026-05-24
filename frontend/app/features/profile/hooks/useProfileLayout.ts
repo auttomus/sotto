@@ -7,7 +7,7 @@ interface UseProfileLayoutOptions {
 }
 
 export function useProfileLayout({ profile }: UseProfileLayoutOptions) {
-  const [activeTab, setActiveTab] = useState<"penawaran" | "pengalaman">("penawaran");
+  const [activeTab, setActiveTab] = useState<"posts" | "listings" | "replies">("posts");
   const [isEditing, setIsEditing] = useState(false);
   const addToast = useToastStore(s => s.addToast);
 
@@ -19,7 +19,7 @@ export function useProfileLayout({ profile }: UseProfileLayoutOptions) {
         id: cache.identify(profile),
         fields: {
           isFollowing: () => true,
-          followersCount: (prev: number = 0) => prev + 1
+          followersCount: (prev: any = "0") => String(Number(prev) + 1)
         }
       });
     }
@@ -33,7 +33,7 @@ export function useProfileLayout({ profile }: UseProfileLayoutOptions) {
         id: cache.identify(profile),
         fields: {
           isFollowing: () => false,
-          followersCount: (prev: number = 1) => prev - 1
+          followersCount: (prev: any = "1") => String(Math.max(0, Number(prev) - 1))
         }
       });
     }

@@ -271,4 +271,38 @@ export class FeedService {
     }
     return 0;
   }
+
+  /** Ambil postingan atau komentar/reply berdasarkan author dari ScyllaDB */
+  async getPostsByAuthor(authorId: string, isReply: boolean) {
+    const authorUuid = types.Uuid.fromString(authorId);
+    const result = await this.scylla.execute(
+      `SELECT * FROM posts WHERE author_id = ? ALLOW FILTERING`,
+      [authorUuid],
+    );
+    const posts = result.rows.map((row) => {
+      const r = row as unknown as {
+        post_id: { toString(): string };
+        author_id: { toString(): string };
+        in_reply_to_post_id?: { toString(): string } | null;
+        content: string;
+        linked_service_id?: { toString(): string } | null;
+        created_at: Date;
+      };
+      return {
+        postId: r.post_id.toString(),
+        authorId: r.author_id.toString(),
+        inReplyToPostId: r.in_reply_to_post_id?.toString() ?? null,
+        content: r.content,
+        linkedServiceId: r.linked_service_id?.toString() ?? null,
+        createdAt: r.created_at,
+      };
+    });
+
+    const filtered = posts.filter((p) =>
+      isReply ? !!p.inReplyToPostId : !p.inReplyToPostId,
+    );
+    return filtered.sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+    );
+  }
 }

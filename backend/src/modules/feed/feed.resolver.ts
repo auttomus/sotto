@@ -19,6 +19,7 @@ import { TagsService } from '../tags/tags.service';
 import { MediaService } from '../media/media.service';
 import { MediaAttachmentModel } from '../media/models/media-attachment.model';
 import { TagModel } from '../tags/models/tag.model';
+import { Public } from '../../common/decorators/public.decorator';
 
 @Resolver(() => PostModel)
 export class FeedResolver {
@@ -218,5 +219,61 @@ export class FeedResolver {
     @Args('postId') postId: string,
   ): Promise<boolean> {
     return this.feedService.toggleLikePost(user.accountId, postId);
+  }
+
+  @Public()
+  @Query(() => [PostModel], { name: 'postsByAccount' })
+  async getPostsByAccount(
+    @Args('accountId', { type: () => String }) accountId: string,
+  ): Promise<PostModel[]> {
+    const posts = await this.feedService.getPostsByAuthor(accountId, false);
+    if (posts.length === 0) return [];
+
+    const author = await this.prisma.account.findUnique({
+      where: { id: accountId },
+      select: {
+        id: true,
+        username: true,
+        displayName: true,
+        avatarObjectKey: true,
+        school: { select: { name: true } },
+      },
+    });
+
+    return posts.map((post) => ({
+      ...post,
+      authorDisplayName: author?.displayName,
+      authorUsername: author?.username,
+      authorAvatarObjectKey: author?.avatarObjectKey,
+      authorSchoolName: author?.school?.name,
+    }));
+  }
+
+  @Public()
+  @Query(() => [PostModel], { name: 'repliesByAccount' })
+  async getRepliesByAccount(
+    @Args('accountId', { type: () => String }) accountId: string,
+  ): Promise<PostModel[]> {
+    const replies = await this.feedService.getPostsByAuthor(accountId, true);
+    if (replies.length === 0) return [];
+
+    const author = await this.prisma.account.findUnique({
+      where: { id: accountId },
+      select: {
+        id: true,
+        username: true,
+        displayName: true,
+        avatarObjectKey: true,
+        school: { select: { name: true } },
+      },
+    });
+
+    return replies.map((reply) => ({
+      ...reply,
+      authorDisplayName: author?.displayName,
+      authorUsername: author?.username,
+      authorAvatarObjectKey: author?.avatarObjectKey,
+      authorSchoolName: author?.school?.name,
+    }));
   }
 }

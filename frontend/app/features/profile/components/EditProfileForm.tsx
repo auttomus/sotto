@@ -73,7 +73,7 @@ export function EditProfileForm({ profile, onCancel, onSuccess }: EditProfileFor
   return (
     <div className="w-full">
       {/* Action Buttons Top Right (Absolute or relative to parent in ProfileLayout) */}
-      <div className="flex justify-end gap-2 mb-4 absolute right-4 -top-12">
+      <div className="flex justify-end gap-2 mb-4 absolute right-4 -top-12" style={{ zIndex: 30 }}>
         <button onClick={onCancel} className="p-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800 transition">
           <X className="h-5 w-5 text-gray-900 dark:text-gray-100" />
         </button>

@@ -1,13 +1,81 @@
 import * as React from "react";
-import { Star, MapPin, Link as LinkIcon, Settings, Calendar, Briefcase, Loader2, X, Check } from "lucide-react";
+import { Star, MapPin, Link as LinkIcon, Settings, Calendar, Briefcase, Loader2, X, Check, MessageCircle } from "lucide-react";
 import { Avatar } from "~/components/ui/Avatar";
 import { Button } from "~/components/ui/Button";
-import { type GetMyProfileQuery, type GetListingsByAccountQuery } from "~/core/apollo/generated";
+import { type GetMyProfileQuery, type GetListingsByAccountQuery, useCreateConversationMutation } from "~/core/apollo/generated";
 import { formatDate } from "~/core/utils/formatDate";
 import { useNavigate } from "react-router";
 import { EditProfileForm } from "./EditProfileForm";
 import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
 import { useProfileLayout } from "~/features/profile/hooks/useProfileLayout";
+import { useAuthStore } from "~/core/store/useAuthStore";
+import { useToastStore } from "~/core/store/useToastStore";
+import { ROUTES } from "~/core/constants/ROUTES";
+import { gql } from "@apollo/client";
+import * as ApolloReactHooks from "@apollo/client/react";
+import { PostCard } from "~/features/feed/components/PostCard";
+
+const GET_POSTS_BY_ACCOUNT = gql`
+  query GetPostsByAccount($accountId: String!) {
+    postsByAccount(accountId: $accountId) {
+      postId
+      content
+      createdAt
+      authorId
+      authorDisplayName
+      authorUsername
+      authorAvatarObjectKey
+      authorSchoolName
+      linkedServiceId
+      inReplyToPostId
+      likesCount
+      repliesCount
+      likedByMe
+      tags {
+        id
+        name
+      }
+      media {
+        id
+        fileName
+        contentType
+        url
+        objectKey
+      }
+    }
+  }
+`;
+
+const GET_REPLIES_BY_ACCOUNT = gql`
+  query GetRepliesByAccount($accountId: String!) {
+    repliesByAccount(accountId: $accountId) {
+      postId
+      content
+      createdAt
+      authorId
+      authorDisplayName
+      authorUsername
+      authorAvatarObjectKey
+      authorSchoolName
+      linkedServiceId
+      inReplyToPostId
+      likesCount
+      repliesCount
+      likedByMe
+      tags {
+        id
+        name
+      }
+      media {
+        id
+        fileName
+        contentType
+        url
+        objectKey
+      }
+    }
+  }
+`;
 
 interface ProfileLayoutProps {
   profile: any; // Using any or extended type since it can be myProfile or userProfile
@@ -17,7 +85,9 @@ interface ProfileLayoutProps {
 
 export function ProfileLayout({ profile, listings, isOwnProfile = false }: ProfileLayoutProps) {
   const navigate = useNavigate();
-  
+  const { user } = useAuthStore();
+  const addToast = useToastStore(s => s.addToast);
+
   const {
     activeTab,
     setActiveTab,
@@ -26,6 +96,40 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
     handleFollowToggle,
     isFollowLoading
   } = useProfileLayout({ profile });
+
+  const [createConversation, { loading: chatLoading }] = useCreateConversationMutation({
+    onCompleted: (data: any) => {
+      navigate(ROUTES.WORKSPACE_CHAT(data.createConversation.id));
+    },
+    onError: (e: any) => addToast('error', e.message),
+  });
+
+  const handleChat = () => {
+    if (!user) {
+      navigate(ROUTES.LOGIN);
+      return;
+    }
+    createConversation({
+      variables: {
+        input: {
+          participantIds: [profile.id],
+          type: "DIRECT",
+        }
+      }
+    });
+  };
+
+  const { data: postsData, loading: postsLoading } = ApolloReactHooks.useQuery<any>(GET_POSTS_BY_ACCOUNT, {
+    variables: { accountId: profile.id },
+    skip: !profile.id,
+    fetchPolicy: "cache-and-network",
+  });
+
+  const { data: repliesData, loading: repliesLoading } = ApolloReactHooks.useQuery<any>(GET_REPLIES_BY_ACCOUNT, {
+    variables: { accountId: profile.id },
+    skip: !profile.id,
+    fetchPolicy: "cache-and-network",
+  });
 
   return (
     <div className="pb-20 relative bg-white dark:bg-gray-950 min-h-screen">
@@ -87,14 +191,28 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
                 </div>
               )
             ) : (
-              <Button 
-                variant={profile.isFollowing ? "outline" : "primary"} 
-                className="font-bold px-5 rounded-full shadow-md shadow-indigo-500/20"
-                onClick={handleFollowToggle}
-                disabled={isFollowLoading}
-              >
-                {isFollowLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (profile.isFollowing ? "Mengikuti" : "Ikuti")}
-              </Button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleChat}
+                  disabled={chatLoading}
+                  className="p-2 border border-gray-200 dark:border-gray-700 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800 transition h-9 w-9 flex items-center justify-center shrink-0 text-gray-700 dark:text-gray-300 disabled:opacity-50"
+                  title="Kirim Pesan"
+                >
+                  {chatLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />
+                  ) : (
+                    <MessageCircle className="h-4 w-4" />
+                  )}
+                </button>
+                <Button 
+                  variant={profile.isFollowing ? "outline" : "primary"} 
+                  className="font-bold px-5 rounded-full shadow-md shadow-indigo-500/20 h-9 text-xs"
+                  onClick={handleFollowToggle}
+                  disabled={isFollowLoading}
+                >
+                  {isFollowLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (profile.isFollowing ? "Mengikuti" : "Ikuti")}
+                </Button>
+              </div>
             )}
           </div>
         </div>
@@ -146,23 +264,34 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
       {/* Tabs */}
       <div className="flex items-center mt-4 border-b border-gray-200 dark:border-gray-800 px-4 md:px-0">
         <button
-          onClick={() => setActiveTab("penawaran")}
+          onClick={() => setActiveTab("posts")}
           className="flex-1 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors relative"
         >
-          <div className={`py-3.5 text-sm font-bold w-fit mx-auto relative ${activeTab === "penawaran" ? "text-gray-900 dark:text-gray-100" : "text-gray-500 dark:text-gray-400"}`}>
-            Penawaran & Produk
-            {activeTab === "penawaran" && (
+          <div className={`py-3.5 text-sm font-bold w-fit mx-auto relative ${activeTab === "posts" ? "text-gray-900 dark:text-gray-100" : "text-gray-500 dark:text-gray-400"}`}>
+            Postingan
+            {activeTab === "posts" && (
               <div className="absolute bottom-0 left-0 w-full h-1 bg-indigo-600 dark:bg-indigo-400 rounded-full"></div>
             )}
           </div>
         </button>
         <button
-          onClick={() => setActiveTab("pengalaman")}
+          onClick={() => setActiveTab("listings")}
           className="flex-1 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors relative"
         >
-          <div className={`py-3.5 text-sm font-bold w-fit mx-auto relative ${activeTab === "pengalaman" ? "text-gray-900 dark:text-gray-100" : "text-gray-500 dark:text-gray-400"}`}>
-            Pengalaman
-            {activeTab === "pengalaman" && (
+          <div className={`py-3.5 text-sm font-bold w-fit mx-auto relative ${activeTab === "listings" ? "text-gray-900 dark:text-gray-100" : "text-gray-500 dark:text-gray-400"}`}>
+            Penawaran
+            {activeTab === "listings" && (
+              <div className="absolute bottom-0 left-0 w-full h-1 bg-indigo-600 dark:bg-indigo-400 rounded-full"></div>
+            )}
+          </div>
+        </button>
+        <button
+          onClick={() => setActiveTab("replies")}
+          className="flex-1 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors relative"
+        >
+          <div className={`py-3.5 text-sm font-bold w-fit mx-auto relative ${activeTab === "replies" ? "text-gray-900 dark:text-gray-100" : "text-gray-500 dark:text-gray-400"}`}>
+            Balasan
+            {activeTab === "replies" && (
               <div className="absolute bottom-0 left-0 w-full h-1 bg-indigo-600 dark:bg-indigo-400 rounded-full"></div>
             )}
           </div>
@@ -171,10 +300,26 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
 
       {/* Tab Content */}
       <div className="w-full">
-        {activeTab === "penawaran" ? (
+        {activeTab === "posts" && (
+          <div className="flex flex-col">
+            {postsLoading ? (
+              <div className="flex justify-center items-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+              </div>
+            ) : !postsData?.postsByAccount || postsData.postsByAccount.length === 0 ? (
+              <div className="text-center p-8 text-gray-500 dark:text-gray-400">Belum ada postingan.</div>
+            ) : (
+              postsData.postsByAccount.map((post: any) => (
+                <PostCard key={post.postId} post={post} />
+              ))
+            )}
+          </div>
+        )}
+
+        {activeTab === "listings" && (
           <div className="flex flex-col">
             {listings.length === 0 ? (
-              <div className="text-center p-8 text-gray-500">Belum ada penawaran.</div>
+              <div className="text-center p-8 text-gray-500 dark:text-gray-400">Belum ada penawaran.</div>
             ) : (
               listings.map((item) => (
                 <div key={item.id} className="p-4 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition cursor-pointer flex gap-4">
@@ -221,9 +366,21 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
               ))
             )}
           </div>
-        ) : (
+        )}
+
+        {activeTab === "replies" && (
           <div className="flex flex-col">
-            <div className="text-center p-8 text-gray-500">Belum ada pengalaman yang ditambahkan.</div>
+            {repliesLoading ? (
+              <div className="flex justify-center items-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+              </div>
+            ) : !repliesData?.repliesByAccount || repliesData.repliesByAccount.length === 0 ? (
+              <div className="text-center p-8 text-gray-500 dark:text-gray-400">Belum ada balasan.</div>
+            ) : (
+              repliesData.repliesByAccount.map((post: any) => (
+                <PostCard key={post.postId} post={post} />
+              ))
+            )}
           </div>
         )}
       </div>
