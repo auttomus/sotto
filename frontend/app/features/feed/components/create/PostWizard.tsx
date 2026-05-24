@@ -1,12 +1,14 @@
 import * as React from "react";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Briefcase, ChevronRight, X } from "lucide-react";
 import { Button } from "~/components/ui/Button";
 import { useCreateStore } from "../../../create/store/useCreateStore";
 import { useToastStore } from "~/core/store/useToastStore";
 import { PostMediaGallery } from "./PostMediaGallery";
 import { PostTagsInput } from "./PostTagsInput";
-import { useSearchTagsQuery } from "~/core/apollo/generated";
+import { useSearchTagsQuery, useGetMyProfileQuery, useGetListingsByAccountQuery } from "~/core/apollo/generated";
 import { useCreatePostLogic } from "../../hooks/useCreatePost";
+import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
+import { ListingCard } from "~/components/ui/ListingCard";
 
 export function PostWizard() {
   const { 
@@ -18,12 +20,15 @@ export function PostWizard() {
     postTags: tags,
     addPostTag: addTag,
     removePostTag: removeTag,
+    linkedServiceId,
+    setLinkedServiceId,
     setSelectedType,
     reset
   } = useCreateStore();
   
   const addToast = useToastStore(s => s.addToast);
   const [showDraftDialog, setShowDraftDialog] = React.useState(false);
+  const [showListingSelector, setShowListingSelector] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const { submitPost, isSubmitting, handleCreateNewTag, isCreatingTag } = useCreatePostLogic(reset);
@@ -42,7 +47,19 @@ export function PostWizard() {
     skip: debouncedSearch.trim().length === 0,
   });
 
-  const title = selectedType === "portfolio" ? "Unggah Karya" : "Berbagi Pengalaman";
+  // Fetch listings for linked service
+  const { data: profileData } = useGetMyProfileQuery();
+  const accountId = profileData?.myProfile?.id;
+
+  const { data: listingsData, loading: listingsLoading } = useGetListingsByAccountQuery({
+    variables: { accountId: accountId || "" },
+    skip: !accountId,
+  });
+
+  const activeListings = listingsData?.listingsByAccount?.filter(l => l.status === 'ACTIVE') || [];
+  const selectedListing = activeListings.find(l => l.id === linkedServiceId);
+
+  const title = selectedType === "portfolio" ? "Unggah Karya & Pengalaman" : "Berbagi Pengalaman";
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -60,7 +77,7 @@ export function PostWizard() {
   };
 
   const handleBack = () => {
-    const hasContent = content.trim().length > 0 || files.length > 0 || tags.length > 0;
+    const hasContent = content.trim().length > 0 || files.length > 0 || tags.length > 0 || linkedServiceId !== null;
     if (hasContent) {
       setShowDraftDialog(true);
     } else {
@@ -152,7 +169,86 @@ export function PostWizard() {
           isCreating={isCreatingTag}
           onCreateNewTag={(name) => handleCreateNewTag(name, addTag)}
         />
+
+        {/* Linked Listing Section */}
+        {selectedListing ? (
+          <div className="w-full mt-5">
+            <ListingCard 
+              listing={selectedListing as any} 
+              isLink={false} 
+              onRemove={() => setLinkedServiceId(null)}
+              className="border-indigo-150 dark:border-indigo-900/50"
+            />
+          </div>
+        ) : (
+          <button 
+            type="button"
+            onClick={() => setShowListingSelector(true)}
+            className="w-full mt-5 flex items-center justify-between p-4 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 hover:border-indigo-500 hover:bg-indigo-50/10 dark:hover:bg-indigo-950/5 transition-all text-left"
+          >
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-150 dark:border-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400">
+                <Briefcase className="h-5 w-5" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">Hubungkan Penawaran</h4>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Tautkan jasa/produk milikmu ke postingan ini</p>
+              </div>
+            </div>
+            <ChevronRight className="h-5 w-5 text-gray-400" />
+          </button>
+        )}
       </div>
+
+      {/* Listing Selector Modal/Bottom Sheet */}
+      {showListingSelector && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setShowListingSelector(false)}>
+          <div className="bg-white dark:bg-gray-900 rounded-t-3xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col animate-in slide-in-from-bottom duration-300" onClick={e => e.stopPropagation()}>
+            <div className="h-1.5 w-12 bg-gray-300 dark:bg-gray-700 rounded-full mx-auto my-3 shrink-0" />
+            <header className="px-4 pb-3 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center shrink-0">
+              <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Pilih Penawaran Anda</h3>
+              <button onClick={() => setShowListingSelector(false)} className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+                <X className="h-5 w-5 text-gray-500" />
+              </button>
+            </header>
+            
+            <div className="p-4 overflow-y-auto space-y-3 flex-1 min-h-0">
+              {listingsLoading ? (
+                <div className="flex justify-center py-10">
+                  <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+                </div>
+              ) : activeListings.length === 0 ? (
+                <div className="text-center py-10 px-4">
+                  <Briefcase className="h-12 w-12 text-gray-300 dark:text-gray-700 mx-auto mb-3" />
+                  <p className="text-sm font-bold text-gray-800 dark:text-gray-200">Belum ada penawaran aktif</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-xs mx-auto">
+                    Buat penawaran terlebih dahulu di menu Utama &gt; Buat Baru &gt; Penawaran & Produk.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2.5">
+                  {activeListings.map(listing => (
+                    <button
+                      key={listing.id}
+                      onClick={() => {
+                        setLinkedServiceId(listing.id);
+                        setShowListingSelector(false);
+                      }}
+                      className="w-full text-left focus:outline-none"
+                    >
+                      <ListingCard 
+                        listing={listing as any} 
+                        isLink={false} 
+                        className={linkedServiceId === listing.id ? 'border-indigo-600 bg-indigo-50/30 dark:bg-indigo-950/20 ring-1 ring-indigo-500/30' : ''}
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

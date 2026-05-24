@@ -1,8 +1,9 @@
 import * as React from "react";
 import { Link } from "react-router";
 import { Loader2, Hash, Briefcase, User, Sparkles } from "lucide-react";
-import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
 import { PostCard } from "~/features/feed/components/PostCard";
+import { ListingCard } from "~/components/ui/ListingCard";
+import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
 
 interface SearchResultsProps {
   isLoading: boolean;
@@ -115,34 +116,10 @@ export function SearchResults({
           </h3>
           <div className="space-y-3">
             {listings.map((listing) => (
-              <Link 
-                to={`/listing/${listing.id}`} 
+              <ListingCard 
                 key={listing.id} 
-                className="flex gap-4 bg-white dark:bg-gray-900 rounded-3xl p-3.5 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md hover:border-gray-200 dark:hover:border-gray-700 transition duration-200 group"
-              >
-                <div className="h-20 w-20 rounded-2xl bg-gray-50 dark:bg-gray-800 overflow-hidden shrink-0 border border-gray-100/50 dark:border-gray-700/30">
-                  {listing.media?.[0] ? (
-                    <img 
-                      src={resolveMediaUrl(listing.media[0].objectKey || listing.media[0].url)} 
-                      alt={listing.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition duration-300" 
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400 text-2xl bg-indigo-50/50 dark:bg-indigo-950/10">📦</div>
-                  )}
-                </div>
-                <div className="flex flex-col flex-1 min-w-0">
-                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 text-sm mb-1 line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                    {listing.title}
-                  </h4>
-                  <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 inline-block px-2 py-0.5 bg-gray-50 dark:bg-gray-800 rounded-md self-start border border-gray-100 dark:border-gray-700/50">
-                    {listing.type === "SERVICE" ? "JASA" : "PRODUK DIGITAL"}
-                  </span>
-                  <p className="font-bold text-indigo-600 dark:text-indigo-400 text-sm mt-auto">
-                    Rp {listing.price?.toLocaleString('id-ID')}
-                  </p>
-                </div>
-              </Link>
+                listing={listing} 
+              />
             ))}
           </div>
         </div>

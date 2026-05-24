@@ -10,8 +10,10 @@ import { Link } from "react-router";
 import { ROUTES } from "~/core/constants/ROUTES";
 import { cn } from "~/core/utils/cn";
 import * as Generated from "~/core/apollo/generated";
+import { ListingCard } from "~/components/ui/ListingCard";
 
 const useToggleLikePostMutation = (Generated as any).useToggleLikePostMutation || (() => [() => Promise.resolve()]);
+const useGetListingDetailQuery = (Generated as any).useGetListingDetailQuery || (() => ({ data: null, loading: false }));
 
 type FeedPost = GetFeedQuery["feed"][0];
 
@@ -34,6 +36,13 @@ export function PostCard({ post: rawPost }: PostCardProps) {
 
   const [liked, setLiked] = useState(post.likedByMe || false);
   const [count, setCount] = useState(post.likesCount || 0);
+
+  const { data: listingData } = useGetListingDetailQuery({
+    variables: { id: post.linkedServiceId || "" },
+    skip: !post.linkedServiceId,
+  });
+
+  const listing = listingData?.listing;
 
   React.useEffect(() => {
     setLiked(post.likedByMe || false);
@@ -133,22 +142,12 @@ export function PostCard({ post: rawPost }: PostCardProps) {
         )}
 
         {/* Linked Listing Card */}
-        {post.linkedServiceId && (
-          <Link
-            to={ROUTES.LISTING_DETAIL(post.linkedServiceId)}
-            className="mt-3 flex items-center gap-3 p-3.5 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/25 hover:bg-gray-100/50 dark:hover:bg-gray-800/40 hover:border-gray-200 dark:hover:border-gray-700 transition-all duration-200 group shadow-sm"
-          >
-            <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-indigo-500/15 to-purple-500/15 dark:from-indigo-500/25 dark:to-purple-500/25 border border-indigo-100/50 dark:border-indigo-500/20 flex items-center justify-center shrink-0 shadow-sm">
-              <span className="text-indigo-600 dark:text-indigo-400 text-base">🛠</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                Lihat Penawaran Terkait
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Klik untuk melihat detail</p>
-            </div>
-            <ChevronRight className="h-4 w-4 text-gray-400 shrink-0" />
-          </Link>
+        {post.linkedServiceId && listing && (
+          <ListingCard 
+            listing={listing as any} 
+            isLink={true} 
+            className="mt-3 bg-gray-50/50 dark:bg-gray-800/10 hover:bg-gray-100/50 dark:hover:bg-gray-800/20 border-gray-100 dark:border-gray-800" 
+          />
         )}
       </div>
 

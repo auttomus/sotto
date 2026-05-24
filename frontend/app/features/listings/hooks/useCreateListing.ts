@@ -36,6 +36,7 @@ export function useCreateListingLogic(resetStore: () => void) {
             type: listingData.type,
             isUnlimited: listingData.isUnlimited,
             deliveryTimeDays: listingData.type === 'SERVICE' ? listingData.deliveryTimeDays : null,
+            maxActiveOrders: listingData.isUnlimited ? null : listingData.maxActiveOrders,
             mediaIds: mediaIds.length > 0 ? mediaIds : undefined
           }
         },
