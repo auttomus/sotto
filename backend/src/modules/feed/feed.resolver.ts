@@ -142,6 +142,39 @@ export class FeedResolver {
     });
   }
 
+  @Public()
+  @Query(() => [PostModel], { name: 'globalFeed' })
+  async getGlobalFeed(
+    @Args('limit', { type: () => Int, defaultValue: 20 }) limit: number,
+  ): Promise<PostModel[]> {
+    const posts = await this.feedService.getGlobalFeed(Math.min(limit, 50));
+    if (posts.length === 0) return [];
+
+    const authorIds = [...new Set(posts.map((p) => p.authorId))];
+    const authors = await this.prisma.account.findMany({
+      where: { id: { in: authorIds } },
+      select: {
+        id: true,
+        username: true,
+        displayName: true,
+        avatarObjectKey: true,
+        school: { select: { name: true } },
+      },
+    });
+    const authorMap = new Map(authors.map((a) => [a.id, a]));
+
+    return posts.map((post) => {
+      const author = authorMap.get(post.authorId);
+      return {
+        ...post,
+        authorDisplayName: author?.displayName,
+        authorUsername: author?.username,
+        authorAvatarObjectKey: author?.avatarObjectKey,
+        authorSchoolName: author?.school?.name,
+      };
+    });
+  }
+
   @Query(() => [PostModel], { name: 'feed' })
   async getFeed(
     @CurrentUser() user: CurrentUserPayload,

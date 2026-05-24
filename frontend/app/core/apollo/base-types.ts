@@ -410,6 +410,7 @@ export type Query = {
   __typename?: 'Query';
   conversations: Array<ConversationModel>;
   feed: Array<PostModel>;
+  globalFeed: Array<PostModel>;
   listing?: Maybe<ListingModel>;
   listings: Array<ListingModel>;
   listingsByAccount: Array<ListingModel>;
@@ -422,8 +423,10 @@ export type Query = {
   offersForConversation: Array<CustomOfferModel>;
   order?: Maybe<OrderModel>;
   post?: Maybe<PostModel>;
+  postsByAccount: Array<PostModel>;
   profile?: Maybe<AccountModel>;
   replies: Array<PostModel>;
+  repliesByAccount: Array<PostModel>;
   school?: Maybe<SchoolModel>;
   schools: Array<SchoolModel>;
   searchAccounts: Array<AccountModel>;
@@ -437,6 +440,11 @@ export type Query = {
 
 
 export type QueryFeedArgs = {
+  limit?: Scalars['Int']['input'];
+};
+
+
+export type QueryGlobalFeedArgs = {
   limit?: Scalars['Int']['input'];
 };
 
@@ -495,6 +503,11 @@ export type QueryPostArgs = {
 };
 
 
+export type QueryPostsByAccountArgs = {
+  accountId: Scalars['String']['input'];
+};
+
+
 export type QueryProfileArgs = {
   username: Scalars['String']['input'];
 };
@@ -502,6 +515,11 @@ export type QueryProfileArgs = {
 
 export type QueryRepliesArgs = {
   postId: Scalars['String']['input'];
+};
+
+
+export type QueryRepliesByAccountArgs = {
+  accountId: Scalars['String']['input'];
 };
 
 

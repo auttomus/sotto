@@ -91,6 +91,37 @@ export class FeedService {
     }
   }
 
+  /** Ambil global feed timeline (semua postingan original) */
+  async getGlobalFeed(limit = 100) {
+    const result = await this.scylla.execute(
+      `SELECT * FROM posts LIMIT ? ALLOW FILTERING`,
+      [limit],
+    );
+    const posts = result.rows.map((row) => {
+      const r = row as unknown as {
+        post_id: { toString(): string };
+        author_id: { toString(): string };
+        in_reply_to_post_id?: { toString(): string } | null;
+        content: string;
+        linked_service_id?: { toString(): string } | null;
+        created_at: Date;
+      };
+      return {
+        postId: r.post_id.toString(),
+        authorId: r.author_id.toString(),
+        inReplyToPostId: r.in_reply_to_post_id?.toString() ?? null,
+        content: r.content,
+        linkedServiceId: r.linked_service_id?.toString() ?? null,
+        createdAt: r.created_at,
+      };
+    });
+
+    const filtered = posts.filter((p) => !p.inReplyToPostId);
+    return filtered.sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+    );
+  }
+
   /** Ambil feed timeline untuk user (candidate posts sebelum ranking) */
   async getUserFeed(userId: string, limit = 200) {
     const result = await this.scylla.execute(

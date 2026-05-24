@@ -1,4 +1,3 @@
-// @ts-nocheck
 /** Internal type. DO NOT USE DIRECTLY. */
 type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 /** Internal type. DO NOT USE DIRECTLY. */
@@ -112,6 +111,13 @@ export type GetRepliesQueryVariables = Exact<{
 
 
 export type GetRepliesQuery = { replies: Array<{ postId: string, content: string, createdAt: string, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, repliesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null }> };
+
+export type GetGlobalFeedQueryVariables = Exact<{
+  limit?: number | null | undefined;
+}>;
+
+
+export type GetGlobalFeedQuery = { globalFeed: Array<{ postId: string, content: string, createdAt: string, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, repliesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null }> };
 
 export type GetListingsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -259,6 +265,20 @@ export type UpdateProfileMutationVariables = Exact<{
 
 
 export type UpdateProfileMutation = { updateProfile: { id: string, displayName: string, username: string, note: string | null, avatarObjectKey: string | null, avatarUrl: string | null, major: string | null, majorId: string | null } };
+
+export type GetPostsByAccountQueryVariables = Exact<{
+  accountId: string;
+}>;
+
+
+export type GetPostsByAccountQuery = { postsByAccount: Array<{ postId: string, content: string, createdAt: string, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, repliesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null }> };
+
+export type GetRepliesByAccountQueryVariables = Exact<{
+  accountId: string;
+}>;
+
+
+export type GetRepliesByAccountQuery = { repliesByAccount: Array<{ postId: string, content: string, createdAt: string, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, repliesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null }> };
 
 
 export const SearchSchoolsDocument = gql`
@@ -1012,6 +1032,72 @@ export type GetRepliesQueryHookResult = ReturnType<typeof useGetRepliesQuery>;
 export type GetRepliesLazyQueryHookResult = ReturnType<typeof useGetRepliesLazyQuery>;
 export type GetRepliesSuspenseQueryHookResult = ReturnType<typeof useGetRepliesSuspenseQuery>;
 export type GetRepliesQueryResult = Apollo.QueryResult<GetRepliesQuery, GetRepliesQueryVariables>;
+export const GetGlobalFeedDocument = gql`
+    query GetGlobalFeed($limit: Int) {
+  globalFeed(limit: $limit) {
+    postId
+    content
+    createdAt
+    authorId
+    authorDisplayName
+    authorUsername
+    authorAvatarObjectKey
+    authorSchoolName
+    linkedServiceId
+    inReplyToPostId
+    likesCount
+    repliesCount
+    likedByMe
+    tags {
+      id
+      name
+    }
+    media {
+      id
+      fileName
+      contentType
+      url
+      objectKey
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetGlobalFeedQuery__
+ *
+ * To run a query within a React component, call `useGetGlobalFeedQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetGlobalFeedQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetGlobalFeedQuery({
+ *   variables: {
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useGetGlobalFeedQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetGlobalFeedQuery, GetGlobalFeedQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetGlobalFeedQuery, GetGlobalFeedQueryVariables>(GetGlobalFeedDocument, options);
+      }
+export function useGetGlobalFeedLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetGlobalFeedQuery, GetGlobalFeedQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetGlobalFeedQuery, GetGlobalFeedQueryVariables>(GetGlobalFeedDocument, options);
+        }
+// @ts-ignore
+export function useGetGlobalFeedSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<GetGlobalFeedQuery, GetGlobalFeedQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetGlobalFeedQuery, GetGlobalFeedQueryVariables>;
+export function useGetGlobalFeedSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetGlobalFeedQuery, GetGlobalFeedQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetGlobalFeedQuery | undefined, GetGlobalFeedQueryVariables>;
+export function useGetGlobalFeedSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetGlobalFeedQuery, GetGlobalFeedQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetGlobalFeedQuery, GetGlobalFeedQueryVariables>(GetGlobalFeedDocument, options);
+        }
+export type GetGlobalFeedQueryHookResult = ReturnType<typeof useGetGlobalFeedQuery>;
+export type GetGlobalFeedLazyQueryHookResult = ReturnType<typeof useGetGlobalFeedLazyQuery>;
+export type GetGlobalFeedSuspenseQueryHookResult = ReturnType<typeof useGetGlobalFeedSuspenseQuery>;
+export type GetGlobalFeedQueryResult = Apollo.QueryResult<GetGlobalFeedQuery, GetGlobalFeedQueryVariables>;
 export const GetListingsDocument = gql`
     query GetListings {
   listings {
@@ -1881,3 +1967,135 @@ export function useUpdateProfileMutation(baseOptions?: ApolloReactHooks.Mutation
 export type UpdateProfileMutationHookResult = ReturnType<typeof useUpdateProfileMutation>;
 export type UpdateProfileMutationResult = Apollo.MutationResult<UpdateProfileMutation>;
 export type UpdateProfileMutationOptions = Apollo.BaseMutationOptions<UpdateProfileMutation, UpdateProfileMutationVariables>;
+export const GetPostsByAccountDocument = gql`
+    query GetPostsByAccount($accountId: String!) {
+  postsByAccount(accountId: $accountId) {
+    postId
+    content
+    createdAt
+    authorId
+    authorDisplayName
+    authorUsername
+    authorAvatarObjectKey
+    authorSchoolName
+    linkedServiceId
+    inReplyToPostId
+    likesCount
+    repliesCount
+    likedByMe
+    tags {
+      id
+      name
+    }
+    media {
+      id
+      fileName
+      contentType
+      url
+      objectKey
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetPostsByAccountQuery__
+ *
+ * To run a query within a React component, call `useGetPostsByAccountQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetPostsByAccountQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetPostsByAccountQuery({
+ *   variables: {
+ *      accountId: // value for 'accountId'
+ *   },
+ * });
+ */
+export function useGetPostsByAccountQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetPostsByAccountQuery, GetPostsByAccountQueryVariables> & ({ variables: GetPostsByAccountQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetPostsByAccountQuery, GetPostsByAccountQueryVariables>(GetPostsByAccountDocument, options);
+      }
+export function useGetPostsByAccountLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetPostsByAccountQuery, GetPostsByAccountQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetPostsByAccountQuery, GetPostsByAccountQueryVariables>(GetPostsByAccountDocument, options);
+        }
+// @ts-ignore
+export function useGetPostsByAccountSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<GetPostsByAccountQuery, GetPostsByAccountQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetPostsByAccountQuery, GetPostsByAccountQueryVariables>;
+export function useGetPostsByAccountSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetPostsByAccountQuery, GetPostsByAccountQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetPostsByAccountQuery | undefined, GetPostsByAccountQueryVariables>;
+export function useGetPostsByAccountSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetPostsByAccountQuery, GetPostsByAccountQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetPostsByAccountQuery, GetPostsByAccountQueryVariables>(GetPostsByAccountDocument, options);
+        }
+export type GetPostsByAccountQueryHookResult = ReturnType<typeof useGetPostsByAccountQuery>;
+export type GetPostsByAccountLazyQueryHookResult = ReturnType<typeof useGetPostsByAccountLazyQuery>;
+export type GetPostsByAccountSuspenseQueryHookResult = ReturnType<typeof useGetPostsByAccountSuspenseQuery>;
+export type GetPostsByAccountQueryResult = Apollo.QueryResult<GetPostsByAccountQuery, GetPostsByAccountQueryVariables>;
+export const GetRepliesByAccountDocument = gql`
+    query GetRepliesByAccount($accountId: String!) {
+  repliesByAccount(accountId: $accountId) {
+    postId
+    content
+    createdAt
+    authorId
+    authorDisplayName
+    authorUsername
+    authorAvatarObjectKey
+    authorSchoolName
+    linkedServiceId
+    inReplyToPostId
+    likesCount
+    repliesCount
+    likedByMe
+    tags {
+      id
+      name
+    }
+    media {
+      id
+      fileName
+      contentType
+      url
+      objectKey
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetRepliesByAccountQuery__
+ *
+ * To run a query within a React component, call `useGetRepliesByAccountQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetRepliesByAccountQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetRepliesByAccountQuery({
+ *   variables: {
+ *      accountId: // value for 'accountId'
+ *   },
+ * });
+ */
+export function useGetRepliesByAccountQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetRepliesByAccountQuery, GetRepliesByAccountQueryVariables> & ({ variables: GetRepliesByAccountQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetRepliesByAccountQuery, GetRepliesByAccountQueryVariables>(GetRepliesByAccountDocument, options);
+      }
+export function useGetRepliesByAccountLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetRepliesByAccountQuery, GetRepliesByAccountQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetRepliesByAccountQuery, GetRepliesByAccountQueryVariables>(GetRepliesByAccountDocument, options);
+        }
+// @ts-ignore
+export function useGetRepliesByAccountSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<GetRepliesByAccountQuery, GetRepliesByAccountQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetRepliesByAccountQuery, GetRepliesByAccountQueryVariables>;
+export function useGetRepliesByAccountSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetRepliesByAccountQuery, GetRepliesByAccountQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetRepliesByAccountQuery | undefined, GetRepliesByAccountQueryVariables>;
+export function useGetRepliesByAccountSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetRepliesByAccountQuery, GetRepliesByAccountQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetRepliesByAccountQuery, GetRepliesByAccountQueryVariables>(GetRepliesByAccountDocument, options);
+        }
+export type GetRepliesByAccountQueryHookResult = ReturnType<typeof useGetRepliesByAccountQuery>;
+export type GetRepliesByAccountLazyQueryHookResult = ReturnType<typeof useGetRepliesByAccountLazyQuery>;
+export type GetRepliesByAccountSuspenseQueryHookResult = ReturnType<typeof useGetRepliesByAccountSuspenseQuery>;
+export type GetRepliesByAccountQueryResult = Apollo.QueryResult<GetRepliesByAccountQuery, GetRepliesByAccountQueryVariables>;

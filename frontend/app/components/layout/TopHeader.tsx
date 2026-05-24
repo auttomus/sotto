@@ -1,12 +1,24 @@
+import * as React from "react";
 import { Bell, Search, Moon, Sun } from "lucide-react";
 import { Link } from "react-router";
 import { useThemeStore } from "~/core/store/useThemeStore";
 
 export default function TopHeader() {
   const { isDark, toggleTheme } = useThemeStore();
+  const [isHidden, setIsHidden] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleScrollHeader = (e: Event) => {
+      const customEvent = e as CustomEvent<{ isHidden: boolean }>;
+      setIsHidden(customEvent.detail.isHidden);
+    };
+
+    window.addEventListener("scroll-header", handleScrollHeader);
+    return () => window.removeEventListener("scroll-header", handleScrollHeader);
+  }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800">
+    <header className={`sticky top-0 z-50 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 transition-transform duration-300 ${isHidden ? "max-md:-translate-y-full" : "translate-y-0"}`}>
       <div className="flex items-center justify-between px-4 h-16 w-full max-w-lg mx-auto md:max-w-none md:px-6">
         <Link to="/home" className="text-xl font-bold tracking-tight text-indigo-600 dark:text-indigo-400 font-serif italic">
           Sotto

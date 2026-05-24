@@ -272,6 +272,7 @@ type PresignedUploadResult {
 type Query {
   conversations: [ConversationModel!]!
   feed(limit: Int! = 20): [PostModel!]!
+  globalFeed(limit: Int! = 20): [PostModel!]!
   listing(id: ID!): ListingModel
   listings: [ListingModel!]!
   listingsByAccount(accountId: ID!): [ListingModel!]!
@@ -284,8 +285,10 @@ type Query {
   offersForConversation(conversationId: ID!): [CustomOfferModel!]!
   order(id: ID!): OrderModel
   post(postId: String!): PostModel
+  postsByAccount(accountId: String!): [PostModel!]!
   profile(username: String!): AccountModel
   replies(postId: String!): [PostModel!]!
+  repliesByAccount(accountId: String!): [PostModel!]!
   school(id: ID!): SchoolModel
   schools: [SchoolModel!]!
   searchAccounts(query: String!): [AccountModel!]!
