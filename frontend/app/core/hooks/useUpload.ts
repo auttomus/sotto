@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client";
 import { useMutation } from "@apollo/client/react";
 import { useCallback } from "react";
+import { compressImage } from "~/core/utils/compressImage";
 import type { 
   MutationRequestUploadUrlArgs, 
   PresignedUploadResult,
@@ -34,11 +35,14 @@ export function useUpload() {
   const [confirmUpload] = useMutation<{ confirmUpload: MediaAttachmentModel }, MutationConfirmUploadArgs>(CONFIRM_UPLOAD);
 
   const uploadFile = useCallback(async (
-    file: File, 
+    rawFile: File, 
     attachedType: string, 
     attachedId?: string, 
     isPrivate = false
   ): Promise<MediaAttachmentModel> => {
+    // Compress image and strip EXIF metadata before upload
+    const file = await compressImage(rawFile);
+
     // 1. Request presigned URL
     const requestRes = await requestUploadUrl({
       variables: {
@@ -55,8 +59,14 @@ export function useUpload() {
     const uploadData = requestRes.data?.requestUploadUrl;
     if (!uploadData) throw new Error("Failed to get upload URL");
 
+    let finalUploadUrl = uploadData.uploadUrl;
+    // In local development, proxy through Nginx (which preserves the minio:9000 Host header for AWS Signature validation)
+    if (typeof window !== 'undefined' && finalUploadUrl.startsWith('http://minio:9000')) {
+      finalUploadUrl = finalUploadUrl.replace('http://minio:9000', '');
+    }
+
     // 2. Upload directly to MinIO
-    const uploadRes = await fetch(uploadData.uploadUrl, {
+    const uploadRes = await fetch(finalUploadUrl, {
       method: 'PUT',
       body: file,
       headers: {

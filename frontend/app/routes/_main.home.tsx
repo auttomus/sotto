@@ -87,7 +87,7 @@ export default function FeedTimelineRoute() {
             {/* End of feed */}
             {!hasMore && posts.length > 0 && (
               <div className="text-center py-8 text-sm text-gray-400 dark:text-gray-500">
-                Sudah di ujung linimasa ✨
+                Sudah di ujung linimasa
               </div>
             )}
           </>

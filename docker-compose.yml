@@ -56,6 +56,11 @@ services:
     restart: unless-stopped
     env_file:
       - ./infrastructure/.env.docker
+    environment:
+      MINIO_API_CORS_ALLOW_ORIGIN: "*"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data

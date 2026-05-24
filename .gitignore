@@ -3,3 +3,5 @@ qdrant_storage
 .agents
 .kilo
 qdrant_storage
+.env.prod
+.env.docker

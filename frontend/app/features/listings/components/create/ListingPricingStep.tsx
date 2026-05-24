@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useCreateStore } from "../../store/useCreateStore";
+import { useCreateStore } from "../../../create/store/useCreateStore";
 
 export function ListingPricingStep() {
   const { listingData, updateListingData } = useCreateStore();
