@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ScyllaService } from '../../infrastructure/scylla/scylla.service';
+import { MediaService } from '../media/media.service';
 import { CreateConversationInput } from './dto/create-conversation.input';
 import { types } from 'cassandra-driver';
 import { ConversationType, Prisma } from '@prisma/client';
@@ -24,6 +25,7 @@ export type SerializedMessage = {
   senderId: string;
   content: string;
   createdAt: Date;
+  media?: any[];
 };
 
 @Injectable()
@@ -31,6 +33,7 @@ export class ChatService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly scylla: ScyllaService,
+    private readonly mediaService: MediaService,
   ) {}
 
   // ── Conversations (PostgreSQL) ─────────────────────────
@@ -155,6 +158,7 @@ export class ChatService {
     });
 
     // Media association (PostgreSQL)
+    let mediaList: any[] = [];
     if (mediaIds?.length) {
       await this.prisma.mediaAttachment.updateMany({
         where: { id: { in: mediaIds }, accountId: senderAccountId },
@@ -163,6 +167,10 @@ export class ChatService {
           attachedType: 'ScyllaMessage',
         },
       });
+      mediaList = await this.mediaService.getMediaForObject(
+        'ScyllaMessage',
+        messageId.toString(),
+      );
     }
 
     return {
@@ -171,6 +179,7 @@ export class ChatService {
       senderId: senderAccountId,
       content,
       createdAt: now,
+      media: mediaList,
     };
   }
 

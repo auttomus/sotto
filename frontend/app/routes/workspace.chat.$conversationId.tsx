@@ -1,9 +1,14 @@
 import * as React from "react";
-import { ArrowLeft, MoreVertical, Paperclip, Send, Check, Loader2 } from "lucide-react";
+import { ArrowLeft, MoreVertical, Loader2 } from "lucide-react";
 import { Link, useParams } from "react-router";
 import { Avatar } from "../components/ui/Avatar";
 import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
 import { useChatRoom } from "~/features/chat/hooks/useChatRoom";
+
+// Modular Components
+import { MessageBubble } from "~/features/chat/components/MessageBubble";
+import { ChatInputArea } from "~/features/chat/components/ChatInputArea";
+import { ListingSelectionModal } from "~/features/chat/components/ListingSelectionModal";
 
 export default function ChatRoute() {
   const { conversationId } = useParams();
@@ -15,10 +20,18 @@ export default function ChatRoute() {
     loading,
     recipient,
     user,
+    selectedImages,
+    setSelectedImages,
+    selectedListing,
+    isUploading,
+    selectListing,
+    cancelListing,
     handleSend,
     handleKeyDown,
     handleInputChange,
   } = useChatRoom({ conversationId: conversationId as string });
+
+  const [isListingModalOpen, setIsListingModalOpen] = React.useState(false);
 
   if (loading && !allMessages.length) {
     return (
@@ -27,8 +40,9 @@ export default function ChatRoute() {
       </div>
     );
   }
+
   return (
-    <div className="flex flex-col h-[100dvh] bg-gray-50 dark:bg-gray-950 w-full max-w-lg mx-auto border-x border-gray-100 dark:border-gray-800 relative">
+    <div className="flex flex-col h-[100dvh] bg-gray-50 dark:bg-gray-950 w-full max-w-lg mx-auto border-x border-gray-100 dark:border-gray-800 relative text-gray-900 dark:text-gray-100">
       {/* Header */}
       <header className="shrink-0 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-10 px-3 h-16 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3">
@@ -58,54 +72,40 @@ export default function ChatRoute() {
           </span>
         </div>
 
-        {allMessages.map((msg: any) => {
-          const isMine = msg.senderId === user?.accountId;
-          
-          return (
-            <div key={msg.messageId} className={`flex gap-2 max-w-[85%] ${isMine ? 'self-end' : ''}`}>
-              {!isMine && (
-                <Avatar src="" size="sm" className="mt-auto shrink-0 h-6 w-6" />
-              )}
-              <div className={`${isMine ? 'bg-indigo-600 rounded-br-sm' : 'bg-white dark:bg-gray-800 rounded-bl-sm border border-gray-100 dark:border-gray-700/50'} p-3 rounded-2xl shadow-sm`}>
-                <p className={`text-sm ${isMine ? 'text-white' : 'text-gray-800 dark:text-gray-200'}`}>
-                  {msg.content}
-                </p>
-                <div className={`flex items-center justify-end gap-1 mt-1 ${!isMine ? 'text-right' : ''}`}>
-                  <span className={`text-[10px] ${isMine ? 'text-indigo-200' : 'text-gray-400'}`}>
-                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                  {isMine && <Check className="h-3 w-3 text-white" />}
-                </div>
-              </div>
-            </div>
-          );
-        })}
+        {allMessages.map((msg: any) => (
+          <MessageBubble 
+            key={msg.messageId} 
+            msg={msg} 
+            userAccountId={user?.accountId} 
+            recipientAvatar={recipient?.avatarObjectKey} 
+          />
+        ))}
         <div ref={messagesEndRef} />
       </div>
 
       {/* Input Area */}
-      <div className="shrink-0 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 p-3 pb-safe">
-        <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-full pr-1.5 pl-3 py-1.5">
-          <button className="text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition shrink-0">
-            <Paperclip className="h-5 w-5" />
-          </button>
-          <input
-            type="text"
-            value={inputText}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2 px-2 text-gray-900 dark:text-gray-100 placeholder-gray-500 outline-none"
-            placeholder="Ketik pesan..."
-          />
-          <button 
-            onClick={handleSend}
-            disabled={!inputText.trim()}
-            className="bg-indigo-600 text-white p-2 rounded-full hover:bg-indigo-700 transition shrink-0 shadow-sm disabled:opacity-50"
-          >
-            <Send className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
+      <ChatInputArea 
+        inputText={inputText}
+        handleInputChange={handleInputChange}
+        handleKeyDown={handleKeyDown}
+        handleSend={handleSend}
+        selectedImages={selectedImages}
+        setSelectedImages={setSelectedImages}
+        selectedListing={selectedListing}
+        onCancelListing={cancelListing}
+        isUploading={isUploading}
+        onOpenListingModal={() => setIsListingModalOpen(true)}
+      />
+
+      {/* Mention Listing sliding / overlay Modal */}
+      <ListingSelectionModal 
+        isOpen={isListingModalOpen}
+        onClose={() => setIsListingModalOpen(false)}
+        onSelect={selectListing}
+        userAccountId={user?.accountId}
+        recipientAccountId={recipient?.accountId}
+        recipientDisplayName={recipient?.displayName}
+      />
     </div>
   );
 }
