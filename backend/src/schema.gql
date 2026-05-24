@@ -85,6 +85,7 @@ input CreateOrderInput {
 
 input CreatePostInput {
   content: String!
+  inReplyToPostId: ID
   linkedServiceId: ID
   mediaIds: [ID!]
   tagIds: [ID!]
@@ -190,6 +191,7 @@ type Mutation {
   markNotificationAsRead(id: ID!): Boolean!
   rejectOffer(offerId: ID!): CustomOfferModel!
   requestUploadUrl(input: RequestUploadInput!): PresignedUploadResult!
+  toggleLikePost(postId: String!): Boolean!
 
   """Catat interaksi user (view, click, like)"""
   trackEvent(actionType: String!, targetId: String!): Boolean!
@@ -253,9 +255,12 @@ type PostModel {
   content: String!
   createdAt: DateTime!
   inReplyToPostId: String
+  likedByMe: Boolean!
+  likesCount: Int!
   linkedServiceId: String
   media: [MediaAttachmentModel!]
   postId: ID!
+  tags: [TagModel!]
 }
 
 type PresignedUploadResult {
@@ -277,7 +282,9 @@ type Query {
   notifications(cursor: String, take: Int = 20): [NotificationModel!]!
   offersForConversation(conversationId: ID!): [CustomOfferModel!]!
   order(id: ID!): OrderModel
+  post(postId: String!): PostModel
   profile(username: String!): AccountModel
+  replies(postId: String!): [PostModel!]!
   school(id: ID!): SchoolModel
   schools: [SchoolModel!]!
   searchAccounts(query: String!): [AccountModel!]!

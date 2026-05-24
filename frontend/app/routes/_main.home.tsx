@@ -71,10 +71,6 @@ export default function FeedTimelineRoute() {
             <h1 className="text-xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
               Beranda
             </h1>
-            <div className="flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 px-3 py-1 rounded-full text-[11px] font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Sinergi Aktif
-            </div>
           </div>
           
           {/* Tabs selector */}

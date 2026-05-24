@@ -75,7 +75,7 @@ export type GetFeedQueryVariables = Exact<{
 }>;
 
 
-export type GetFeedQuery = { feed: Array<{ postId: string, content: string, createdAt: string, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null }> };
+export type GetFeedQuery = { feed: Array<{ postId: string, content: string, createdAt: string, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null }> };
 
 export type CreatePostMutationVariables = Exact<{
   input: Types.CreatePostInput;
@@ -83,6 +83,27 @@ export type CreatePostMutationVariables = Exact<{
 
 
 export type CreatePostMutation = { createPost: { postId: string, content: string, createdAt: string, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null } };
+
+export type ToggleLikePostMutationVariables = Exact<{
+  postId: string;
+}>;
+
+
+export type ToggleLikePostMutation = { toggleLikePost: boolean };
+
+export type GetPostQueryVariables = Exact<{
+  postId: string;
+}>;
+
+
+export type GetPostQuery = { post: { postId: string, content: string, createdAt: string, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null } | null };
+
+export type GetRepliesQueryVariables = Exact<{
+  postId: string;
+}>;
+
+
+export type GetRepliesQuery = { replies: Array<{ postId: string, content: string, createdAt: string, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null }> };
 
 export type GetListingsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -653,6 +674,12 @@ export const GetFeedDocument = gql`
     authorSchoolName
     linkedServiceId
     inReplyToPostId
+    likesCount
+    likedByMe
+    tags {
+      id
+      name
+    }
     media {
       id
       fileName
@@ -747,6 +774,167 @@ export function useCreatePostMutation(baseOptions?: ApolloReactHooks.MutationHoo
 export type CreatePostMutationHookResult = ReturnType<typeof useCreatePostMutation>;
 export type CreatePostMutationResult = Apollo.MutationResult<CreatePostMutation>;
 export type CreatePostMutationOptions = Apollo.BaseMutationOptions<CreatePostMutation, CreatePostMutationVariables>;
+export const ToggleLikePostDocument = gql`
+    mutation ToggleLikePost($postId: String!) {
+  toggleLikePost(postId: $postId)
+}
+    `;
+export type ToggleLikePostMutationFn = Apollo.MutationFunction<ToggleLikePostMutation, ToggleLikePostMutationVariables>;
+
+/**
+ * __useToggleLikePostMutation__
+ *
+ * To run a mutation, you first call `useToggleLikePostMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useToggleLikePostMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [toggleLikePostMutation, { data, loading, error }] = useToggleLikePostMutation({
+ *   variables: {
+ *      postId: // value for 'postId'
+ *   },
+ * });
+ */
+export function useToggleLikePostMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ToggleLikePostMutation, ToggleLikePostMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<ToggleLikePostMutation, ToggleLikePostMutationVariables>(ToggleLikePostDocument, options);
+      }
+export type ToggleLikePostMutationHookResult = ReturnType<typeof useToggleLikePostMutation>;
+export type ToggleLikePostMutationResult = Apollo.MutationResult<ToggleLikePostMutation>;
+export type ToggleLikePostMutationOptions = Apollo.BaseMutationOptions<ToggleLikePostMutation, ToggleLikePostMutationVariables>;
+export const GetPostDocument = gql`
+    query GetPost($postId: String!) {
+  post(postId: $postId) {
+    postId
+    content
+    createdAt
+    authorId
+    authorDisplayName
+    authorUsername
+    authorAvatarObjectKey
+    authorSchoolName
+    linkedServiceId
+    inReplyToPostId
+    likesCount
+    likedByMe
+    tags {
+      id
+      name
+    }
+    media {
+      id
+      fileName
+      contentType
+      url
+      objectKey
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetPostQuery__
+ *
+ * To run a query within a React component, call `useGetPostQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetPostQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetPostQuery({
+ *   variables: {
+ *      postId: // value for 'postId'
+ *   },
+ * });
+ */
+export function useGetPostQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetPostQuery, GetPostQueryVariables> & ({ variables: GetPostQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetPostQuery, GetPostQueryVariables>(GetPostDocument, options);
+      }
+export function useGetPostLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetPostQuery, GetPostQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetPostQuery, GetPostQueryVariables>(GetPostDocument, options);
+        }
+// @ts-ignore
+export function useGetPostSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<GetPostQuery, GetPostQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetPostQuery, GetPostQueryVariables>;
+export function useGetPostSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetPostQuery, GetPostQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetPostQuery | undefined, GetPostQueryVariables>;
+export function useGetPostSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetPostQuery, GetPostQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetPostQuery, GetPostQueryVariables>(GetPostDocument, options);
+        }
+export type GetPostQueryHookResult = ReturnType<typeof useGetPostQuery>;
+export type GetPostLazyQueryHookResult = ReturnType<typeof useGetPostLazyQuery>;
+export type GetPostSuspenseQueryHookResult = ReturnType<typeof useGetPostSuspenseQuery>;
+export type GetPostQueryResult = Apollo.QueryResult<GetPostQuery, GetPostQueryVariables>;
+export const GetRepliesDocument = gql`
+    query GetReplies($postId: String!) {
+  replies(postId: $postId) {
+    postId
+    content
+    createdAt
+    authorId
+    authorDisplayName
+    authorUsername
+    authorAvatarObjectKey
+    authorSchoolName
+    linkedServiceId
+    inReplyToPostId
+    likesCount
+    likedByMe
+    tags {
+      id
+      name
+    }
+    media {
+      id
+      fileName
+      contentType
+      url
+      objectKey
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetRepliesQuery__
+ *
+ * To run a query within a React component, call `useGetRepliesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetRepliesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetRepliesQuery({
+ *   variables: {
+ *      postId: // value for 'postId'
+ *   },
+ * });
+ */
+export function useGetRepliesQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetRepliesQuery, GetRepliesQueryVariables> & ({ variables: GetRepliesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetRepliesQuery, GetRepliesQueryVariables>(GetRepliesDocument, options);
+      }
+export function useGetRepliesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetRepliesQuery, GetRepliesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetRepliesQuery, GetRepliesQueryVariables>(GetRepliesDocument, options);
+        }
+// @ts-ignore
+export function useGetRepliesSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<GetRepliesQuery, GetRepliesQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetRepliesQuery, GetRepliesQueryVariables>;
+export function useGetRepliesSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetRepliesQuery, GetRepliesQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetRepliesQuery | undefined, GetRepliesQueryVariables>;
+export function useGetRepliesSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetRepliesQuery, GetRepliesQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetRepliesQuery, GetRepliesQueryVariables>(GetRepliesDocument, options);
+        }
+export type GetRepliesQueryHookResult = ReturnType<typeof useGetRepliesQuery>;
+export type GetRepliesLazyQueryHookResult = ReturnType<typeof useGetRepliesLazyQuery>;
+export type GetRepliesSuspenseQueryHookResult = ReturnType<typeof useGetRepliesSuspenseQuery>;
+export type GetRepliesQueryResult = Apollo.QueryResult<GetRepliesQuery, GetRepliesQueryVariables>;
 export const GetListingsDocument = gql`
     query GetListings {
   listings {
