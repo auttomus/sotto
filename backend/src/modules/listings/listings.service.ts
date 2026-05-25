@@ -231,7 +231,7 @@ export class ListingsService {
 
   async findByAccount(accountId: string): Promise<SerializedListing[]> {
     const listings = await this.prisma.listing.findMany({
-      where: { accountId: accountId },
+      where: { accountId: accountId, status: ListingStatus.ACTIVE },
       include: {
         account: {
           select: {

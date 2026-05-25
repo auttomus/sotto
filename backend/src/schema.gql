@@ -104,6 +104,7 @@ type CustomOfferModel {
   sellerAccountId: String!
   status: OfferStatus!
   updatedAt: DateTime!
+  orderId: String
 }
 
 """
@@ -199,6 +200,7 @@ type Mutation {
   updateListing(id: ID!, input: UpdateListingInput!): ListingModel!
   updateProfile(input: UpdateProfileInput!): AccountModel!
   withdrawOffer(offerId: ID!): CustomOfferModel!
+  getMidtransSnapToken(orderId: ID!): String!
 }
 
 type NotificationModel {

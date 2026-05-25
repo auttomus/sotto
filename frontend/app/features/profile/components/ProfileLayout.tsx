@@ -4,7 +4,7 @@ import { Avatar } from "~/components/ui/Avatar";
 import { Button } from "~/components/ui/Button";
 import { type GetMyProfileQuery, type GetListingsByAccountQuery, useCreateConversationMutation } from "~/core/apollo/generated";
 import { formatDate } from "~/core/utils/formatDate";
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router";
 import { EditProfileForm } from "./EditProfileForm";
 import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
 import { useProfileLayout } from "~/features/profile/hooks/useProfileLayout";
@@ -322,7 +322,11 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
               <div className="text-center p-8 text-gray-500 dark:text-gray-400">Belum ada penawaran.</div>
             ) : (
               listings.map((item) => (
-                <div key={item.id} className="p-4 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition cursor-pointer flex gap-4">
+                <Link 
+                  key={item.id} 
+                  to={`/listing/${item.id}`}
+                  className="p-4 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition cursor-pointer flex gap-4 block"
+                >
                   <Avatar src={resolveMediaUrl(profile.avatarObjectKey)} size="sm" className="hidden sm:block shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 mb-1 hidden sm:flex">
@@ -362,7 +366,7 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
                       </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))
             )}
           </div>

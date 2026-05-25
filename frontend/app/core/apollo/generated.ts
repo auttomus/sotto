@@ -168,6 +168,13 @@ export type GetOrderDetailQueryVariables = Exact<{
 
 export type GetOrderDetailQuery = { order: { id: string, status: Types.OrderStatus, agreedPrice: number, createdAt: string, buyerAccountId: string, sellerAccountId: string, listingId: string } | null };
 
+export type GetOffersForConversationQueryVariables = Exact<{
+  conversationId: string | number;
+}>;
+
+
+export type GetOffersForConversationQuery = { offersForConversation: Array<{ id: string, conversationId: string, sellerAccountId: string, buyerAccountId: string, listingId: string | null, description: string, proposedPrice: number, deliveryTimeDays: number, status: Types.OfferStatus, orderId: string | null, createdAt: string }> };
+
 export type CreateOrderMutationVariables = Exact<{
   input: Types.CreateOrderInput;
 }>;
@@ -194,7 +201,7 @@ export type AcceptOfferMutationVariables = Exact<{
 }>;
 
 
-export type AcceptOfferMutation = { acceptOffer: { id: string, status: Types.OfferStatus } };
+export type AcceptOfferMutation = { acceptOffer: { id: string, status: Types.OfferStatus, orderId: string | null } };
 
 export type RejectOfferMutationVariables = Exact<{
   offerId: string | number;
@@ -202,6 +209,13 @@ export type RejectOfferMutationVariables = Exact<{
 
 
 export type RejectOfferMutation = { rejectOffer: { id: string, status: Types.OfferStatus } };
+
+export type GetMidtransSnapTokenMutationVariables = Exact<{
+  orderId: string | number;
+}>;
+
+
+export type GetMidtransSnapTokenMutation = { getMidtransSnapToken: string };
 
 export type AdvanceOrderStatusMutationVariables = Exact<{
   orderId: string | number;
@@ -1423,6 +1437,59 @@ export type GetOrderDetailQueryHookResult = ReturnType<typeof useGetOrderDetailQ
 export type GetOrderDetailLazyQueryHookResult = ReturnType<typeof useGetOrderDetailLazyQuery>;
 export type GetOrderDetailSuspenseQueryHookResult = ReturnType<typeof useGetOrderDetailSuspenseQuery>;
 export type GetOrderDetailQueryResult = Apollo.QueryResult<GetOrderDetailQuery, GetOrderDetailQueryVariables>;
+export const GetOffersForConversationDocument = gql`
+    query GetOffersForConversation($conversationId: ID!) {
+  offersForConversation(conversationId: $conversationId) {
+    id
+    conversationId
+    sellerAccountId
+    buyerAccountId
+    listingId
+    description
+    proposedPrice
+    deliveryTimeDays
+    status
+    orderId
+    createdAt
+  }
+}
+    `;
+
+/**
+ * __useGetOffersForConversationQuery__
+ *
+ * To run a query within a React component, call `useGetOffersForConversationQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetOffersForConversationQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetOffersForConversationQuery({
+ *   variables: {
+ *      conversationId: // value for 'conversationId'
+ *   },
+ * });
+ */
+export function useGetOffersForConversationQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetOffersForConversationQuery, GetOffersForConversationQueryVariables> & ({ variables: GetOffersForConversationQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetOffersForConversationQuery, GetOffersForConversationQueryVariables>(GetOffersForConversationDocument, options);
+      }
+export function useGetOffersForConversationLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetOffersForConversationQuery, GetOffersForConversationQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetOffersForConversationQuery, GetOffersForConversationQueryVariables>(GetOffersForConversationDocument, options);
+        }
+// @ts-ignore
+export function useGetOffersForConversationSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<GetOffersForConversationQuery, GetOffersForConversationQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetOffersForConversationQuery, GetOffersForConversationQueryVariables>;
+export function useGetOffersForConversationSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetOffersForConversationQuery, GetOffersForConversationQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetOffersForConversationQuery | undefined, GetOffersForConversationQueryVariables>;
+export function useGetOffersForConversationSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetOffersForConversationQuery, GetOffersForConversationQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetOffersForConversationQuery, GetOffersForConversationQueryVariables>(GetOffersForConversationDocument, options);
+        }
+export type GetOffersForConversationQueryHookResult = ReturnType<typeof useGetOffersForConversationQuery>;
+export type GetOffersForConversationLazyQueryHookResult = ReturnType<typeof useGetOffersForConversationLazyQuery>;
+export type GetOffersForConversationSuspenseQueryHookResult = ReturnType<typeof useGetOffersForConversationSuspenseQuery>;
+export type GetOffersForConversationQueryResult = Apollo.QueryResult<GetOffersForConversationQuery, GetOffersForConversationQueryVariables>;
 export const CreateOrderDocument = gql`
     mutation CreateOrder($input: CreateOrderInput!) {
   createOrder(input: $input) {
@@ -1532,6 +1599,7 @@ export const AcceptOfferDocument = gql`
   acceptOffer(offerId: $offerId) {
     id
     status
+    orderId
   }
 }
     `;
@@ -1595,6 +1663,37 @@ export function useRejectOfferMutation(baseOptions?: ApolloReactHooks.MutationHo
 export type RejectOfferMutationHookResult = ReturnType<typeof useRejectOfferMutation>;
 export type RejectOfferMutationResult = Apollo.MutationResult<RejectOfferMutation>;
 export type RejectOfferMutationOptions = Apollo.BaseMutationOptions<RejectOfferMutation, RejectOfferMutationVariables>;
+export const GetMidtransSnapTokenDocument = gql`
+    mutation GetMidtransSnapToken($orderId: ID!) {
+  getMidtransSnapToken(orderId: $orderId)
+}
+    `;
+export type GetMidtransSnapTokenMutationFn = Apollo.MutationFunction<GetMidtransSnapTokenMutation, GetMidtransSnapTokenMutationVariables>;
+
+/**
+ * __useGetMidtransSnapTokenMutation__
+ *
+ * To run a mutation, you first call `useGetMidtransSnapTokenMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useGetMidtransSnapTokenMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [getMidtransSnapTokenMutation, { data, loading, error }] = useGetMidtransSnapTokenMutation({
+ *   variables: {
+ *      orderId: // value for 'orderId'
+ *   },
+ * });
+ */
+export function useGetMidtransSnapTokenMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<GetMidtransSnapTokenMutation, GetMidtransSnapTokenMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<GetMidtransSnapTokenMutation, GetMidtransSnapTokenMutationVariables>(GetMidtransSnapTokenDocument, options);
+      }
+export type GetMidtransSnapTokenMutationHookResult = ReturnType<typeof useGetMidtransSnapTokenMutation>;
+export type GetMidtransSnapTokenMutationResult = Apollo.MutationResult<GetMidtransSnapTokenMutation>;
+export type GetMidtransSnapTokenMutationOptions = Apollo.BaseMutationOptions<GetMidtransSnapTokenMutation, GetMidtransSnapTokenMutationVariables>;
 export const AdvanceOrderStatusDocument = gql`
     mutation AdvanceOrderStatus($orderId: ID!) {
   advanceOrderStatus(orderId: $orderId) {

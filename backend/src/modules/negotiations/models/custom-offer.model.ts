@@ -28,6 +28,9 @@ export class CustomOfferModel {
   @Field(() => String, { nullable: true })
   listingId?: string | null;
 
+  @Field(() => String, { nullable: true })
+  orderId?: string | null;
+
   @Field()
   description: string;
 

@@ -9,6 +9,7 @@ import { useChatRoom } from "~/features/chat/hooks/useChatRoom";
 import { MessageBubble } from "~/features/chat/components/MessageBubble";
 import { ChatInputArea } from "~/features/chat/components/ChatInputArea";
 import { ListingSelectionModal } from "~/features/chat/components/ListingSelectionModal";
+import { CreateOfferModal } from "~/features/chat/components/CreateOfferModal";
 
 export default function ChatRoute() {
   const { conversationId } = useParams();
@@ -29,9 +30,11 @@ export default function ChatRoute() {
     handleSend,
     handleKeyDown,
     handleInputChange,
+    refetchOffers,
   } = useChatRoom({ conversationId: conversationId as string });
 
   const [isListingModalOpen, setIsListingModalOpen] = React.useState(false);
+  const [isOfferModalOpen, setIsOfferModalOpen] = React.useState(false);
 
   if (loading && !allMessages.length) {
     return (
@@ -78,6 +81,7 @@ export default function ChatRoute() {
             msg={msg} 
             userAccountId={user?.accountId} 
             recipientAvatar={recipient?.avatarObjectKey} 
+            refetchOffers={refetchOffers}
           />
         ))}
         <div ref={messagesEndRef} />
@@ -95,6 +99,7 @@ export default function ChatRoute() {
         onCancelListing={cancelListing}
         isUploading={isUploading}
         onOpenListingModal={() => setIsListingModalOpen(true)}
+        onOpenOfferModal={() => setIsOfferModalOpen(true)}
       />
 
       {/* Mention Listing sliding / overlay Modal */}
@@ -105,6 +110,15 @@ export default function ChatRoute() {
         userAccountId={user?.accountId}
         recipientAccountId={recipient?.accountId}
         recipientDisplayName={recipient?.displayName}
+      />
+
+      {/* Custom Offer Modal */}
+      <CreateOfferModal
+        isOpen={isOfferModalOpen}
+        onClose={() => setIsOfferModalOpen(false)}
+        conversationId={conversationId as string}
+        buyerAccountId={recipient?.accountId || ""}
+        listingId={selectedListing?.id}
       />
     </div>
   );

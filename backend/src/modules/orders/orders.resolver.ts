@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ID, Context } from '@nestjs/graphql';
 import { OrdersService } from './orders.service';
 import { ReviewsService } from './reviews.service';
 import { OrderModel, ReviewModel } from './models/order.model';
@@ -8,12 +8,23 @@ import {
   type CurrentUserPayload,
 } from '../../common/decorators/current-user.decorator';
 import { OrderStatus } from '@prisma/client';
+import { PaymentsService } from '../payments/payments.service';
+
+interface NgrokTunnel {
+  proto: string;
+  public_url: string;
+}
+
+interface NgrokApiResponse {
+  tunnels?: NgrokTunnel[];
+}
 
 @Resolver(() => OrderModel)
 export class OrdersResolver {
   constructor(
     private readonly ordersService: OrdersService,
     private readonly reviewsService: ReviewsService,
+    private readonly paymentsService: PaymentsService,
   ) {}
 
   private serializeOrder(order: import('@prisma/client').Order): OrderModel {
@@ -101,5 +112,48 @@ export class OrdersResolver {
       targetAccountId: review.targetAccountId,
       comment: review.comment ?? undefined,
     };
+  }
+
+  @Mutation(() => String)
+  async getMidtransSnapToken(
+    @Args('orderId', { type: () => ID }) orderId: string,
+    @Context() context: { req: import('express').Request },
+  ): Promise<string> {
+    const req = context.req;
+    let publicUrl = process.env.PUBLIC_URL;
+
+    // Auto-discovery URL Ngrok dinamis jika tidak ada yang diset di .env
+    if (!publicUrl) {
+      try {
+        const ngrokRes = await fetch('http://localhost:4040/api/tunnels');
+        if (ngrokRes.ok) {
+          const data = (await ngrokRes.json()) as NgrokApiResponse;
+          const tunnel =
+            data.tunnels?.find((t) => t.proto === 'https') ||
+            data.tunnels?.find((t) => t.proto === 'http');
+          if (tunnel && tunnel.public_url) {
+            publicUrl = tunnel.public_url;
+          }
+        }
+      } catch {
+        // Ngrok API tidak merespons (mungkin mati), lanjutkan ke fallback request header
+      }
+    }
+
+    // Fallback terakhir: Deteksi host asal (Ngrok atau Localhost) secara dinamis dari header
+    if (!publicUrl) {
+      const rawHost =
+        req.headers['x-forwarded-host'] ||
+        req.headers['host'] ||
+        'localhost:8080';
+      const host = Array.isArray(rawHost) ? rawHost[0] : rawHost;
+
+      const rawProto = req.headers['x-forwarded-proto'] || 'http';
+      const protocol = Array.isArray(rawProto) ? rawProto[0] : rawProto;
+
+      publicUrl = `${protocol}://${host}`;
+    }
+
+    return this.paymentsService.getSnapToken(orderId, publicUrl);
   }
 }

@@ -1,17 +1,153 @@
 import * as React from "react";
 import { Check } from "lucide-react";
+import { useNavigate } from "react-router";
 import { Avatar } from "~/components/ui/Avatar";
 import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
 import { ChatMessageListing } from "./ChatMessageListing";
+import {
+  useAcceptOfferMutation,
+  useRejectOfferMutation,
+  useWithdrawOfferMutation,
+} from "~/core/apollo/generated";
+import { useToastStore } from "~/core/store/useToastStore";
 
 interface MessageBubbleProps {
   msg: any;
   userAccountId?: string;
   recipientAvatar?: string | null;
+  refetchOffers?: () => void;
 }
 
-export function MessageBubble({ msg, userAccountId, recipientAvatar }: MessageBubbleProps) {
+export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffers }: MessageBubbleProps) {
   const isMine = msg.senderId === userAccountId;
+  const navigate = useNavigate();
+  const addToast = useToastStore((s) => s.addToast);
+
+  const [acceptOffer, { loading: accepting }] = useAcceptOfferMutation({
+    onCompleted: (res: any) => {
+      addToast("success", "Penawaran diterima! Mengalihkan ke pembayaran...");
+      refetchOffers?.();
+      if (res.acceptOffer?.orderId) {
+        navigate(`/workspace/order/${res.acceptOffer.orderId}`);
+      }
+    },
+    onError: (e: any) => addToast("error", e.message),
+  });
+
+  const [rejectOffer, { loading: rejecting }] = useRejectOfferMutation({
+    onCompleted: () => {
+      addToast("success", "Penawaran berhasil ditolak.");
+      refetchOffers?.();
+    },
+    onError: (e: any) => addToast("error", e.message),
+  });
+
+  const [withdrawOffer, { loading: withdrawing }] = useWithdrawOfferMutation({
+    onCompleted: () => {
+      addToast("success", "Penawaran berhasil ditarik.");
+      refetchOffers?.();
+    },
+    onError: (e: any) => addToast("error", e.message),
+  });
+
+  const actionLoading = accepting || rejecting || withdrawing;
+
+  // Render Custom Offer Card
+  if (msg.isCustomOffer) {
+    const offer = msg.offerData;
+    const isSeller = offer.sellerAccountId === userAccountId;
+    const formattedPrice = Number(offer.proposedPrice).toLocaleString("id-ID");
+
+    return (
+      <div className={`flex gap-2 max-w-[85%] ${isSeller ? "self-end" : ""} w-full animate-fade-in`}>
+        {!isSeller && (
+          <Avatar
+            src={recipientAvatar ? resolveMediaUrl(recipientAvatar) : ""}
+            size="sm"
+            className="mt-auto shrink-0 h-6 w-6"
+          />
+        )}
+        <div className="bg-white dark:bg-gray-900 border-2 border-indigo-500/20 dark:border-indigo-500/10 p-4 rounded-3xl shadow-md w-full relative overflow-hidden">
+          <div className="absolute -top-10 -right-10 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl pointer-events-none" />
+
+          <div className="flex items-center justify-between mb-3 border-b border-gray-100 dark:border-gray-800 pb-2">
+            <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 tracking-wide uppercase">
+              Penawaran Khusus
+            </span>
+            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+              offer.status === "PENDING" ? "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" :
+              offer.status === "ACCEPTED" ? "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400" :
+              offer.status === "REJECTED" ? "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400" :
+              "bg-gray-100 text-gray-500 dark:bg-gray-850 dark:text-gray-400"
+            }`}>
+              {offer.status === "PENDING" ? "Menunggu" :
+               offer.status === "ACCEPTED" ? "Disetujui" :
+               offer.status === "REJECTED" ? "Ditolak" : "Ditarik"}
+            </span>
+          </div>
+
+          <p className="text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed mb-4 font-medium">
+            {offer.description}
+          </p>
+
+          <div className="grid grid-cols-2 gap-3 mb-4 bg-gray-50 dark:bg-gray-850 p-3 rounded-2xl border border-gray-100/50 dark:border-gray-800/30">
+            <div className="flex flex-col">
+              <span className="text-[8px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Harga Kesepakatan</span>
+              <span className="text-xs font-extrabold text-indigo-600 dark:text-indigo-400">Rp {formattedPrice}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[8px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Durasi Pengiriman</span>
+              <span className="text-xs font-bold text-gray-800 dark:text-gray-200">{offer.deliveryTimeDays} Hari</span>
+            </div>
+          </div>
+
+          {offer.status === "PENDING" && (
+            <div className="flex gap-2">
+              {!isSeller ? (
+                <>
+                  <button
+                    onClick={() => rejectOffer({ variables: { offerId: offer.id } })}
+                    disabled={actionLoading}
+                    className="flex-1 py-2 text-center text-[11px] font-bold text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/40 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition cursor-pointer disabled:opacity-50"
+                  >
+                    Tolak
+                  </button>
+                  <button
+                    onClick={() => acceptOffer({ variables: { offerId: offer.id } })}
+                    disabled={actionLoading}
+                    className="flex-[2] py-2 text-center text-[11px] font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md shadow-indigo-600/10 hover:shadow-indigo-600/20 active:scale-[0.99] transition cursor-pointer disabled:opacity-50"
+                  >
+                    Terima & Bayar
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => withdrawOffer({ variables: { offerId: offer.id } })}
+                  disabled={actionLoading}
+                  className="w-full py-2 text-center text-[11px] font-bold text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-850 rounded-xl transition cursor-pointer disabled:opacity-50"
+                >
+                  Tarik Penawaran
+                </button>
+              )}
+            </div>
+          )}
+
+          {offer.status === "ACCEPTED" && offer.orderId && !isSeller && (
+            <button
+              onClick={() => navigate(`/workspace/order/${offer.orderId}`)}
+              className="w-full py-2 text-center text-[11px] font-bold text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-900/40 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 rounded-xl transition cursor-pointer"
+            >
+              Lihat Detail Order
+            </button>
+          )}
+
+          <div className="flex justify-end items-center mt-2.5 text-[8px] text-gray-400 dark:text-gray-500">
+            {new Date(offer.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+          </div>
+        </div>
+      </div>
+    );
+  }
   
   // Regex to parse UUID of mentioned listing in text
   const listingRegex = /\s*\/listing\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\s*/g;

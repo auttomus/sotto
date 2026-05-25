@@ -116,6 +116,23 @@ services:
     networks:
       - platform_net
 
+  # 8. NGROK TUNNEL (Public URL untuk Midtrans Webhook)
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: sotto_ngrok
+    restart: unless-stopped
+    command:
+      - "http"
+      - "nginx:80"
+    env_file:
+      - ./infrastructure/.env.docker
+    ports:
+      - "4040:4040"
+    depends_on:
+      - nginx
+    networks:
+      - platform_net
+
 networks:
   platform_net:
     driver: bridge
