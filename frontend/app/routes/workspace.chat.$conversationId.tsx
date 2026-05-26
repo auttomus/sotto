@@ -119,6 +119,7 @@ export default function ChatRoute() {
         conversationId={conversationId as string}
         buyerAccountId={recipient?.accountId || ""}
         listingId={selectedListing?.id}
+        onSuccess={refetchOffers}
       />
     </div>
   );

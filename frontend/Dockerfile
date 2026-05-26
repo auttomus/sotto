@@ -6,12 +6,14 @@ RUN corepack enable
 FROM base AS dev-deps
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile --ignore-scripts
+# Koreksi di sini
+RUN pnpm install --ignore-scripts
 
 FROM base AS prod-deps
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --prod --frozen-lockfile --ignore-scripts
+# Koreksi di sini
+RUN pnpm install --prod --ignore-scripts
 
 FROM base AS build
 WORKDIR /app

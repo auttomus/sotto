@@ -25,7 +25,7 @@ export type MajorsBySchoolQuery = { majorsBySchool: Array<{ id: string, name: st
 export type GetConversationsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetConversationsQuery = { conversations: Array<{ id: string, type: Types.ConversationType, createdAt: string, updatedAt: string, participants: Array<{ accountId: string, displayName: string, avatarObjectKey: string | null }> | null, activeOrder: { id: string, status: Types.OrderStatus, agreedPrice: number, createdAt: string } | null }> };
+export type GetConversationsQuery = { conversations: Array<{ id: string, type: Types.ConversationType, createdAt: string, updatedAt: string, lastMessageContent: string | null, lastMessageAt: string | null, participants: Array<{ accountId: string, displayName: string, avatarObjectKey: string | null }> | null, activeOrder: { id: string, status: Types.OrderStatus, agreedPrice: number, createdAt: string } | null }> };
 
 export type GetMessagesQueryVariables = Exact<{
   conversationId: string | number;
@@ -395,6 +395,8 @@ export const GetConversationsDocument = gql`
       displayName
       avatarObjectKey
     }
+    lastMessageContent
+    lastMessageAt
     activeOrder {
       id
       status

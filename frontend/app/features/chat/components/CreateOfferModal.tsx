@@ -9,6 +9,7 @@ interface CreateOfferModalProps {
   conversationId: string;
   buyerAccountId: string;
   listingId?: string | null;
+  onSuccess?: () => void;
 }
 
 export function CreateOfferModal({
@@ -17,6 +18,7 @@ export function CreateOfferModal({
   conversationId,
   buyerAccountId,
   listingId,
+  onSuccess,
 }: CreateOfferModalProps) {
   const addToast = useToastStore((s) => s.addToast);
   const [description, setDescription] = React.useState("");
@@ -29,6 +31,7 @@ export function CreateOfferModal({
       setDescription("");
       setPriceStr("");
       setDeliveryDays(3);
+      onSuccess?.();
       onClose();
     },
     onError: (e: any) => addToast("error", e.message),
