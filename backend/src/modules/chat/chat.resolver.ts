@@ -149,4 +149,20 @@ export class ChatConversationResolver {
       agreedPrice: activeOrder.agreedPrice.toNumber(),
     };
   }
+
+  @ResolveField(() => String, { nullable: true })
+  async lastMessageContent(
+    @Parent() conversation: ConversationModel,
+  ): Promise<string | null> {
+    const messages = await this.chatService.getMessages(conversation.id, 1);
+    return messages[0]?.content || null;
+  }
+
+  @ResolveField(() => Date, { nullable: true })
+  async lastMessageAt(
+    @Parent() conversation: ConversationModel,
+  ): Promise<Date | null> {
+    const messages = await this.chatService.getMessages(conversation.id, 1);
+    return messages[0]?.createdAt || null;
+  }
 }

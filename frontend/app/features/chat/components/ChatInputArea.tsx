@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Paperclip, Package, Send, Loader2, X } from "lucide-react";
+import { Paperclip, Package, Send, Loader2, X, Tag } from "lucide-react";
 
 interface ChatInputAreaProps {
   inputText: string;
@@ -12,6 +12,7 @@ interface ChatInputAreaProps {
   onCancelListing: () => void;
   isUploading: boolean;
   onOpenListingModal: () => void;
+  onOpenOfferModal?: () => void;
 }
 
 export function ChatInputArea({
@@ -25,6 +26,7 @@ export function ChatInputArea({
   onCancelListing,
   isUploading,
   onOpenListingModal,
+  onOpenOfferModal,
 }: ChatInputAreaProps) {
   return (
     <div className="shrink-0 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 p-3 pb-safe">
@@ -113,6 +115,18 @@ export function ChatInputArea({
         >
           <Package className="h-5 w-5" />
         </button>
+
+        {/* Custom Offer Button */}
+        {onOpenOfferModal && (
+          <button 
+            type="button"
+            onClick={onOpenOfferModal}
+            className="text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition shrink-0 cursor-pointer"
+            title="Buat Penawaran Jasa"
+          >
+            <Tag className="h-5 w-5" />
+          </button>
+        )}
 
         <input
           type="text"

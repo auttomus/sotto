@@ -1,5 +1,6 @@
 import * as React from "react";
-import { useGetMessagesQuery, useGetConversationsQuery } from "~/core/apollo/generated";
+import { useLocation } from "react-router";
+import { useGetMessagesQuery, useGetConversationsQuery, useGetOffersForConversationQuery } from "~/core/apollo/generated";
 import { useAuthStore } from "~/core/store/useAuthStore";
 import { useChatSocket } from "~/core/hooks/useChatSocket";
 import { useUpload } from "~/core/hooks/useUpload";
@@ -9,17 +10,35 @@ interface UseChatRoomOptions {
 }
 
 export function useChatRoom({ conversationId }: UseChatRoomOptions) {
+  const location = useLocation();
+  const incomingMention = location.state?.mentionListing;
+
   const { user } = useAuthStore();
   const { uploadFile } = useUpload();
   const [inputText, setInputText] = React.useState("");
   const [localMessages, setLocalMessages] = React.useState<any[]>([]);
   const [selectedImages, setSelectedImages] = React.useState<File[]>([]);
   const [selectedListing, setSelectedListing] = React.useState<any | null>(null);
+
+  React.useEffect(() => {
+    if (incomingMention) {
+      setSelectedListing(incomingMention);
+      // Clear browser history state to avoid duplication on page reload
+      window.history.replaceState({}, document.title);
+    }
+  }, [incomingMention]);
+
   const [isUploading, setIsUploading] = React.useState(false);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
   const { data, loading, error } = useGetMessagesQuery({
     variables: { conversationId, limit: 50 },
+    skip: !conversationId,
+    fetchPolicy: "cache-and-network"
+  });
+
+  const { data: offersData, refetch: refetchOffers } = useGetOffersForConversationQuery({
+    variables: { conversationId },
     skip: !conversationId,
     fetchPolicy: "cache-and-network"
   });
@@ -44,8 +63,24 @@ export function useChatRoom({ conversationId }: UseChatRoomOptions) {
 
   const allMessages = React.useMemo(() => {
     const serverMessages = data?.messages || [];
-    return [...serverMessages].reverse().concat(localMessages);
-  }, [data, localMessages]);
+    const chatMsgs = [...serverMessages].reverse().concat(localMessages);
+    const offers = offersData?.offersForConversation || [];
+
+    // Map each Custom Offer to a pseudo-message object
+    const offerMsgs = offers.map((offer: any) => ({
+      messageId: `offer-${offer.id}`,
+      senderId: offer.sellerAccountId,
+      content: `[CUSTOM_OFFER]${JSON.stringify(offer)}`,
+      createdAt: offer.createdAt,
+      isCustomOffer: true,
+      offerData: offer,
+    }));
+
+    // Combine and sort by createdAt ascending
+    return [...chatMsgs, ...offerMsgs].sort((a: any, b: any) => {
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    });
+  }, [data, localMessages, offersData]);
 
   // Auto-scroll to bottom on new messages
   React.useEffect(() => {
@@ -144,5 +179,6 @@ export function useChatRoom({ conversationId }: UseChatRoomOptions) {
     handleSend,
     handleKeyDown,
     handleInputChange,
+    refetchOffers,
   };
 }

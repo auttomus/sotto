@@ -2,12 +2,13 @@
   "name": "frontend",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@11.1.2",
   "scripts": {
     "build": "react-router build",
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
-    "codegen": "graphql-codegen && echo -e \"// @ts-nocheck\\n\\$(cat app/core/apollo/generated.ts)\" > app/core/apollo/generated.ts"
+    "codegen": "graphql-codegen"
   },
   "dependencies": {
     "@apollo/client": "^4.1.9",

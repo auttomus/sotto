@@ -114,6 +114,7 @@ export type CustomOfferModel = {
   expiresAt?: Maybe<Scalars['DateTime']['output']>;
   id: Scalars['ID']['output'];
   listingId?: Maybe<Scalars['String']['output']>;
+  orderId?: Maybe<Scalars['String']['output']>;
   proposedPrice: Scalars['Float']['output'];
   sellerAccountId: Scalars['String']['output'];
   status: OfferStatus;
@@ -201,6 +202,7 @@ export type Mutation = {
   deleteListing: Scalars['Boolean']['output'];
   deleteMedia: Scalars['Boolean']['output'];
   follow: Scalars['Boolean']['output'];
+  getMidtransSnapToken: Scalars['String']['output'];
   markAllNotificationsAsRead: Scalars['Boolean']['output'];
   markNotificationAsRead: Scalars['Boolean']['output'];
   rejectOffer: CustomOfferModel;
@@ -285,6 +287,11 @@ export type MutationDeleteMediaArgs = {
 
 export type MutationFollowArgs = {
   targetAccountId: Scalars['ID']['input'];
+};
+
+
+export type MutationGetMidtransSnapTokenArgs = {
+  orderId: Scalars['ID']['input'];
 };
 
 

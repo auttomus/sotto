@@ -54,7 +54,7 @@ export default function ChatsListRoute() {
             <div className="text-center text-gray-500 py-10">Belum ada pesan.</div>
           ) : (
             chats.map((chat: any) => {
-              const otherParticipant = chat.participants?.find((p: any) => p.accountId !== user?.id) || chat.participants?.[0];
+              const otherParticipant = chat.participants?.find((p: any) => p.accountId !== user?.accountId) || chat.participants?.[0];
               const displayName = otherParticipant?.displayName || 'User';
               const avatar = resolveMediaUrl(otherParticipant?.avatarObjectKey);
               
@@ -71,11 +71,11 @@ export default function ChatsListRoute() {
                     <div className="flex items-center justify-between mb-1">
                       <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm truncate">{displayName}</h3>
                       <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap ml-2">
-                        {formatDate(chat.updatedAt as string)}
+                        {formatDate((chat.lastMessageAt || chat.updatedAt) as string)}
                       </span>
                     </div>
-                    <p className={`text-sm truncate text-gray-500 dark:text-gray-400`}>
-                      {chat.activeOrder ? "Order Aktif" : "Buka pesan"}
+                    <p className="text-sm truncate text-gray-500 dark:text-gray-400">
+                      {chat.lastMessageContent || (chat.activeOrder ? "Order Aktif" : "Buka pesan")}
                     </p>
                   </div>
                 </Link>

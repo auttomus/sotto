@@ -7,14 +7,22 @@ import {
   type CurrentUserPayload,
 } from '../../common/decorators/current-user.decorator';
 import { Prisma } from '@prisma/client';
+import { PrismaService } from '../../prisma/prisma.service';
 
 type OfferRow = Prisma.CustomOfferGetPayload<Record<string, never>>;
 
 @Resolver(() => CustomOfferModel)
 export class NegotiationsResolver {
-  constructor(private readonly negotiationsService: NegotiationsService) {}
+  constructor(
+    private readonly negotiationsService: NegotiationsService,
+    private readonly prisma: PrismaService,
+  ) {}
 
-  private serializeOffer(offer: OfferRow): CustomOfferModel {
+  private async serializeOffer(offer: OfferRow): Promise<CustomOfferModel> {
+    const order = await this.prisma.order.findUnique({
+      where: { customOfferId: offer.id },
+      select: { id: true },
+    });
     return {
       id: offer.id,
       conversationId: offer.conversationId,
@@ -26,6 +34,7 @@ export class NegotiationsResolver {
       deliveryTimeDays: offer.deliveryTimeDays,
       status: offer.status,
       expiresAt: offer.expiresAt ?? undefined,
+      orderId: order?.id ?? null,
       createdAt: offer.createdAt,
       updatedAt: offer.updatedAt,
     };
@@ -85,6 +94,6 @@ export class NegotiationsResolver {
   ): Promise<CustomOfferModel[]> {
     const offers =
       await this.negotiationsService.getOffersForConversation(conversationId);
-    return offers.map((o) => this.serializeOffer(o));
+    return Promise.all(offers.map((o) => this.serializeOffer(o)));
   }
 }

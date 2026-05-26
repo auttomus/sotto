@@ -36,7 +36,15 @@ export function ListingDetail({ listing }: ListingDetailProps) {
 
   const [createConversation, { loading: chatLoading }] = useCreateConversationMutation({
     onCompleted: (data: any) => {
-      navigate(ROUTES.WORKSPACE_CHAT(data.createConversation.id));
+      navigate(ROUTES.WORKSPACE_CHAT(data.createConversation.id), {
+        state: {
+          mentionListing: {
+            id: listing.id,
+            title: listing.title,
+            price: listing.price,
+          }
+        }
+      });
     },
     onError: (e: any) => addToast('error', e.message),
   });
@@ -87,9 +95,9 @@ export function ListingDetail({ listing }: ListingDetailProps) {
   const isActionLoading = orderLoading || chatLoading;
 
   return (
-    <div className="pb-24 bg-white dark:bg-gray-950 min-h-screen relative">
+    <div className="flex flex-col min-h-[100dvh] bg-white dark:bg-gray-950 relative text-gray-900 dark:text-gray-100">
       {/* Header Mobile / Navigation */}
-      <div className="fixed top-0 left-0 right-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-white/85 dark:bg-gray-900/85 backdrop-blur-md px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between shrink-0">
         <button 
           onClick={() => navigate(-1)} 
           className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition"
@@ -104,10 +112,10 @@ export function ListingDetail({ listing }: ListingDetailProps) {
             <Share2 className="h-5 w-5" />
           </button>
         </div>
-      </div>
+      </header>
 
       {/* Main Content */}
-      <div className="pt-14 w-full">
+      <div className="flex-grow w-full">
         {/* Media Gallery Carousel */}
         {hasMedia ? (
           <div className="relative w-full aspect-square md:aspect-video bg-gray-100 dark:bg-gray-900 overflow-hidden">
@@ -221,7 +229,7 @@ export function ListingDetail({ listing }: ListingDetailProps) {
       </div>
 
       {/* Sticky Bottom Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 p-4 pb-safe flex items-center gap-3">
+      <div className="sticky bottom-0 left-0 right-0 z-40 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 p-4 pb-safe flex items-center gap-3 shrink-0">
         <button 
           onClick={handleChat}
           disabled={isOwnListing || isActionLoading}

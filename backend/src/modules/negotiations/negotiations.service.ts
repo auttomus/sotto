@@ -30,20 +30,64 @@ export class NegotiationsService {
 
   /** Terima penawaran → nanti trigger order creation */
   async acceptOffer(offerId: string, buyerAccountId: string) {
-    const offer = await this.prisma.customOffer.findUnique({
-      where: { id: offerId },
-    });
-    if (!offer) throw new NotFoundException('Penawaran tidak ditemukan.');
-    if (offer.buyerAccountId !== buyerAccountId) {
-      throw new BadRequestException('Hanya pembeli yang bisa menerima.');
-    }
-    if (offer.status !== OfferStatus.PENDING) {
-      throw new BadRequestException('Penawaran sudah tidak aktif.');
-    }
+    return this.prisma.$transaction(async (tx) => {
+      const offer = await tx.customOffer.findUnique({
+        where: { id: offerId },
+      });
+      if (!offer) throw new NotFoundException('Penawaran tidak ditemukan.');
+      if (offer.buyerAccountId !== buyerAccountId) {
+        throw new BadRequestException('Hanya pembeli yang bisa menerima.');
+      }
+      if (offer.status !== OfferStatus.PENDING) {
+        throw new BadRequestException('Penawaran sudah tidak aktif.');
+      }
 
-    return this.prisma.customOffer.update({
-      where: { id: offerId },
-      data: { status: OfferStatus.ACCEPTED },
+      // 1. Update Custom Offer Status to ACCEPTED
+      const updatedOffer = await tx.customOffer.update({
+        where: { id: offerId },
+        data: { status: OfferStatus.ACCEPTED },
+      });
+
+      // 2. Resolve listingId
+      let listingId = offer.listingId;
+      if (!listingId) {
+        // Cari listing aktif pertama milik penjual
+        const activeListing = await tx.listing.findFirst({
+          where: { accountId: offer.sellerAccountId, status: 'ACTIVE' },
+        });
+        if (activeListing) {
+          listingId = activeListing.id;
+        } else {
+          // Buat listing dummy/fallback jika penjual belum punya listing aktif sama sekali
+          const fallbackListing = await tx.listing.create({
+            data: {
+              accountId: offer.sellerAccountId,
+              title: `Jasa Kustom (${offer.deliveryTimeDays} Hari)`,
+              description:
+                offer.description ||
+                'Pengerjaan kustom disepakati melalui obrolan chat',
+              price: offer.proposedPrice,
+              status: 'ARCHIVED',
+              isUnlimited: true,
+            },
+          });
+          listingId = fallbackListing.id;
+        }
+      }
+
+      // 3. Create the Order
+      await tx.order.create({
+        data: {
+          buyerAccountId: offer.buyerAccountId,
+          sellerAccountId: offer.sellerAccountId,
+          listingId,
+          customOfferId: offer.id,
+          agreedPrice: offer.proposedPrice,
+          status: 'PENDING_PAYMENT',
+        },
+      });
+
+      return updatedOffer;
     });
   }
 

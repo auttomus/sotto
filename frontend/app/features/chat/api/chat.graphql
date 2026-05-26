@@ -9,6 +9,8 @@ query GetConversations {
       displayName
       avatarObjectKey
     }
+    lastMessageContent
+    lastMessageAt
     activeOrder {
       id
       status

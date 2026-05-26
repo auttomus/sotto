@@ -6,7 +6,8 @@ RUN corepack enable
 FROM base AS dependencies
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile --ignore-scripts
+# Koreksi di sini
+RUN pnpm install --ignore-scripts
 
 FROM base AS build
 WORKDIR /app
@@ -18,7 +19,8 @@ RUN pnpm run build
 FROM base AS prod-dependencies
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --prod --frozen-lockfile --ignore-scripts
+# Koreksi di sini
+RUN pnpm install --prod --ignore-scripts
 COPY prisma ./prisma
 RUN pnpm dlx prisma@6 generate
 
