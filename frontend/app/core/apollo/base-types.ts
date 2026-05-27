@@ -36,6 +36,7 @@ export type AccountModel = {
 
 export type AccountPartial = {
   __typename?: 'AccountPartial';
+  avatarObjectKey?: Maybe<Scalars['String']['output']>;
   displayName: Scalars['String']['output'];
   major?: Maybe<Scalars['String']['output']>;
   trustScore: Scalars['Float']['output'];

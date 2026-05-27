@@ -157,14 +157,14 @@ export type DeletePostMutation = { deletePost: boolean };
 export type GetListingsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetListingsQuery = { listings: Array<{ id: string, title: string, description: string, price: number, status: Types.ListingStatus, createdAt: string, updatedAt: string, accountId: string, account: { displayName: string, major: string | null, trustScore: number, username: string | null } | null }> };
+export type GetListingsQuery = { listings: Array<{ id: string, title: string, description: string, price: number, status: Types.ListingStatus, createdAt: string, updatedAt: string, accountId: string, account: { displayName: string, major: string | null, trustScore: number, username: string | null, avatarObjectKey: string | null } | null }> };
 
 export type GetListingDetailQueryVariables = Exact<{
   id: string | number;
 }>;
 
 
-export type GetListingDetailQuery = { listing: { id: string, title: string, description: string, price: number, status: Types.ListingStatus, type: Types.ListingType, isUnlimited: boolean, deliveryTimeDays: number | null, createdAt: string, updatedAt: string, accountId: string, account: { displayName: string, major: string | null, trustScore: number, username: string | null } | null, media: Array<{ id: string, fileName: string, contentType: string, objectKey: string, url: string | null, isPrivate: boolean }> | null } | null };
+export type GetListingDetailQuery = { listing: { id: string, title: string, description: string, price: number, status: Types.ListingStatus, type: Types.ListingType, isUnlimited: boolean, deliveryTimeDays: number | null, createdAt: string, updatedAt: string, accountId: string, account: { displayName: string, major: string | null, trustScore: number, username: string | null, avatarObjectKey: string | null } | null, media: Array<{ id: string, fileName: string, contentType: string, objectKey: string, url: string | null, isPrivate: boolean }> | null } | null };
 
 export type CreateListingMutationVariables = Exact<{
   input: Types.CreateListingInput;
@@ -1317,6 +1317,7 @@ export const GetListingsDocument = gql`
       major
       trustScore
       username
+      avatarObjectKey
     }
   }
 }
@@ -1375,6 +1376,7 @@ export const GetListingDetailDocument = gql`
       major
       trustScore
       username
+      avatarObjectKey
     }
     media {
       id

@@ -13,6 +13,7 @@ query GetListings {
       major
       trustScore
       username
+      avatarObjectKey
     }
   }
 }
@@ -35,6 +36,7 @@ query GetListingDetail($id: ID!) {
       major
       trustScore
       username
+      avatarObjectKey
     }
     media {
       id

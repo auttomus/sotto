@@ -206,7 +206,7 @@ export function ListingDetail({ listing }: ListingDetailProps) {
               <Link to={listing.account.username ? ROUTES.PROFILE_PUBLIC(listing.account.username) : "#"} className="flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 transition">
                 <div className="flex items-center gap-3">
                   <Avatar 
-                    src={resolveMediaUrl((listing.account as any).avatarObjectKey)} 
+                    src={resolveMediaUrl(listing.account.avatarObjectKey)} 
                     alt={listing.account.displayName} 
                     size="lg" 
                   />

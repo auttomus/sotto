@@ -34,6 +34,7 @@ type SerializedListing = {
     major: string | null;
     trustScore: number;
     username: string;
+    avatarObjectKey?: string | null;
   } | null;
 };
 
@@ -45,6 +46,7 @@ type ListingWithAccount = Prisma.ListingGetPayload<{
         major: { select: { name: true } };
         trustScore: true;
         username: true;
+        avatarObjectKey: true;
       };
     };
   };
@@ -77,6 +79,7 @@ export class ListingsService {
             major: listing.account.major?.name ?? null,
             trustScore: Number(listing.account.trustScore),
             username: listing.account.username,
+            avatarObjectKey: listing.account.avatarObjectKey,
           }
         : null,
     };
@@ -106,6 +109,7 @@ export class ListingsService {
             major: { select: { name: true } },
             trustScore: true,
             username: true,
+            avatarObjectKey: true,
           },
         },
       },
@@ -145,6 +149,7 @@ export class ListingsService {
             major: { select: { name: true } },
             trustScore: true,
             username: true,
+            avatarObjectKey: true,
           },
         },
       },
@@ -189,6 +194,7 @@ export class ListingsService {
             major: { select: { name: true } },
             trustScore: true,
             username: true,
+            avatarObjectKey: true,
           },
         },
       },
@@ -255,6 +261,7 @@ export class ListingsService {
             major: { select: { name: true } },
             trustScore: true,
             username: true,
+            avatarObjectKey: true,
           },
         },
       },
@@ -273,6 +280,7 @@ export class ListingsService {
             major: { select: { name: true } },
             trustScore: true,
             username: true,
+            avatarObjectKey: true,
           },
         },
       },
@@ -295,6 +303,7 @@ export class ListingsService {
             major: { select: { name: true } },
             trustScore: true,
             username: true,
+            avatarObjectKey: true,
           },
         },
       },

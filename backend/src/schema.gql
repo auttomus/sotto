@@ -22,6 +22,7 @@ type AccountModel {
 }
 
 type AccountPartial {
+  avatarObjectKey: String
   displayName: String!
   major: String
   trustScore: Float!

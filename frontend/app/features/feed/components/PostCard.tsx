@@ -90,17 +90,21 @@ export function PostCard({ post: rawPost }: PostCardProps) {
     variables: { postId: post.postId },
     optimisticResponse: {
       __typename: "Mutation",
-      toggleLikePost: !post.likedByMe,
+      toggleLikePost: !liked,
     },
-    update(cache: any) {
+    update(cache: any, { data }: any) {
+      const newLikedState = data && typeof data.toggleLikePost === "boolean"
+        ? data.toggleLikePost
+        : !liked;
+
       cache.modify({
         id: cache.identify(post),
         fields: {
-          likedByMe(existing: boolean) {
-            return !existing;
+          likedByMe() {
+            return newLikedState;
           },
-          likesCount(existing: number) {
-            return post.likedByMe ? Math.max(0, existing - 1) : existing + 1;
+          likesCount(existing: number = 0) {
+            return newLikedState ? existing + 1 : Math.max(0, existing - 1);
           },
         },
       });
