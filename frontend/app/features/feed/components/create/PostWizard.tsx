@@ -101,7 +101,7 @@ export function PostWizard() {
     <div className="flex flex-col min-h-screen bg-background w-full max-w-lg mx-auto border-x border-border relative">
       {showDraftDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm" onClick={() => setShowDraftDialog(false)}>
-          <div className="bg-card border border-border rounded-2xl shadow-xl p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
+          <div className="bg-card border border-border rounded-md shadow-xl p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
             <h3 className="text-lg font-bold text-foreground mb-2">Simpan sebagai Draft?</h3>
             <p className="text-sm text-muted-foreground mb-6">Kamu memiliki perubahan yang belum disimpan. Ingin menyimpannya untuk dilanjutkan nanti?</p>
             <div className="flex flex-col gap-2">
@@ -211,10 +211,10 @@ export function PostWizard() {
           <button 
             type="button"
             onClick={() => setShowListingSelector(true)}
-            className="w-full mt-5 flex items-center justify-between p-4 rounded-2xl border border-dashed border-border hover:border-primary hover:bg-primary/5 transition-all text-left"
+            className="w-full mt-5 flex items-center justify-between p-4 rounded-md border border-dashed border-border hover:border-primary hover:bg-primary/5 transition-all text-left"
           >
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-muted border border-border flex items-center justify-center text-muted-foreground">
+              <div className="h-10 w-10 rounded-md bg-muted border border-border flex items-center justify-center text-muted-foreground">
                 <Briefcase className="h-5 w-5" />
               </div>
               <div>

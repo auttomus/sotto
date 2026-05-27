@@ -58,28 +58,20 @@ export function PostHeader({
             </span>
           </div>
           {post.authorSchoolName && (
-            <div className="mt-0.5">
-              <Link 
-                to={post.authorUsername ? ROUTES.PROFILE_PUBLIC(post.authorUsername) : "#"}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <LabelBadge variant="school" value={post.authorSchoolName} />
-              </Link>
-            </div>
+            <span className="text-xs text-muted-foreground mt-0.5 block">
+              {post.authorSchoolName}
+            </span>
           )}
           {post.tags && post.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-1.5">
+            <div className="flex flex-wrap gap-2 mt-1">
               {post.tags.map((tag: any) => (
                 <Link
                   key={tag.id}
                   to={`/explore?query=${encodeURIComponent(tag.name)}`}
                   onClick={(e) => e.stopPropagation()}
-                  className="hover:-translate-y-0.5 hover:shadow-sm transition-all cursor-pointer"
+                  className="text-xs font-semibold text-primary hover:underline"
                 >
-                  <LabelBadge
-                    variant="tag"
-                    value={tag.name}
-                  />
+                  #{tag.name}
                 </Link>
               ))}
             </div>
@@ -99,7 +91,7 @@ export function PostHeader({
             <MoreHorizontal className="h-5 w-5" />
           </button>
           {showMenu && (
-            <div className="absolute right-0 mt-1 z-30 bg-popover text-popover-foreground border border-border rounded-xl shadow-lg p-1.5 min-w-[120px] flex flex-col gap-0.5 animate-scale-in">
+            <div className="absolute right-0 mt-1 z-30 bg-popover text-popover-foreground border border-border rounded-md shadow-lg p-1.5 min-w-[120px] flex flex-col gap-0.5 animate-scale-in">
               <button
                 type="button"
                 onClick={(e) => {

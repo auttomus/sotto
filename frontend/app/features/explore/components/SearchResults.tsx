@@ -37,7 +37,7 @@ export function SearchResults({
 
   if (!hasResults) {
     return (
-      <div className="text-center py-16 px-4 bg-card rounded-3xl border border-border shadow-sm">
+      <div className="text-center py-16 px-4 bg-card rounded-md border border-border shadow-sm">
         <div className="text-4xl mb-3">🔍</div>
         <p className="text-foreground font-medium">Tidak ada hasil ditemukan</p>
         <p className="text-sm text-muted-foreground mt-1">Coba gunakan kata kunci lain untuk "{searchQuery}"</p>
@@ -49,7 +49,7 @@ export function SearchResults({
     <div className="space-y-8 pb-10">
       {/* 1. Tag Results */}
       {tags.length > 0 && (
-        <div className="bg-card p-4 rounded-3xl border border-border shadow-sm">
+        <div className="bg-card p-4 rounded-md border border-border shadow-sm">
           <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-1.5">
             <Hash className="h-3.5 w-3.5 text-primary" /> Topik & Tag
           </h3>
@@ -78,7 +78,7 @@ export function SearchResults({
               <Link 
                 to={`/profile/${account.username}`} 
                 key={account.id} 
-                className="bg-card rounded-3xl p-5 border border-border shadow-sm flex flex-col items-center text-center hover:shadow-md hover:bg-accent/5 transition-all hover:-translate-y-0.5 cursor-pointer group"
+                className="bg-card rounded-md p-5 border border-border shadow-sm flex flex-col items-center text-center hover:shadow-md hover:bg-accent/5 transition-all hover:-translate-y-0.5 cursor-pointer group"
               >
                 <div className="h-16 w-16 rounded-full bg-muted mb-3 overflow-hidden border-2 border-border shadow-inner shrink-0 group-hover:scale-105 transition duration-200">
                   {account.avatarObjectKey ? (
@@ -149,7 +149,7 @@ export function SearchResults({
           <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-1.5 px-1">
             <Sparkles className="h-3.5 w-3.5 text-primary" /> Karya & Showcase
           </h3>
-          <div className="space-y-px bg-card rounded-3xl overflow-hidden border border-border shadow-sm divide-y divide-border">
+          <div className="space-y-px bg-card rounded-md overflow-hidden border border-border shadow-sm divide-y divide-border">
             {posts.map((post) => (
               <PostCard key={post.postId} post={post} />
             ))}

@@ -44,7 +44,7 @@ export function Dialog({
       onClick={onClose}
     >
       <div 
-        className={`bg-card text-foreground rounded-3xl border border-border shadow-2xl w-full ${maxWidthClass} overflow-hidden relative transition-all duration-300 transform scale-100 animate-zoom-in`}
+        className={`bg-card text-foreground rounded-md border border-border shadow-2xl w-full ${maxWidthClass} overflow-hidden relative transition-all duration-300 transform scale-100 animate-zoom-in`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

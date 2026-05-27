@@ -20,7 +20,7 @@ export default function SettingsRoute() {
       <div className="p-4 space-y-6 max-w-lg mx-auto w-full">
         {/* Profile Card Summary */}
         {user && (
-          <div className="flex items-center gap-3 p-4 bg-card rounded-2xl border border-border">
+          <div className="flex items-center gap-3 p-4 bg-card rounded-md border border-border">
             <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg uppercase">
               {user.displayName[0]}
             </div>
@@ -40,10 +40,10 @@ export default function SettingsRoute() {
           <div className="space-y-2">
             <button 
               onClick={() => navigate("/profile")} 
-              className="w-full flex items-center justify-between p-4 bg-card hover:bg-accent/5 rounded-2xl border border-border transition group cursor-pointer"
+              className="w-full flex items-center justify-between p-4 bg-card hover:bg-accent/5 rounded-md border border-border transition group cursor-pointer"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-muted text-foreground">
+                <div className="p-2 rounded-md bg-muted text-foreground">
                   <User className="h-5 w-5" />
                 </div>
                 <div className="text-left">

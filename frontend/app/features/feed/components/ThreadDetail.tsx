@@ -44,17 +44,17 @@ export function ThreadDetail({
   };
 
   return (
-    <div className="pb-20 bg-white dark:bg-gray-900 min-h-screen">
+    <div className="pb-20 bg-background min-h-screen">
       <PageHeader title="Utasan" showBackButton />
 
       {/* Main Post Card */}
-      <div className="border-b border-gray-100 dark:border-gray-800">
+      <div className="border-b border-border">
         <PostCard post={post} />
       </div>
 
       {/* Input reply (X-style) */}
       {currentUser && (
-        <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-900/10">
+        <div className="p-4 border-b border-border bg-muted/30">
           <form onSubmit={onSubmit} className="flex gap-3 items-start">
             <Avatar src={resolveMediaUrl(currentUser.avatarObjectKey)} size="sm" />
             <div className="flex-1 relative">
@@ -64,18 +64,18 @@ export function ThreadDetail({
                 onChange={(e) => setReplyText(e.target.value)}
                 placeholder="Balas postingan ini..."
                 rows={2}
-                className="w-full bg-transparent border-0 resize-none text-gray-800 dark:text-gray-100 placeholder-gray-400 focus:ring-0 text-sm focus:outline-none font-medium leading-relaxed mb-1"
+                className="w-full bg-transparent border-0 resize-none text-foreground placeholder-muted-foreground focus:ring-0 text-sm focus:outline-none font-medium leading-relaxed mb-1"
               />
               <MentionSuggestions
                 value={replyText}
                 onChange={setReplyText}
                 inputRef={textareaRef}
               />
-              <div className="flex justify-end border-t border-gray-100 dark:border-gray-800/85 pt-2.5 mt-1">
+              <div className="flex justify-end border-t border-border pt-2.5 mt-1">
                 <button
-                  type="submit"
-                  disabled={!replyText.trim() || submitting}
-                  className="px-4 py-1.5 rounded-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold text-xs transition flex items-center gap-1.5 cursor-pointer active:scale-[0.97]"
+                   type="submit"
+                   disabled={!replyText.trim() || submitting}
+                   className="px-4 py-1.5 rounded-full bg-primary hover:opacity-90 disabled:opacity-50 text-primary-foreground font-semibold text-xs transition flex items-center gap-1.5 cursor-pointer active:scale-[0.97]"
                 >
                   {submitting ? (
                     <Loader2 className="h-3 w-3 animate-spin" />
@@ -92,19 +92,19 @@ export function ThreadDetail({
 
       {/* Replies Header */}
       {replies.length > 0 && (
-        <div className="px-4 py-3 bg-gray-50/50 dark:bg-gray-900/20 border-b border-gray-100 dark:border-gray-800 text-xs font-semibold text-gray-500 tracking-wider">
+        <div className="px-4 py-3 bg-muted/50 border-b border-border text-xs font-semibold text-muted-foreground tracking-wider">
           BALASAN ({replies.length})
         </div>
       )}
 
       {/* Replies List */}
-      <div className="divide-y divide-gray-100 dark:divide-gray-800">
+      <div className="divide-y divide-border">
         {repliesLoading ? (
           <div className="p-8 flex items-center justify-center">
-            <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
           </div>
         ) : replies.length === 0 ? (
-          <div className="p-8 text-center text-sm text-gray-400">
+          <div className="p-8 text-center text-sm text-muted-foreground">
             Belum ada balasan. Jadilah yang pertama membalas!
           </div>
         ) : (

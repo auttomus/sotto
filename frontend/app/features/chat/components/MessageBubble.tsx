@@ -139,7 +139,7 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffe
             </button>
             {showMenu && (
               <div 
-                className="absolute right-0 bottom-full mb-1 z-35 bg-popover text-popover-foreground border border-border rounded-xl shadow-lg p-1 min-w-[100px] flex flex-col gap-0.5 animate-scale-in"
+                className="absolute right-0 bottom-full mb-1 z-35 bg-popover text-popover-foreground border border-border rounded-md shadow-lg p-1 min-w-[100px] flex flex-col gap-0.5 animate-scale-in"
                 onClick={(e) => e.stopPropagation()}
               >
                 <button
@@ -172,7 +172,7 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffe
         )}
 
         {/* Kotak gelembung pesan */}
-        <div className={`p-3 rounded-2xl shadow-sm ${
+        <div className={`p-3 rounded-md shadow-sm ${
           isMine 
             ? 'bg-primary text-primary-foreground rounded-br-sm' 
             : 'bg-card border border-border text-foreground rounded-bl-sm'
@@ -183,7 +183,7 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffe
                 type="text"
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
-                className="w-full bg-background text-foreground border border-border rounded-xl px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-ring"
+                className="w-full bg-background text-foreground border border-border rounded-md px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-ring"
                 autoFocus
               />
               <div className="flex justify-end gap-1.5">

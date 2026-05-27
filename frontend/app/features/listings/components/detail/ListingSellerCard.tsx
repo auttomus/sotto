@@ -20,10 +20,10 @@ export function ListingSellerCard({ account }: ListingSellerCardProps) {
 
   return (
     <div className="py-6">
-      <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 text-lg">Tentang Penjual</h3>
+      <h3 className="font-bold text-foreground mb-4 text-lg">Tentang Penjual</h3>
       <Link 
         to={account.username ? ROUTES.PROFILE_PUBLIC(account.username) : "#"} 
-        className="flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 transition"
+        className="flex items-center justify-between p-4 rounded-md border border-border hover:bg-accent hover:text-accent-foreground transition"
       >
         <div className="flex items-center gap-3">
           <Avatar 
@@ -32,10 +32,10 @@ export function ListingSellerCard({ account }: ListingSellerCardProps) {
             size="lg" 
           />
           <div>
-            <h4 className="font-bold text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
+            <h4 className="font-bold text-foreground flex items-center gap-1.5">
               {account.displayName}
             </h4>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-muted-foreground">
               {account.major || `@${account.username}`}
             </p>
             <div className="flex items-center gap-1 mt-1 text-xs font-medium text-amber-600 dark:text-amber-500">
@@ -44,7 +44,7 @@ export function ListingSellerCard({ account }: ListingSellerCardProps) {
             </div>
           </div>
         </div>
-        <ChevronRight className="h-5 w-5 text-gray-400" />
+        <ChevronRight className="h-5 w-5 text-muted-foreground" />
       </Link>
     </div>
   );

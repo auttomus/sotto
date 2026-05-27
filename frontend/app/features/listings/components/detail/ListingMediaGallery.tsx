@@ -24,14 +24,14 @@ export function ListingMediaGallery({ media, title, isFullyBooked }: ListingMedi
 
   if (!hasMedia) {
     return (
-      <div className="w-full aspect-video bg-gradient-to-r from-indigo-500/20 to-purple-500/20 flex items-center justify-center">
-        <span className="text-4xl"></span>
+      <div className="w-full aspect-video bg-muted flex items-center justify-center">
+        <span className="text-4xl">📦</span>
       </div>
     );
   }
 
   return (
-    <div className="relative w-full aspect-square md:aspect-video bg-gray-100 dark:bg-gray-900 overflow-hidden">
+    <div className="relative w-full aspect-square md:aspect-video bg-muted overflow-hidden">
       <img 
         src={resolveMediaUrl(media[currentMedia].url || (media[currentMedia] as any).objectKey)} 
         alt={title}

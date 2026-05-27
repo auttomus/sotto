@@ -15,13 +15,13 @@ export function PostEditor({
 }: PostEditorProps) {
   return (
     <div 
-      className="bg-muted p-3 rounded-2xl border border-border mb-3 flex flex-col gap-2"
+      className="bg-muted p-3 rounded-md border border-border mb-3 flex flex-col gap-2"
       onClick={(e) => e.stopPropagation()} // Mencegah klik menyebar ke artikel
     >
       <textarea
         value={editContent}
         onChange={(e) => setEditContent(e.target.value)}
-        className="w-full text-[14px] bg-background text-foreground rounded-xl p-3 border border-border focus:outline-none focus:border-primary focus:ring-1 focus:ring-ring resize-none font-medium leading-relaxed"
+        className="w-full text-[14px] bg-background text-foreground rounded-md p-3 border border-border focus:outline-none focus:border-primary focus:ring-1 focus:ring-ring resize-none font-medium leading-relaxed"
         rows={3}
       />
       <div className="flex justify-end gap-2">
@@ -35,7 +35,7 @@ export function PostEditor({
         <button
           type="button"
           onClick={onSave}
-          className="px-4 py-1.5 text-xs font-bold bg-primary text-primary-foreground rounded-xl hover:opacity-90 active:scale-[0.98] transition cursor-pointer"
+          className="px-4 py-1.5 text-xs font-bold bg-primary text-primary-foreground rounded-md hover:opacity-90 active:scale-[0.98] transition cursor-pointer"
         >
           Simpan
         </button>

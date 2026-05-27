@@ -15,7 +15,7 @@ export function ChatMessageListing({ listingId }: ChatMessageListingProps) {
 
   if (loading) {
     return (
-      <div className="mt-2 p-3 bg-muted/50 rounded-2xl border border-border flex items-center justify-center min-h-[80px] w-full">
+      <div className="mt-2 p-3 bg-muted/50 rounded-md border border-border flex items-center justify-center min-h-[80px] w-full">
         <Loader2 className="h-5 w-5 animate-spin text-primary" />
       </div>
     );
@@ -28,7 +28,7 @@ export function ChatMessageListing({ listingId }: ChatMessageListingProps) {
     <ListingCard
       listing={listing as any}
       isLink={true}
-      className="mt-2 bg-muted hover:bg-muted border border-border shadow-none max-w-sm rounded-2xl p-2.5"
+      className="mt-2 border border-border shadow-none max-w-sm rounded-md p-2.5"
     />
   );
 }

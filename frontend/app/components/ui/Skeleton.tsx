@@ -33,7 +33,7 @@ export function PostCardSkeleton() {
         <Skeleton className="h-4 w-[60%]" />
         
         {/* Optional Media Skeleton */}
-        <Skeleton className="h-48 w-full rounded-2xl mt-4" />
+        <Skeleton className="h-48 w-full rounded-md mt-4" />
       </div>
 
       {/* Actions */}
@@ -72,7 +72,7 @@ export function ListingDetailSkeleton() {
 
         <div className="py-6">
           <Skeleton className="h-6 w-40 mb-4" />
-          <div className="flex items-center gap-4 p-4 border border-border rounded-xl">
+          <div className="flex items-center gap-4 p-4 border border-border rounded-md">
             <Skeleton className="h-14 w-14 rounded-full" />
             <div className="space-y-2 flex-1">
               <Skeleton className="h-5 w-40" />

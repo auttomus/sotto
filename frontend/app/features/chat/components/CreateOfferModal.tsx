@@ -121,7 +121,7 @@ export function CreateOfferModal({
               <label className="form-label mb-1.5 block">
                 Waktu Pengerjaan (Hari)
               </label>
-              <div className="flex items-center bg-muted border border-border rounded-xl overflow-hidden">
+              <div className="flex items-center bg-muted border border-border rounded-md overflow-hidden">
                 <button
                   type="button"
                   onClick={() => setDeliveryDays((d) => Math.max(1, d - 1))}
@@ -149,7 +149,7 @@ export function CreateOfferModal({
             </div>
           </div>
 
-          <div className="bg-primary/10 border border-primary/20 rounded-2xl p-3 flex items-start gap-2.5">
+          <div className="bg-primary/10 border border-primary/20 rounded-md p-3 flex items-start gap-2.5">
             <AlertCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
             <p className="text-[10px] text-muted-foreground leading-relaxed font-medium">
               Penawaran khusus ini akan dikirim langsung ke obrolan sebagai kartu interaktif. Pembeli dapat memilih untuk menyetujuinya, yang secara otomatis akan memulai transaksi order.
@@ -159,7 +159,7 @@ export function CreateOfferModal({
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-4 rounded-xl bg-primary hover:opacity-90 text-primary-foreground font-semibold text-sm transition shadow-lg shadow-primary/10 active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            className="w-full py-3 px-4 rounded-md bg-primary hover:opacity-90 text-primary-foreground font-semibold text-sm transition shadow-lg shadow-primary/10 active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             {loading ? (
               <>

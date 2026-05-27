@@ -20,7 +20,7 @@ export function ListingMediaStep({ handleFileSelect, removeFile }: ListingMediaS
 
       <div className="grid grid-cols-2 gap-3 pt-2">
         {files.map((file: File, i: number) => (
-          <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-border group">
+          <div key={i} className="relative aspect-square rounded-md overflow-hidden border border-border group">
             <img src={URL.createObjectURL(file)} alt="preview" className="w-full h-full object-cover" />
             <button 
               onClick={() => removeFile(i)}
@@ -34,7 +34,7 @@ export function ListingMediaStep({ handleFileSelect, removeFile }: ListingMediaS
         {files.length < 5 && (
           <button 
             onClick={() => fileInputRef.current?.click()}
-            className="aspect-square rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center hover:bg-muted transition text-muted-foreground hover:text-primary cursor-pointer"
+            className="aspect-square rounded-md border-2 border-dashed border-border flex flex-col items-center justify-center hover:bg-muted transition text-muted-foreground hover:text-primary cursor-pointer"
           >
             <ImageIcon className="h-8 w-8 mb-2" />
             <span className="text-sm font-medium">Tambah Foto</span>

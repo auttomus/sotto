@@ -198,7 +198,7 @@ export function PostCard({ post: rawPost }: PostCardProps) {
             <ListingCard 
               listing={listing as any} 
               isLink={true} 
-              className="mt-3 bg-muted/50 hover:bg-muted border border-border" 
+              className="mt-3" 
             />
           </div>
         )}

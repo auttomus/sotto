@@ -11,6 +11,7 @@ import { PageHeader } from "~/components/layout/PageHeader";
 import { ListingMediaGallery } from "./detail/ListingMediaGallery";
 import { ListingSellerCard } from "./detail/ListingSellerCard";
 import { ListingActionBar } from "./detail/ListingActionBar";
+import { LabelBadge } from "~/components/ui/LabelBadge";
 
 type RawListingDetail = NonNullable<GetListingDetailQuery["listing"]>;
 
@@ -105,7 +106,7 @@ export function ListingDetail({ listing }: ListingDetailProps) {
   const isActionLoading = orderLoading || chatLoading;
 
   return (
-    <div className="flex flex-col min-h-[100dvh] bg-white dark:bg-gray-950 relative text-gray-900 dark:text-gray-100">
+    <div className="flex flex-col min-h-[100dvh] bg-background relative text-foreground">
       <PageHeader
         title=""
         showBackButton
@@ -114,7 +115,7 @@ export function ListingDetail({ listing }: ListingDetailProps) {
             <button 
               type="button"
               onClick={handleLike}
-              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-900 dark:text-gray-100 cursor-pointer"
+              className="p-2 rounded-full hover:bg-muted transition text-foreground cursor-pointer"
             >
               <Heart className={`h-5 w-5 ${isLiked ? 'text-red-500 fill-red-500 scale-110' : ''} transition-all duration-200`} />
             </button>
@@ -125,7 +126,7 @@ export function ListingDetail({ listing }: ListingDetailProps) {
                 text: listing.description || undefined,
                 url: `/listing/${listing.id}`
               })}
-              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-900 dark:text-gray-100 cursor-pointer"
+              className="p-2 rounded-full hover:bg-muted transition text-foreground cursor-pointer"
             >
               <Share2 className="h-5 w-5" />
             </button>
@@ -145,25 +146,28 @@ export function ListingDetail({ listing }: ListingDetailProps) {
         {/* Listing Info */}
         <div className="p-4 md:p-6">
           <div className="mb-2">
-            <span className="inline-block px-2.5 py-1 rounded-md bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs font-bold uppercase tracking-wider mb-2">
-              {listing.type === 'DIGITAL_PRODUCT' ? 'Produk Digital' : 'Jasa'}
+            <span className="inline-block mb-2">
+              <LabelBadge
+                variant={listing.type === "SERVICE" ? "listing-service" : "listing-product"}
+                value={listing.type === 'DIGITAL_PRODUCT' ? 'PRODUK DIGITAL' : 'JASA'}
+              />
             </span>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground leading-tight">
               {listing.title}
             </h1>
           </div>
 
-          <div className="flex flex-col gap-1 pb-6 border-b border-gray-100 dark:border-gray-800">
-            <span className="text-sm text-gray-500 dark:text-gray-400">Harga</span>
-            <span className="text-3xl font-black text-indigo-600 dark:text-indigo-400">
+          <div className="flex flex-col gap-1 pb-6 border-b border-border">
+            <span className="text-sm text-muted-foreground">Harga</span>
+            <span className="text-3xl font-black text-primary">
               Rp {listing.price.toLocaleString("id-ID")}
             </span>
           </div>
 
           {/* Description */}
-          <div className="py-6 border-b border-gray-100 dark:border-gray-800">
-            <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-3 text-lg">Deskripsi</h3>
-            <div className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
+          <div className="py-6 border-b border-border">
+            <h3 className="font-bold text-foreground mb-3 text-lg">Deskripsi</h3>
+            <div className="text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap">
               {listing.description}
             </div>
           </div>
