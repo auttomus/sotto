@@ -33,7 +33,55 @@ export class FeedService {
       content,
       linkedServiceId: linkedServiceId ?? null,
       createdAt: now,
+      editedAt: null,
+      deletedAt: null,
     };
+  }
+
+  /** Update post (ScyllaDB) */
+  async updatePost(postId: string, authorId: string, content: string) {
+    const postUuid = types.TimeUuid.fromString(postId);
+
+    const checkResult = await this.scylla.execute(
+      `SELECT author_id FROM posts WHERE post_id = ?`,
+      [postUuid],
+    );
+    if (checkResult.rows.length === 0) throw new Error('Post tidak ditemukan');
+    const ownerRow = checkResult.rows[0] as unknown as {
+      author_id: { toString(): string };
+    };
+    if (ownerRow.author_id.toString() !== authorId)
+      throw new Error('Tidak memiliki izin untuk menyunting post ini');
+
+    const now = new Date();
+    await this.scylla.execute(
+      `UPDATE posts SET content = ?, edited_at = ? WHERE post_id = ?`,
+      [content, now, postUuid],
+    );
+    return this.getPost(postId);
+  }
+
+  /** Soft-delete post (ScyllaDB) */
+  async deletePost(postId: string, authorId: string) {
+    const postUuid = types.TimeUuid.fromString(postId);
+
+    const checkResult = await this.scylla.execute(
+      `SELECT author_id FROM posts WHERE post_id = ?`,
+      [postUuid],
+    );
+    if (checkResult.rows.length === 0) throw new Error('Post tidak ditemukan');
+    const ownerRow = checkResult.rows[0] as unknown as {
+      author_id: { toString(): string };
+    };
+    if (ownerRow.author_id.toString() !== authorId)
+      throw new Error('Tidak memiliki izin untuk menghapus post ini');
+
+    const now = new Date();
+    await this.scylla.execute(
+      `UPDATE posts SET deleted_at = ? WHERE post_id = ?`,
+      [now, postUuid],
+    );
+    return true;
   }
 
   /** Tulis komentar (post dengan in_reply_to_post_id) */
@@ -59,6 +107,8 @@ export class FeedService {
       inReplyToPostId: parentPostId,
       content,
       createdAt: now,
+      editedAt: null,
+      deletedAt: null,
     };
   }
 
@@ -105,6 +155,8 @@ export class FeedService {
         content: string;
         linked_service_id?: { toString(): string } | null;
         created_at: Date;
+        edited_at?: Date | null;
+        deleted_at?: Date | null;
       };
       return {
         postId: r.post_id.toString(),
@@ -113,10 +165,12 @@ export class FeedService {
         content: r.content,
         linkedServiceId: r.linked_service_id?.toString() ?? null,
         createdAt: r.created_at,
+        editedAt: r.edited_at ?? null,
+        deletedAt: r.deleted_at ?? null,
       };
     });
 
-    const filtered = posts.filter((p) => !p.inReplyToPostId);
+    const filtered = posts.filter((p) => !p.inReplyToPostId && !p.deletedAt);
     return filtered.sort(
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
     );
@@ -157,7 +211,12 @@ export class FeedService {
       content: string;
       linked_service_id?: { toString(): string } | null;
       created_at: Date;
+      edited_at?: Date | null;
+      deleted_at?: Date | null;
     };
+
+    if (row.deleted_at) return null; // Filter deleted
+
     return {
       postId: row.post_id.toString(),
       authorId: row.author_id.toString(),
@@ -165,6 +224,8 @@ export class FeedService {
       content: row.content,
       linkedServiceId: row.linked_service_id?.toString() ?? null,
       createdAt: row.created_at,
+      editedAt: row.edited_at ?? null,
+      deletedAt: row.deleted_at ?? null,
     };
   }
 
@@ -176,24 +237,30 @@ export class FeedService {
       `SELECT * FROM posts WHERE post_id IN ?`,
       [timeUuids],
     );
-    return result.rows.map((row) => {
-      const r = row as unknown as {
-        post_id: { toString(): string };
-        author_id: { toString(): string };
-        in_reply_to_post_id?: { toString(): string } | null;
-        content: string;
-        linked_service_id?: { toString(): string } | null;
-        created_at: Date;
-      };
-      return {
-        postId: r.post_id.toString(),
-        authorId: r.author_id.toString(),
-        inReplyToPostId: r.in_reply_to_post_id?.toString() ?? null,
-        content: r.content,
-        linkedServiceId: r.linked_service_id?.toString() ?? null,
-        createdAt: r.created_at,
-      };
-    });
+    return result.rows
+      .map((row) => {
+        const r = row as unknown as {
+          post_id: { toString(): string };
+          author_id: { toString(): string };
+          in_reply_to_post_id?: { toString(): string } | null;
+          content: string;
+          linked_service_id?: { toString(): string } | null;
+          created_at: Date;
+          edited_at?: Date | null;
+          deleted_at?: Date | null;
+        };
+        return {
+          postId: r.post_id.toString(),
+          authorId: r.author_id.toString(),
+          inReplyToPostId: r.in_reply_to_post_id?.toString() ?? null,
+          content: r.content,
+          linkedServiceId: r.linked_service_id?.toString() ?? null,
+          createdAt: r.created_at,
+          editedAt: r.edited_at ?? null,
+          deletedAt: r.deleted_at ?? null,
+        };
+      })
+      .filter((p) => !p.deletedAt);
   }
 
   /** Toggle like status for a post in ScyllaDB */
@@ -260,24 +327,30 @@ export class FeedService {
       `SELECT * FROM posts WHERE in_reply_to_post_id = ?`,
       [postUuid],
     );
-    return result.rows.map((row) => {
-      const r = row as unknown as {
-        post_id: { toString(): string };
-        author_id: { toString(): string };
-        in_reply_to_post_id?: { toString(): string } | null;
-        content: string;
-        linked_service_id?: { toString(): string } | null;
-        created_at: Date;
-      };
-      return {
-        postId: r.post_id.toString(),
-        authorId: r.author_id.toString(),
-        inReplyToPostId: r.in_reply_to_post_id?.toString() ?? null,
-        content: r.content,
-        linkedServiceId: r.linked_service_id?.toString() ?? null,
-        createdAt: r.created_at,
-      };
-    });
+    return result.rows
+      .map((row) => {
+        const r = row as unknown as {
+          post_id: { toString(): string };
+          author_id: { toString(): string };
+          in_reply_to_post_id?: { toString(): string } | null;
+          content: string;
+          linked_service_id?: { toString(): string } | null;
+          created_at: Date;
+          edited_at?: Date | null;
+          deleted_at?: Date | null;
+        };
+        return {
+          postId: r.post_id.toString(),
+          authorId: r.author_id.toString(),
+          inReplyToPostId: r.in_reply_to_post_id?.toString() ?? null,
+          content: r.content,
+          linkedServiceId: r.linked_service_id?.toString() ?? null,
+          createdAt: r.created_at,
+          editedAt: r.edited_at ?? null,
+          deletedAt: r.deleted_at ?? null,
+        };
+      })
+      .filter((p) => !p.deletedAt);
   }
 
   /** Ambil jumlah reply/komentar untuk suatu post dari ScyllaDB */
@@ -318,6 +391,8 @@ export class FeedService {
         content: string;
         linked_service_id?: { toString(): string } | null;
         created_at: Date;
+        edited_at?: Date | null;
+        deleted_at?: Date | null;
       };
       return {
         postId: r.post_id.toString(),
@@ -326,11 +401,14 @@ export class FeedService {
         content: r.content,
         linkedServiceId: r.linked_service_id?.toString() ?? null,
         createdAt: r.created_at,
+        editedAt: r.edited_at ?? null,
+        deletedAt: r.deleted_at ?? null,
       };
     });
 
-    const filtered = posts.filter((p) =>
-      isReply ? !!p.inReplyToPostId : !p.inReplyToPostId,
+    const filtered = posts.filter(
+      (p) =>
+        !p.deletedAt && (isReply ? !!p.inReplyToPostId : !p.inReplyToPostId),
     );
     return filtered.sort(
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),

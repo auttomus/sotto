@@ -26,6 +26,7 @@ export default function DesktopSidebar() {
           <NavLink
             key={item.to}
             to={item.to}
+            end={item.to === "/profile"}
             className={({ isActive }) =>
               cn(
                 "flex items-center gap-4 px-3 py-3 rounded-xl transition-all group relative",

@@ -11,7 +11,10 @@ const config: CodegenConfig = {
   generates: {
     // File 1: Base types saja (schema types, inputs, enums)
     'app/core/apollo/base-types.ts': {
-      plugins: ['typescript'],
+      plugins: [
+        { add: { content: '/* eslint-disable */\n// @ts-nocheck\n' } },
+        'typescript'
+      ],
       config: {
         scalars: {
           DateTime: 'string',
@@ -22,6 +25,7 @@ const config: CodegenConfig = {
     // File 2: Operations & React Hooks (mengimpor dari base-types)
     'app/core/apollo/generated.ts': {
       plugins: [
+        { add: { content: '/* eslint-disable */\n// @ts-nocheck\n' } },
         'typescript-operations',
         'typescript-react-apollo' // Ini yang ajaib, mengubah GraphQL jadi React Hooks
       ],
@@ -36,7 +40,6 @@ const config: CodegenConfig = {
           DateTime: 'string',
           Date: 'string',
         },
-        banner: '/* eslint-disable */\n// @ts-nocheck\n',
       },
     },
   },

@@ -31,6 +31,8 @@ export default function ChatRoute() {
     handleKeyDown,
     handleInputChange,
     refetchOffers,
+    editMessage,
+    deleteMessage,
   } = useChatRoom({ conversationId: conversationId as string });
 
   const [isListingModalOpen, setIsListingModalOpen] = React.useState(false);
@@ -82,6 +84,8 @@ export default function ChatRoute() {
             userAccountId={user?.accountId} 
             recipientAvatar={recipient?.avatarObjectKey} 
             refetchOffers={refetchOffers}
+            onEdit={editMessage}
+            onDelete={deleteMessage}
           />
         ))}
         <div ref={messagesEndRef} />

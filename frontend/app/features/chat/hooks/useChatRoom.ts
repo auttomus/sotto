@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useLocation } from "react-router";
-import { useGetMessagesQuery, useGetConversationsQuery, useGetOffersForConversationQuery } from "~/core/apollo/generated";
+import { useGetMessagesQuery, useGetConversationsQuery, useGetOffersForConversationQuery, useUpdateMessageMutation, useDeleteMessageMutation } from "~/core/apollo/generated";
 import { useAuthStore } from "~/core/store/useAuthStore";
 import { useChatSocket } from "~/core/hooks/useChatSocket";
 import { useUpload } from "~/core/hooks/useUpload";
@@ -49,6 +49,41 @@ export function useChatRoom({ conversationId }: UseChatRoomOptions) {
 
   const conversation = convData?.conversations?.find((c: any) => c.id === conversationId);
   const recipient = conversation?.participants?.find((p: any) => p.accountId !== user?.accountId);
+
+  const [updateMessageMutation] = useUpdateMessageMutation({
+    refetchQueries: ["GetMessages"]
+  });
+
+  const [deleteMessageMutation] = useDeleteMessageMutation({
+    refetchQueries: ["GetMessages"]
+  });
+
+  const editMessage = async (messageId: string, newContent: string) => {
+    try {
+      await updateMessageMutation({
+        variables: {
+          conversationId,
+          messageId,
+          input: { content: newContent }
+        }
+      });
+    } catch (err) {
+      console.error("Gagal mengubah pesan:", err);
+    }
+  };
+
+  const deleteMessage = async (messageId: string) => {
+    try {
+      await deleteMessageMutation({
+        variables: {
+          conversationId,
+          messageId
+        }
+      });
+    } catch (err) {
+      console.error("Gagal menghapus pesan:", err);
+    }
+  };
 
   // Real-time messaging via Socket.io
   const { sendMessage: socketSendMessage, sendTyping } = useChatSocket({
@@ -180,5 +215,7 @@ export function useChatRoom({ conversationId }: UseChatRoomOptions) {
     handleKeyDown,
     handleInputChange,
     refetchOffers,
+    editMessage,
+    deleteMessage,
   };
 }

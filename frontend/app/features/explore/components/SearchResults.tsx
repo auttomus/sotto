@@ -2,7 +2,7 @@ import * as React from "react";
 import { Link } from "react-router";
 import { Loader2, Hash, Briefcase, User, Sparkles } from "lucide-react";
 import { PostCard } from "~/features/feed/components/PostCard";
-import { ListingCard } from "~/components/ui/ListingCard";
+import { ListingCard } from "~/features/listings/components/ListingCard";
 import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
 
 interface SearchResultsProps {

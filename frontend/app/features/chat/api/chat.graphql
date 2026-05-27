@@ -26,6 +26,8 @@ query GetMessages($conversationId: ID!, $limit: Int) {
     senderId
     content
     createdAt
+    editedAt
+    deletedAt
     media {
       id
       fileName
@@ -41,4 +43,16 @@ mutation CreateConversation($input: CreateConversationInput!) {
     type
     createdAt
   }
+}
+
+mutation UpdateMessage($conversationId: ID!, $messageId: ID!, $input: UpdateMessageInput!) {
+  updateMessage(conversationId: $conversationId, messageId: $messageId, input: $input) {
+    messageId
+    content
+    editedAt
+  }
+}
+
+mutation DeleteMessage($conversationId: ID!, $messageId: ID!) {
+  deleteMessage(conversationId: $conversationId, messageId: $messageId)
 }

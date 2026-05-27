@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Loader2 } from "lucide-react";
-import { ListingCard } from "~/components/ui/ListingCard";
+import { ListingCard } from "~/features/listings/components/ListingCard";
 import { useGetListingDetailQuery } from "~/core/apollo/generated";
 
 interface ChatMessageListingProps {

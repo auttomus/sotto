@@ -1,9 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TagsService } from '../tags/tags.service';
 import { CreateListingInput } from './dto/create-listing.input';
 import { UpdateListingInput } from './dto/update-listing.input';
-import { ListingType, ListingStatus, Prisma } from '@prisma/client';
+import {
+  ListingType,
+  ListingStatus,
+  OrderStatus,
+  Prisma,
+} from '@prisma/client';
 
 // Explicit return type to satisfy strict TypeScript / no-unsafe-return
 type SerializedListing = {
@@ -128,7 +137,7 @@ export class ListingsService {
     input: UpdateListingInput,
   ): Promise<SerializedListing> {
     const existing = await this.prisma.listing.findFirst({
-      where: { id: listingId, accountId: accountId },
+      where: { id: listingId, accountId: accountId, deletedAt: null },
       include: {
         account: {
           select: {
@@ -141,6 +150,18 @@ export class ListingsService {
       },
     });
     if (!existing) throw new NotFoundException('Listing tidak ditemukan.');
+
+    const activeOrders = await this.prisma.order.count({
+      where: {
+        listingId,
+        status: { in: [OrderStatus.PENDING_PAYMENT, OrderStatus.IN_PROGRESS] },
+      },
+    });
+    if (activeOrders > 0) {
+      throw new BadRequestException(
+        'Tidak bisa menyunting listing yang sedang memiliki order aktif.',
+      );
+    }
 
     const listing = await this.prisma.listing.update({
       where: { id: listingId, lockVersion: existing.lockVersion },
@@ -181,21 +202,52 @@ export class ListingsService {
       );
     }
 
+    if (input.mediaIds !== undefined) {
+      // Unlink previous media by setting attachedId to orphaned
+      await this.prisma.mediaAttachment.updateMany({
+        where: { attachedId: listing.id, attachedType: 'Listing' },
+        data: { attachedId: 'orphaned', attachedType: 'Orphan' },
+      });
+      // Link new media
+      if (input.mediaIds.length > 0) {
+        await this.prisma.mediaAttachment.updateMany({
+          where: { id: { in: input.mediaIds }, accountId },
+          data: { attachedId: listing.id, attachedType: 'Listing' },
+        });
+      }
+    }
+
     return this.serializeListing(listing);
   }
 
   async delete(listingId: string, accountId: string): Promise<boolean> {
     const existing = await this.prisma.listing.findFirst({
-      where: { id: listingId, accountId: accountId },
+      where: { id: listingId, accountId: accountId, deletedAt: null },
     });
     if (!existing) throw new NotFoundException('Listing tidak ditemukan.');
-    await this.prisma.listing.delete({ where: { id: listingId } });
+
+    const activeOrders = await this.prisma.order.count({
+      where: {
+        listingId,
+        status: { in: [OrderStatus.PENDING_PAYMENT, OrderStatus.IN_PROGRESS] },
+      },
+    });
+    if (activeOrders > 0) {
+      throw new BadRequestException(
+        'Tidak bisa menghapus listing yang sedang memiliki order aktif.',
+      );
+    }
+
+    await this.prisma.listing.update({
+      where: { id: listingId },
+      data: { deletedAt: new Date() },
+    });
     return true;
   }
 
   async findOne(listingId: string): Promise<SerializedListing> {
-    const listing = await this.prisma.listing.findUnique({
-      where: { id: listingId },
+    const listing = await this.prisma.listing.findFirst({
+      where: { id: listingId, deletedAt: null },
       include: {
         account: {
           select: {
@@ -213,7 +265,7 @@ export class ListingsService {
 
   async findAll(): Promise<SerializedListing[]> {
     const listings = await this.prisma.listing.findMany({
-      where: { status: ListingStatus.ACTIVE },
+      where: { status: ListingStatus.ACTIVE, deletedAt: null },
       include: {
         account: {
           select: {
@@ -231,7 +283,11 @@ export class ListingsService {
 
   async findByAccount(accountId: string): Promise<SerializedListing[]> {
     const listings = await this.prisma.listing.findMany({
-      where: { accountId: accountId, status: ListingStatus.ACTIVE },
+      where: {
+        accountId: accountId,
+        status: ListingStatus.ACTIVE,
+        deletedAt: null,
+      },
       include: {
         account: {
           select: {

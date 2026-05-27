@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Loader2, X } from "lucide-react";
-import { ListingCard } from "~/components/ui/ListingCard";
+import { ListingCard } from "~/features/listings/components/ListingCard";
 import { useGetListingsByAccountQuery } from "~/core/apollo/generated";
 
 interface ListingSelectionModalProps {

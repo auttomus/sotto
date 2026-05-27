@@ -92,6 +92,8 @@ export class ScyllaService implements OnModuleInit, OnModuleDestroy {
         content text,
         linked_service_id uuid,
         created_at timestamp,
+        edited_at timestamp,
+        deleted_at timestamp,
         PRIMARY KEY (post_id)
       )`,
 
@@ -113,6 +115,8 @@ export class ScyllaService implements OnModuleInit, OnModuleDestroy {
         sender_id uuid,
         content text,
         created_at timestamp,
+        edited_at timestamp,
+        deleted_at timestamp,
         PRIMARY KEY (conversation_id, message_id)
       ) WITH CLUSTERING ORDER BY (message_id DESC)`,
 
@@ -138,6 +142,22 @@ export class ScyllaService implements OnModuleInit, OnModuleDestroy {
     for (const ddl of tables) {
       await this.client.execute(ddl);
     }
+
+    // Migrasi kolom tambahan (abaikan error jika sudah ada)
+    const alters = [
+      'ALTER TABLE posts ADD edited_at timestamp',
+      'ALTER TABLE posts ADD deleted_at timestamp',
+      'ALTER TABLE messages ADD edited_at timestamp',
+      'ALTER TABLE messages ADD deleted_at timestamp',
+    ];
+    for (const alterQuery of alters) {
+      try {
+        await this.client.execute(alterQuery);
+      } catch {
+        // Abaikan error jika kolom sudah ada
+      }
+    }
+
     this.logger.log('ScyllaDB tabel siap');
   }
 }

@@ -43,6 +43,8 @@ query GetListingsByAccount($accountId: ID!) {
     deliveryTimeDays
     status
     type
+    createdAt
+    updatedAt
     media {
       id
       url

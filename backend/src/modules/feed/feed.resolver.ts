@@ -10,6 +10,7 @@ import {
 import { FeedService } from './feed.service';
 import { PostModel } from './models/post.model';
 import { CreatePostInput } from './dto/create-post.input';
+import { UpdatePostInput } from './dto/update-post.input';
 import {
   CurrentUser,
   type CurrentUserPayload,
@@ -80,6 +81,55 @@ export class FeedResolver {
     );
 
     return post;
+  }
+
+  @Mutation(() => PostModel)
+  async updatePost(
+    @CurrentUser() user: CurrentUserPayload,
+    @Args('postId') postId: string,
+    @Args('input') input: UpdatePostInput,
+  ) {
+    const accountId = user.accountId;
+
+    // update post in Scylla
+    if (input.content !== undefined) {
+      await this.feedService.updatePost(postId, accountId, input.content);
+    }
+
+    // update tags
+    if (input.tagIds) {
+      await this.tagsService.setTagsForObject(
+        input.tagIds,
+        postId,
+        'ScyllaPost',
+      );
+    }
+
+    // update media
+    if (input.mediaIds !== undefined) {
+      await this.prisma.mediaAttachment.updateMany({
+        where: { attachedId: postId, attachedType: 'ScyllaPost' },
+        data: { attachedId: 'orphaned', attachedType: 'Orphan' },
+      });
+      if (input.mediaIds.length > 0) {
+        await this.prisma.mediaAttachment.updateMany({
+          where: { id: { in: input.mediaIds }, accountId },
+          data: { attachedId: postId, attachedType: 'ScyllaPost' },
+        });
+      }
+    }
+
+    const post = await this.getPost(postId);
+    if (!post) throw new Error('Post tidak ditemukan');
+    return post;
+  }
+
+  @Mutation(() => Boolean)
+  async deletePost(
+    @CurrentUser() user: CurrentUserPayload,
+    @Args('postId') postId: string,
+  ) {
+    return this.feedService.deletePost(postId, user.accountId);
   }
 
   @Query(() => PostModel, { name: 'post', nullable: true })

@@ -1,8 +1,17 @@
 import * as React from "react";
-import { Star, MapPin, Link as LinkIcon, Settings, Calendar, Briefcase, Loader2, X, Check, MessageCircle } from "lucide-react";
+import { Star, MapPin, Link as LinkIcon, Settings, Calendar, Briefcase, Loader2, X, Check, MessageCircle, Pencil, Trash2 } from "lucide-react";
 import { Avatar } from "~/components/ui/Avatar";
 import { Button } from "~/components/ui/Button";
-import { type GetMyProfileQuery, type GetListingsByAccountQuery, useCreateConversationMutation } from "~/core/apollo/generated";
+import { Dialog } from "~/components/ui/Dialog";
+import { 
+  type GetMyProfileQuery, 
+  type GetListingsByAccountQuery, 
+  useCreateConversationMutation, 
+  useUpdateListingMutation, 
+  useDeleteListingMutation,
+  useGetPostsByAccountQuery,
+  useGetRepliesByAccountQuery
+} from "~/core/apollo/generated";
 import { formatDate } from "~/core/utils/formatDate";
 import { useNavigate, Link } from "react-router";
 import { EditProfileForm } from "./EditProfileForm";
@@ -11,71 +20,7 @@ import { useProfileLayout } from "~/features/profile/hooks/useProfileLayout";
 import { useAuthStore } from "~/core/store/useAuthStore";
 import { useToastStore } from "~/core/store/useToastStore";
 import { ROUTES } from "~/core/constants/ROUTES";
-import { gql } from "@apollo/client";
-import * as ApolloReactHooks from "@apollo/client/react";
 import { PostCard } from "~/features/feed/components/PostCard";
-
-const GET_POSTS_BY_ACCOUNT = gql`
-  query GetPostsByAccount($accountId: String!) {
-    postsByAccount(accountId: $accountId) {
-      postId
-      content
-      createdAt
-      authorId
-      authorDisplayName
-      authorUsername
-      authorAvatarObjectKey
-      authorSchoolName
-      linkedServiceId
-      inReplyToPostId
-      likesCount
-      repliesCount
-      likedByMe
-      tags {
-        id
-        name
-      }
-      media {
-        id
-        fileName
-        contentType
-        url
-        objectKey
-      }
-    }
-  }
-`;
-
-const GET_REPLIES_BY_ACCOUNT = gql`
-  query GetRepliesByAccount($accountId: String!) {
-    repliesByAccount(accountId: $accountId) {
-      postId
-      content
-      createdAt
-      authorId
-      authorDisplayName
-      authorUsername
-      authorAvatarObjectKey
-      authorSchoolName
-      linkedServiceId
-      inReplyToPostId
-      likesCount
-      repliesCount
-      likedByMe
-      tags {
-        id
-        name
-      }
-      media {
-        id
-        fileName
-        contentType
-        url
-        objectKey
-      }
-    }
-  }
-`;
 
 interface ProfileLayoutProps {
   profile: any; // Using any or extended type since it can be myProfile or userProfile
@@ -87,6 +32,43 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const addToast = useToastStore(s => s.addToast);
+
+  const [editingListing, setEditingListing] = React.useState<any | null>(null);
+  const [deletingListingId, setDeletingListingId] = React.useState<string | null>(null);
+  const [editTitle, setEditTitle] = React.useState("");
+  const [editDescription, setEditDescription] = React.useState("");
+  const [editPrice, setEditPrice] = React.useState(0);
+  const [editDeliveryTime, setEditDeliveryTime] = React.useState<number | null>(null);
+
+  const [updateListing, { loading: isUpdatingListing }] = useUpdateListingMutation({
+    refetchQueries: ["GetListingsByAccount"],
+    onCompleted: () => {
+      addToast("success", "Penawaran berhasil diperbarui");
+      setEditingListing(null);
+    },
+    onError: (err) => {
+      addToast("error", err.message);
+    }
+  });
+
+  const [deleteListing, { loading: isDeletingListing }] = useDeleteListingMutation({
+    refetchQueries: ["GetListingsByAccount"],
+    onCompleted: () => {
+      addToast("success", "Penawaran berhasil dihapus");
+      setDeletingListingId(null);
+    },
+    onError: (err) => {
+      addToast("error", err.message);
+    }
+  });
+
+  const handleEditListing = (item: any) => {
+    setEditingListing(item);
+    setEditTitle(item.title);
+    setEditDescription(item.description);
+    setEditPrice(item.price);
+    setEditDeliveryTime(item.deliveryTimeDays);
+  };
 
   const {
     activeTab,
@@ -119,13 +101,13 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
     });
   };
 
-  const { data: postsData, loading: postsLoading } = ApolloReactHooks.useQuery<any>(GET_POSTS_BY_ACCOUNT, {
+  const { data: postsData, loading: postsLoading } = useGetPostsByAccountQuery({
     variables: { accountId: profile.id },
     skip: !profile.id,
     fetchPolicy: "cache-and-network",
   });
 
-  const { data: repliesData, loading: repliesLoading } = ApolloReactHooks.useQuery<any>(GET_REPLIES_BY_ACCOUNT, {
+  const { data: repliesData, loading: repliesLoading } = useGetRepliesByAccountQuery({
     variables: { accountId: profile.id },
     skip: !profile.id,
     fetchPolicy: "cache-and-network",
@@ -363,6 +345,37 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
                             </div>
                           )}
                         </div>
+                        {isOwnProfile && (
+                          <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleEditListing(item);
+                              }}
+                              className="px-3 py-1.5 text-[11px] font-bold bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-1 transition cursor-pointer"
+                            >
+                              <Pencil className="h-3 w-3" />
+                              Sunting
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setDeletingListingId(item.id);
+                              }}
+                              className="px-3 py-1.5 text-[11px] font-bold bg-red-50 dark:bg-red-950/20 text-red-650 dark:text-red-400 rounded-xl hover:bg-red-100 dark:hover:bg-red-950/40 flex items-center gap-1 transition cursor-pointer"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                              Hapus
+                            </button>
+                            {item.updatedAt && new Date(item.updatedAt).getTime() > new Date(item.createdAt || 0).getTime() + 1000 && (
+                              <span className="text-[10px] italic text-gray-400 dark:text-gray-500 font-medium ml-auto self-center">
+                                (diperbarui)
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -388,6 +401,152 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
           </div>
         )}
       </div>
+
+      {/* Edit Listing Dialog */}
+      <Dialog
+        isOpen={!!editingListing}
+        onClose={() => setEditingListing(null)}
+        title={
+          <span className="flex items-center gap-2">
+            <Pencil className="h-5 w-5 text-indigo-500" />
+            Sunting Penawaran
+          </span>
+        }
+        maxWidth="md"
+        footer={
+          <>
+            <button
+              onClick={() => setEditingListing(null)}
+              className="flex-1 py-2.5 text-center text-xs font-bold text-gray-550 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-850 rounded-xl transition cursor-pointer"
+            >
+              Batal
+            </button>
+            <button
+              onClick={async () => {
+                if (!editTitle.trim() || !editDescription.trim() || editPrice <= 0) {
+                  addToast("error", "Judul, deskripsi, dan harga harus valid!");
+                  return;
+                }
+                await updateListing({
+                  variables: {
+                    id: editingListing.id,
+                    input: {
+                      title: editTitle.trim(),
+                      description: editDescription.trim(),
+                      basePrice: editPrice,
+                      deliveryTimeDays: editDeliveryTime ? Number(editDeliveryTime) : null,
+                    }
+                  }
+                });
+              }}
+              disabled={isUpdatingListing}
+              className="flex-[2] py-2.5 text-center text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md shadow-indigo-600/10 active:scale-[0.99] transition cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+            >
+              {isUpdatingListing ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Menyimpan...
+                </>
+              ) : (
+                "Simpan Perubahan"
+              )}
+            </button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Judul Penawaran</label>
+            <input
+              type="text"
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
+              className="w-full text-sm bg-gray-50 dark:bg-gray-850 text-gray-900 dark:text-gray-100 rounded-xl p-3 border border-gray-200 dark:border-gray-700 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-medium"
+              placeholder="Contoh: Jasa Pembuatan Website Portfolio"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Deskripsi</label>
+            <textarea
+              value={editDescription}
+              onChange={(e) => setEditDescription(e.target.value)}
+              className="w-full text-sm bg-gray-50 dark:bg-gray-850 text-gray-900 dark:text-gray-100 rounded-xl p-3 border border-gray-200 dark:border-gray-700 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-medium resize-none"
+              rows={4}
+              placeholder="Jelaskan secara detail tentang penawaran Anda..."
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Harga (Rp)</label>
+              <input
+                type="number"
+                value={editPrice}
+                onChange={(e) => setEditPrice(Number(e.target.value))}
+                className="w-full text-sm bg-gray-50 dark:bg-gray-850 text-gray-900 dark:text-gray-100 rounded-xl p-3 border border-gray-200 dark:border-gray-700 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-bold"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Estimasi (Hari)</label>
+              <input
+                type="number"
+                value={editDeliveryTime || ""}
+                onChange={(e) => setEditDeliveryTime(e.target.value ? Number(e.target.value) : null)}
+                className="w-full text-sm bg-gray-50 dark:bg-gray-850 text-gray-900 dark:text-gray-100 rounded-xl p-3 border border-gray-200 dark:border-gray-700 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-bold"
+                placeholder="Instan / N/A"
+              />
+            </div>
+          </div>
+        </div>
+      </Dialog>
+
+      {/* Delete Listing Dialog */}
+      <Dialog
+        isOpen={!!deletingListingId}
+        onClose={() => setDeletingListingId(null)}
+        title={
+          <span className="flex items-center gap-2 text-red-650">
+            <Trash2 className="h-5 w-5" />
+            Hapus Penawaran
+          </span>
+        }
+        maxWidth="sm"
+        footer={
+          <>
+            <button
+              onClick={() => setDeletingListingId(null)}
+              className="flex-1 py-2.5 text-center text-xs font-bold text-gray-500 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-850 rounded-xl transition cursor-pointer"
+            >
+              Batal
+            </button>
+            <button
+              onClick={async () => {
+                if (!deletingListingId) return;
+                await deleteListing({
+                  variables: { id: deletingListingId }
+                });
+              }}
+              disabled={isDeletingListing}
+              className="flex-1 py-2.5 text-center text-xs font-bold bg-red-650 hover:bg-red-700 text-white rounded-xl shadow-md transition cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              {isDeletingListing ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  Menghapus...
+                </>
+              ) : (
+                "Hapus"
+              )}
+            </button>
+          </>
+        }
+      >
+        <p className="text-gray-650 dark:text-gray-400 font-medium">
+          Apakah Anda yakin ingin menghapus penawaran ini? Tindakan ini bersifat permanen dan tidak dapat dibatalkan.
+        </p>
+      </Dialog>
     </div>
   );
 }

@@ -19,6 +19,7 @@ export default function BottomNav() {
           <NavLink
             key={item.to}
             to={item.to}
+            end={item.to === "/profile"}
             className={({ isActive }) =>
               cn(
                 "flex flex-col items-center justify-center w-full h-full space-y-1 relative group transition-colors",

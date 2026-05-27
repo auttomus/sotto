@@ -8,7 +8,7 @@ import { PostTagsInput } from "./PostTagsInput";
 import { useSearchTagsQuery, useGetMyProfileQuery, useGetListingsByAccountQuery } from "~/core/apollo/generated";
 import { useCreatePostLogic } from "../../hooks/useCreatePost";
 import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
-import { ListingCard } from "~/components/ui/ListingCard";
+import { ListingCard } from "~/features/listings/components/ListingCard";
 
 export function PostWizard() {
   const { 

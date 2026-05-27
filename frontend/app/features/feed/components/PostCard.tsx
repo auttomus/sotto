@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useState, useRef } from "react";
-import { Heart, MessageCircle, Share2, MoreHorizontal, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Heart, MessageCircle, Share2, MoreHorizontal, ChevronLeft, ChevronRight, X, Pencil, Trash2 } from "lucide-react";
 import { Avatar } from "~/components/ui/Avatar";
 import { Badge } from "~/components/ui/Badge";
 import type { GetFeedQuery } from "~/core/apollo/generated";
@@ -10,7 +10,9 @@ import { Link } from "react-router";
 import { ROUTES } from "~/core/constants/ROUTES";
 import { cn } from "~/core/utils/cn";
 import * as Generated from "~/core/apollo/generated";
-import { ListingCard } from "~/components/ui/ListingCard";
+import { ListingCard } from "~/features/listings/components/ListingCard";
+import { useAuthStore } from "~/core/store/useAuthStore";
+import { useToastStore } from "~/core/store/useToastStore";
 
 const useToggleLikePostMutation = (Generated as any).useToggleLikePostMutation || (() => [() => Promise.resolve()]);
 const useGetListingDetailQuery = (Generated as any).useGetListingDetailQuery || (() => ({ data: null, loading: false }));
@@ -36,6 +38,14 @@ export function PostCard({ post: rawPost }: PostCardProps) {
 
   const [liked, setLiked] = useState(post.likedByMe || false);
   const [count, setCount] = useState(post.likesCount || 0);
+  const [showMenu, setShowMenu] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState(post.content || "");
+
+  const { user } = useAuthStore();
+  const addToast = useToastStore((s) => s.addToast);
+
+  const isMine = post.authorId === user?.accountId;
 
   const { data: listingData } = useGetListingDetailQuery({
     variables: { id: post.linkedServiceId || "" },
@@ -48,6 +58,33 @@ export function PostCard({ post: rawPost }: PostCardProps) {
     setLiked(post.likedByMe || false);
     setCount(post.likesCount || 0);
   }, [post.likedByMe, post.likesCount]);
+
+  React.useEffect(() => {
+    if (!showMenu) return;
+    const handleClose = () => setShowMenu(false);
+    window.addEventListener("click", handleClose);
+    return () => window.removeEventListener("click", handleClose);
+  }, [showMenu]);
+
+  const [deletePost] = Generated.useDeletePostMutation({
+    refetchQueries: ["GetFeed", "GetGlobalFeed"],
+    onCompleted: () => {
+      addToast("success", "Postingan berhasil dihapus");
+    },
+    onError: (err) => {
+      addToast("error", err.message);
+    }
+  });
+
+  const [updatePost] = Generated.useUpdatePostMutation({
+    refetchQueries: ["GetFeed", "GetGlobalFeed"],
+    onCompleted: () => {
+      addToast("success", "Postingan berhasil diperbarui");
+    },
+    onError: (err) => {
+      addToast("error", err.message);
+    }
+  });
 
   const [toggleLike] = useToggleLikePostMutation({
     variables: { postId: post.postId },
@@ -100,8 +137,13 @@ export function PostCard({ post: rawPost }: PostCardProps) {
               <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm group-hover:underline">
                 {post.authorDisplayName || post.authorUsername}
               </h3>
-              <span className="text-xs text-gray-500 dark:text-gray-400">
+              <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
                 · {formatDate(post.createdAt as string)}
+                {post.editedAt && (
+                  <span className="text-[10px] italic text-indigo-500 dark:text-indigo-400 font-medium ml-1">
+                    (diedit)
+                  </span>
+                )}
               </span>
             </div>
             {post.authorSchoolName && (
@@ -123,18 +165,94 @@ export function PostCard({ post: rawPost }: PostCardProps) {
             )}
           </div>
         </Link>
-        <button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-          <MoreHorizontal className="h-5 w-5" />
-        </button>
+        {isMine && (
+          <div className="relative">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowMenu(!showMenu);
+              }}
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+            >
+              <MoreHorizontal className="h-5 w-5" />
+            </button>
+            {showMenu && (
+              <div className="absolute right-0 mt-1 z-30 bg-white dark:bg-gray-900 border border-gray-150 dark:border-gray-800 rounded-xl shadow-lg p-1.5 min-w-[120px] flex flex-col gap-0.5 animate-scale-in">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsEditing(true);
+                    setShowMenu(false);
+                  }}
+                  className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg text-left w-full cursor-pointer font-semibold"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                  Sunting
+                </button>
+                <button
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    if (confirm("Apakah Anda yakin ingin menghapus postingan ini?")) {
+                      await deletePost({ variables: { postId: post.postId } });
+                    }
+                    setShowMenu(false);
+                  }}
+                  className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg text-left w-full cursor-pointer font-semibold"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Hapus
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Body */}
       <div className="mb-3">
-        <Link to={ROUTES.POST_DETAIL(post.postId)} className="block group/content hover:opacity-95 transition-opacity">
-          <p className="text-gray-800 dark:text-gray-100 text-[15px] leading-relaxed mb-3 whitespace-pre-wrap line-clamp-6">
-            {post.content}
-          </p>
-        </Link>
+        {isEditing ? (
+          <div className="bg-gray-50 dark:bg-gray-950 p-3 rounded-2xl border border-gray-100 dark:border-gray-800/80 mb-3 flex flex-col gap-2">
+            <textarea
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              className="w-full text-[14px] bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-xl p-3 border border-gray-200 dark:border-gray-700 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-none font-medium leading-relaxed"
+              rows={3}
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  setIsEditing(false);
+                  setEditContent(post.content || "");
+                }}
+                className="px-3 py-1.5 text-xs font-bold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                onClick={async () => {
+                  if (editContent.trim() && editContent.trim() !== post.content) {
+                    await updatePost({
+                      variables: {
+                        postId: post.postId,
+                        input: { content: editContent.trim() }
+                      }
+                    });
+                  }
+                  setIsEditing(false);
+                }}
+                className="px-4 py-1.5 text-xs font-bold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-md shadow-indigo-600/10 hover:shadow-indigo-600/20 active:scale-[0.98] transition cursor-pointer"
+              >
+                Simpan
+              </button>
+            </div>
+          </div>
+        ) : (
+          <Link to={ROUTES.POST_DETAIL(post.postId)} className="block group/content hover:opacity-95 transition-opacity">
+            <p className="text-gray-800 dark:text-gray-100 text-[15px] leading-relaxed mb-3 whitespace-pre-wrap line-clamp-6 font-medium">
+              {post.content}
+            </p>
+          </Link>
+        )}
 
         {/* Media Carousel */}
         {post.media && post.media.length > 0 && (

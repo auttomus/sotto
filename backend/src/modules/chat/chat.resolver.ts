@@ -11,6 +11,7 @@ import {
 import { ChatService, type SerializedMessage } from './chat.service';
 import { ConversationModel, MessageModel } from './models/chat.model';
 import { CreateConversationInput } from './dto/create-conversation.input';
+import { UpdateMessageInput } from './dto/update-message.input';
 import {
   CurrentUser,
   type CurrentUserPayload,
@@ -47,6 +48,38 @@ export class ChatMessageResolver {
     // Validasi bahwa user adalah peserta
     await this.chatService.validateParticipant(conversationId, user.accountId);
     return this.chatService.getMessages(conversationId, limit);
+  }
+
+  @Mutation(() => MessageModel)
+  async updateMessage(
+    @CurrentUser() user: CurrentUserPayload,
+    @Args('conversationId', { type: () => ID }) conversationId: string,
+    @Args('messageId', { type: () => ID }) messageId: string,
+    @Args('input') input: UpdateMessageInput,
+  ): Promise<SerializedMessage> {
+    const msg = await this.chatService.getMessage(conversationId, messageId);
+    const contentToUpdate = input.content ?? msg.content;
+
+    return this.chatService.updateMessage(
+      conversationId,
+      messageId,
+      user.accountId,
+      contentToUpdate,
+      input.mediaIds,
+    );
+  }
+
+  @Mutation(() => Boolean)
+  async deleteMessage(
+    @CurrentUser() user: CurrentUserPayload,
+    @Args('conversationId', { type: () => ID }) conversationId: string,
+    @Args('messageId', { type: () => ID }) messageId: string,
+  ): Promise<boolean> {
+    return this.chatService.deleteMessage(
+      conversationId,
+      messageId,
+      user.accountId,
+    );
   }
 
   @ResolveField(() => [MediaAttachmentModel])

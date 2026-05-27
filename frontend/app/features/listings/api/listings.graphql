@@ -6,6 +6,7 @@ query GetListings {
     price
     status
     createdAt
+    updatedAt
     accountId
     account {
       displayName
@@ -27,6 +28,7 @@ query GetListingDetail($id: ID!) {
     isUnlimited
     deliveryTimeDays
     createdAt
+    updatedAt
     accountId
     account {
       displayName
@@ -62,6 +64,7 @@ mutation UpdateListing($id: ID!, $input: UpdateListingInput!) {
     description
     price
     status
+    updatedAt
   }
 }
 
