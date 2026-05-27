@@ -45,6 +45,9 @@ export class ConversationParticipant {
 
   @Field(() => String, { nullable: true })
   avatarObjectKey?: string;
+
+  @Field(() => String, { nullable: true })
+  username?: string;
 }
 
 @ObjectType()

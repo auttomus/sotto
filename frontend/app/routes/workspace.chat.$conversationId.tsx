@@ -54,14 +54,17 @@ export default function ChatRoute() {
           <Link to="/chats" className="p-2 -ml-2 rounded-full hover:bg-muted transition">
             <ArrowLeft className="h-5 w-5 text-foreground" />
           </Link>
-          <div className="flex items-center gap-2.5">
+          <Link
+            to={recipient?.username ? `/profile/${recipient.username}` : "#"}
+            className="flex items-center gap-2.5 hover:opacity-80 transition cursor-pointer"
+          >
             <div className="relative">
               <Avatar src={recipient ? resolveMediaUrl(recipient.avatarObjectKey) : ""} size="sm" alt={recipient?.displayName || "User"} />
             </div>
             <div className="flex flex-col">
               <span className="font-semibold text-foreground text-sm leading-none">{recipient?.displayName || 'Percakapan'}</span>
             </div>
-          </div>
+          </Link>
         </div>
         <button className="p-2 rounded-full hover:bg-muted transition">
           <MoreVertical className="h-5 w-5 text-muted-foreground" />

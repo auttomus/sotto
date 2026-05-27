@@ -1,9 +1,10 @@
 import * as React from "react";
-import { Check, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Check, MoreHorizontal, Pencil, Trash2, X } from "lucide-react";
 import { useNavigate } from "react-router";
 import { Avatar } from "~/components/ui/Avatar";
 import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
 import { ChatMessageListing } from "./ChatMessageListing";
+import { ChatMessagePost } from "./ChatMessagePost";
 import {
   useAcceptOfferMutation,
   useRejectOfferMutation,
@@ -27,12 +28,39 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffe
 
   const [showMenu, setShowMenu] = React.useState(false);
   const [isEditing, setIsEditing] = React.useState(false);
+  const [lightboxUrl, setLightboxUrl] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (lightboxUrl) {
+      document.body.style.overflow = "hidden";
+      const handleEscape = (e: KeyboardEvent) => {
+        if (e.key === "Escape") setLightboxUrl(null);
+      };
+      window.addEventListener("keydown", handleEscape);
+      return () => {
+        window.removeEventListener("keydown", handleEscape);
+        document.body.style.overflow = "unset";
+      };
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [lightboxUrl]);
   
-  // Regex to parse UUID of mentioned listing in text
+  // Regex to parse UUID of mentioned listing or post in text
   const listingRegex = /\s*\/listing\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\s*/g;
-  const match = msg.content?.match(listingRegex);
-  const listingId = match ? match[0].match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/)?.[0] : null;
-  const cleanContent = msg.content?.replace(listingRegex, "").trim();
+  const postRegex = /\s*\/post\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\s*/g;
+
+  const matchListing = msg.content?.match(listingRegex);
+  const listingId = matchListing ? matchListing[0].match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/)?.[0] : null;
+
+  const matchPost = msg.content?.match(postRegex);
+  const postId = matchPost ? matchPost[0].match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/)?.[0] : null;
+
+  const cleanContent = msg.content
+    ?.replace(listingRegex, "")
+    ?.replace(postRegex, "")
+    ?.trim();
 
   const [editContent, setEditContent] = React.useState(cleanContent || "");
 
@@ -193,142 +221,172 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffe
   }
 
   return (
-    <div className={`flex gap-2 max-w-[85%] ${isMine ? 'self-end flex-row-reverse' : ''} group relative items-center`}>
-      {!isMine && (
-        <Avatar 
-          src={recipientAvatar ? resolveMediaUrl(recipientAvatar) : ""} 
-          size="sm" 
-          className="mt-auto shrink-0 h-6 w-6" 
-        />
-      )}
-      
-      {/* Edit/Delete options menu for own messages */}
-      {isMine && !msg.isCustomOffer && !isEditing && (
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center shrink-0 relative">
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowMenu(!showMenu);
-            }} 
-            className="p-1 hover:bg-muted rounded-full text-muted-foreground hover:text-foreground transition cursor-pointer"
-          >
-            <MoreHorizontal className="h-4 w-4" />
-          </button>
-
-          {showMenu && (
-            <div className="absolute bottom-full right-0 mb-1 z-30 bg-card border border-border rounded-xl shadow-lg p-1 min-w-[90px] flex flex-col gap-0.5">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsEditing(true);
-                  setShowMenu(false);
-                }}
-                className="flex items-center gap-1.5 px-2 py-1.5 text-[11px] font-bold text-foreground hover:bg-muted rounded-lg text-left w-full cursor-pointer"
-              >
-                <Pencil className="h-3 w-3" />
-                Ubah
-              </button>
-              <button
-                onClick={async (e) => {
-                  e.stopPropagation();
-                  if (confirm("Apakah Anda yakin ingin menghapus pesan ini?")) {
-                    await onDelete?.(msg.messageId);
-                    addToast("success", "Pesan berhasil dihapus");
-                  }
-                  setShowMenu(false);
-                }}
-                className="flex items-center gap-1.5 px-2 py-1.5 text-[11px] font-bold text-destructive hover:bg-destructive/10 rounded-lg text-left w-full cursor-pointer"
-              >
-                <Trash2 className="h-3 w-3" />
-                Hapus
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-
-      <div className={`${isMine ? 'bg-primary text-primary-foreground rounded-br-sm' : 'bg-card border border-border rounded-bl-sm'} p-3 rounded-2xl shadow-sm w-full`}>
-        {isEditing ? (
-          <div className="flex flex-col gap-2 min-w-[200px]">
-            <textarea
-              value={editContent}
-              onChange={(e) => setEditContent(e.target.value)}
-              className="w-full text-sm bg-muted text-foreground rounded-xl p-2 border border-border focus:outline-none focus:border-primary/50 resize-none font-medium"
-              rows={2}
-            />
-            <div className="flex justify-end gap-1">
-              <button
-                onClick={() => {
-                  setIsEditing(false);
-                  setEditContent(cleanContent || "");
-                }}
-                className="px-2.5 py-1 text-[11px] font-bold text-muted-foreground hover:text-foreground transition cursor-pointer"
-              >
-                Batal
-              </button>
-              <button
-                onClick={async () => {
-                  let finalContent = editContent.trim();
-                  if (listingId) {
-                    finalContent = `${finalContent}\n/listing/${listingId}`;
-                  }
-                  if (finalContent && finalContent !== msg.content) {
-                    await onEdit?.(msg.messageId, finalContent);
-                    addToast("success", "Pesan berhasil diubah");
-                  }
-                  setIsEditing(false);
-                }}
-                className="px-3 py-1 text-[11px] font-bold bg-primary text-primary-foreground rounded-lg hover:opacity-90 shadow-sm active:scale-[0.98] transition cursor-pointer"
-              >
-                Simpan
-              </button>
-            </div>
-          </div>
-        ) : (
-          cleanContent && (
-            <p className={`text-sm ${isMine ? 'text-primary-foreground font-medium' : 'text-foreground'} whitespace-pre-wrap break-words`}>
-              {cleanContent}
-            </p>
-          )
+    <>
+      <div className={`flex gap-2 max-w-[85%] ${isMine ? 'self-end flex-row-reverse' : ''} group relative items-center`}>
+        {!isMine && (
+          <Avatar 
+            src={recipientAvatar ? resolveMediaUrl(recipientAvatar) : ""} 
+            size="sm" 
+            className="mt-auto shrink-0 h-6 w-6" 
+          />
         )}
+        
+        {/* Edit/Delete options menu for own messages */}
+        {isMine && !msg.isCustomOffer && !isEditing && (
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center shrink-0 relative">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowMenu(!showMenu);
+              }} 
+              className="p-1 hover:bg-muted rounded-full text-muted-foreground hover:text-foreground transition cursor-pointer"
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </button>
 
-        {/* Display listing attachment if mentioned */}
-        {listingId && <ChatMessageListing listingId={listingId} />}
-
-        {/* Display media attachments (Images) */}
-        {!msg.deletedAt && msg.media && msg.media.length > 0 && (
-          <div className="mt-2 space-y-2">
-            {msg.media.map((item: any) => {
-              const url = resolveMediaUrl(item.url || item.objectKey);
-              return (
-                <div 
-                  key={item.id} 
-                  className="rounded-xl overflow-hidden max-w-full bg-muted border border-border max-h-[220px] flex items-center justify-center cursor-zoom-in group/media"
-                  onClick={() => window.open(url, '_blank')}
+            {showMenu && (
+              <div className="absolute bottom-full right-0 mb-1 z-30 bg-card border border-border rounded-xl shadow-lg p-1 min-w-[90px] flex flex-col gap-0.5">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsEditing(true);
+                    setShowMenu(false);
+                  }}
+                  className="flex items-center gap-1.5 px-2 py-1.5 text-[11px] font-bold text-foreground hover:bg-muted rounded-lg text-left w-full cursor-pointer"
                 >
-                  <img
-                    src={url || ""}
-                    alt={item.fileName || "Gambar chat"}
-                    className="w-full h-auto max-h-[220px] object-cover rounded-xl select-none group-hover/media:brightness-95 transition-all duration-200"
-                  />
-                </div>
-              );
-            })}
+                  <Pencil className="h-3 w-3" />
+                  Ubah
+                </button>
+                <button
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    if (confirm("Apakah Anda yakin ingin menghapus pesan ini?")) {
+                      await onDelete?.(msg.messageId);
+                      addToast("success", "Pesan berhasil dihapus");
+                    }
+                    setShowMenu(false);
+                  }}
+                  className="flex items-center gap-1.5 px-2 py-1.5 text-[11px] font-bold text-destructive hover:bg-destructive/10 rounded-lg text-left w-full cursor-pointer"
+                >
+                  <Trash2 className="h-3 w-3" />
+                  Hapus
+                </button>
+              </div>
+            )}
           </div>
         )}
 
-        <div className="flex items-center justify-end gap-1 mt-1.5">
-          {msg.editedAt && (
-            <span className={`text-[8px] italic mr-1 ${isMine ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
-              (diedit)
-            </span>
+        <div className={`${isMine ? 'bg-primary text-primary-foreground rounded-br-sm' : 'bg-card border border-border rounded-bl-sm'} p-3 rounded-2xl shadow-sm w-full`}>
+          {isEditing ? (
+            <div className="flex flex-col gap-2 min-w-[200px]">
+              <textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                className="w-full text-sm bg-muted text-foreground rounded-xl p-2 border border-border focus:outline-none focus:border-primary/50 resize-none font-medium"
+                rows={2}
+              />
+              <div className="flex justify-end gap-1">
+                <button
+                  onClick={() => {
+                    setIsEditing(false);
+                    setEditContent(cleanContent || "");
+                  }}
+                  className="px-2.5 py-1 text-[11px] font-bold text-muted-foreground hover:text-foreground transition cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={async () => {
+                    let finalContent = editContent.trim();
+                    if (listingId) {
+                      finalContent = `${finalContent}\n/listing/${listingId}`;
+                    }
+                    if (postId) {
+                      finalContent = `${finalContent}\n/post/${postId}`;
+                    }
+                    if (finalContent && finalContent !== msg.content) {
+                      await onEdit?.(msg.messageId, finalContent);
+                      addToast("success", "Pesan berhasil diubah");
+                    }
+                    setIsEditing(false);
+                  }}
+                  className="px-3 py-1 text-[11px] font-bold bg-primary text-primary-foreground rounded-lg hover:opacity-90 shadow-sm active:scale-[0.98] transition cursor-pointer"
+                >
+                  Simpan
+                </button>
+              </div>
+            </div>
+          ) : (
+            cleanContent && (
+              <p className={`text-sm ${isMine ? 'text-primary-foreground font-medium' : 'text-foreground'} whitespace-pre-wrap break-words`}>
+                {cleanContent}
+              </p>
+            )
           )}
-          <span className={`text-[9px] ${isMine ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
-            {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          </span>
-          {isMine && <Check className="h-3 w-3 text-primary-foreground" />}
+
+          {/* Display listing attachment if mentioned */}
+          {listingId && <ChatMessageListing listingId={listingId} />}
+
+          {/* Display post attachment if mentioned */}
+          {postId && <ChatMessagePost postId={postId} />}
+
+          {/* Display media attachments (Images) */}
+          {!msg.deletedAt && msg.media && msg.media.length > 0 && (
+            <div className="mt-2 space-y-2">
+              {msg.media.map((item: any) => {
+                const url = resolveMediaUrl(item.url || item.objectKey);
+                return (
+                  <div 
+                    key={item.id} 
+                    className="rounded-xl overflow-hidden max-w-full bg-muted border border-border max-h-[220px] flex items-center justify-center cursor-zoom-in group/media"
+                    onClick={() => setLightboxUrl(url ?? null)}
+                  >
+                    <img
+                      src={url || ""}
+                      alt={item.fileName || "Gambar chat"}
+                      className="w-full h-auto max-h-[220px] object-cover rounded-xl select-none group-hover/media:brightness-95 transition-all duration-200"
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <div className="flex items-center justify-end gap-1 mt-1.5">
+            {msg.editedAt && (
+              <span className={`text-[8px] italic mr-1 ${isMine ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                (diedit)
+              </span>
+            )}
+            <span className={`text-[9px] ${isMine ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+              {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+            {isMine && <Check className="h-3 w-3 text-primary-foreground" />}
+          </div>
         </div>
       </div>
-    </div>
+
+      {lightboxUrl && (
+        <div
+          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center transition-all animate-fade-in duration-200"
+          onClick={() => setLightboxUrl(null)}
+        >
+          <button
+            onClick={() => setLightboxUrl(null)}
+            className="absolute top-6 right-6 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all hover:scale-105 active:scale-95 z-55 cursor-pointer"
+          >
+            <X className="h-6 w-6" />
+          </button>
+          <div className="max-w-[95vw] max-h-[95vh] flex items-center justify-center p-4">
+            <img
+              src={lightboxUrl}
+              alt="Enlarged media"
+              className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl animate-zoom-in select-none"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
+    </>
   );
 }

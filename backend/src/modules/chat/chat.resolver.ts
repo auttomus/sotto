@@ -27,6 +27,7 @@ import { OrderStatus } from '@prisma/client';
 type ParticipantRow = {
   account: {
     id: string;
+    username: string;
     displayName: string;
     avatarObjectKey: string | null;
   };
@@ -117,6 +118,7 @@ export class ChatConversationResolver {
         accountId: p.account.id,
         displayName: p.account.displayName,
         avatarObjectKey: p.account.avatarObjectKey ?? undefined,
+        username: p.account.username,
       })),
     };
   }
@@ -135,6 +137,7 @@ export class ChatConversationResolver {
         accountId: p.account.id,
         displayName: p.account.displayName,
         avatarObjectKey: p.account.avatarObjectKey ?? undefined,
+        username: p.account.username,
       })),
     }));
   }
@@ -188,7 +191,12 @@ export class ChatConversationResolver {
     @Parent() conversation: ConversationModel,
   ): Promise<string | null> {
     const messages = await this.chatService.getMessages(conversation.id, 1);
-    return messages[0]?.content || null;
+    const lastMsg = messages[0];
+    if (!lastMsg) return null;
+    if (lastMsg.deletedAt) {
+      return 'Pesan ini telah dihapus';
+    }
+    return lastMsg.content || null;
   }
 
   @ResolveField(() => Date, { nullable: true })

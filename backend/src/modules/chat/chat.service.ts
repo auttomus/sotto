@@ -12,7 +12,12 @@ type ConversationWithParticipants = Prisma.ConversationGetPayload<{
     participants: {
       include: {
         account: {
-          select: { id: true; displayName: true; avatarObjectKey: true };
+          select: {
+            id: true;
+            username: true;
+            displayName: true;
+            avatarObjectKey: true;
+          };
         };
       };
     };
@@ -64,7 +69,12 @@ export class ChatService {
           participants: {
             include: {
               account: {
-                select: { id: true, displayName: true, avatarObjectKey: true },
+                select: {
+                  id: true,
+                  username: true,
+                  displayName: true,
+                  avatarObjectKey: true,
+                },
               },
             },
           },
@@ -87,7 +97,12 @@ export class ChatService {
         participants: {
           include: {
             account: {
-              select: { id: true, displayName: true, avatarObjectKey: true },
+              select: {
+                id: true,
+                username: true,
+                displayName: true,
+                avatarObjectKey: true,
+              },
             },
           },
         },
@@ -107,7 +122,12 @@ export class ChatService {
         participants: {
           include: {
             account: {
-              select: { id: true, displayName: true, avatarObjectKey: true },
+              select: {
+                id: true,
+                username: true,
+                displayName: true,
+                avatarObjectKey: true,
+              },
             },
           },
         },

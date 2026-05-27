@@ -60,6 +60,7 @@ export type ConversationParticipant = {
   accountId: Scalars['ID']['output'];
   avatarObjectKey?: Maybe<Scalars['String']['output']>;
   displayName: Scalars['String']['output'];
+  username?: Maybe<Scalars['String']['output']>;
 };
 
 export enum ConversationType {

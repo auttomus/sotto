@@ -51,11 +51,11 @@ export function useChatRoom({ conversationId }: UseChatRoomOptions) {
   const recipient = conversation?.participants?.find((p: any) => p.accountId !== user?.accountId);
 
   const [updateMessageMutation] = useUpdateMessageMutation({
-    refetchQueries: ["GetMessages"]
+    refetchQueries: ["GetMessages", "GetConversations"]
   });
 
   const [deleteMessageMutation] = useDeleteMessageMutation({
-    refetchQueries: ["GetMessages"]
+    refetchQueries: ["GetMessages", "GetConversations"]
   });
 
   const editMessage = async (messageId: string, newContent: string) => {

@@ -44,6 +44,7 @@ type ConversationParticipant {
   accountId: ID!
   avatarObjectKey: String
   displayName: String!
+  username: String
 }
 
 enum ConversationType {

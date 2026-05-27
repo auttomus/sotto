@@ -28,7 +28,7 @@ export function ChatMessageListing({ listingId }: ChatMessageListingProps) {
     <ListingCard
       listing={listing as any}
       isLink={true}
-      className="mt-2 bg-card border-border shadow-sm max-w-sm rounded-2xl p-2.5"
+      className="mt-2 bg-muted hover:bg-muted border border-border shadow-none max-w-sm rounded-2xl p-2.5"
     />
   );
 }
