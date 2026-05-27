@@ -13,6 +13,8 @@ import * as Generated from "~/core/apollo/generated";
 import { ListingCard } from "~/features/listings/components/ListingCard";
 import { useAuthStore } from "~/core/store/useAuthStore";
 import { useToastStore } from "~/core/store/useToastStore";
+import { shareObject } from "~/core/utils/share";
+import { LabelBadge } from "~/components/ui/LabelBadge";
 
 const useToggleLikePostMutation = (Generated as any).useToggleLikePostMutation || (() => [() => Promise.resolve()]);
 const useGetListingDetailQuery = (Generated as any).useGetListingDetailQuery || (() => ({ data: null, loading: false }));
@@ -121,10 +123,8 @@ export function PostCard({ post: rawPost }: PostCardProps) {
       setLiked(!nextLiked);
       setCount(liked ? count : Math.max(0, count - 1));
     });
-  };
-
-  return (
-    <article className="bg-white dark:bg-gray-900 p-5 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50/30 dark:hover:bg-gray-800/10 transition-all duration-200">
+  };  return (
+    <article className="bg-card p-5 border-b border-border hover:bg-accent/5 transition-all duration-200">
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <Link
@@ -138,32 +138,29 @@ export function PostCard({ post: rawPost }: PostCardProps) {
           />
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm group-hover:underline">
+              <h3 className="font-semibold text-foreground text-sm group-hover:text-primary transition-colors">
                 {post.authorDisplayName || post.authorUsername}
               </h3>
-              <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+              <span className="text-xs text-muted-foreground flex items-center gap-1">
                 · {formatDate(post.createdAt as string)}
                 {post.editedAt && (
-                  <span className="text-[10px] italic text-indigo-500 dark:text-indigo-400 font-medium ml-1">
+                  <span className="text-[10px] italic text-primary font-medium ml-1">
                     (diedit)
                   </span>
                 )}
               </span>
             </div>
             {post.authorSchoolName && (
-              <Badge variant="secondary" className="mt-0.5 text-[10px]">
-                {post.authorSchoolName}
-              </Badge>
+              <LabelBadge variant="school" value={post.authorSchoolName} className="mt-0.5" />
             )}
             {post.tags && post.tags.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-1.5">
                 {post.tags.map((tag: any) => (
-                  <span
+                  <LabelBadge
                     key={tag.id}
-                    className="text-[10px] font-semibold bg-indigo-50/80 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-100/50 dark:border-indigo-500/10"
-                  >
-                    #{tag.name}
-                  </span>
+                    variant="tag"
+                    value={tag.name}
+                  />
                 ))}
               </div>
             )}
@@ -176,19 +173,19 @@ export function PostCard({ post: rawPost }: PostCardProps) {
                 e.stopPropagation();
                 setShowMenu(!showMenu);
               }}
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+              className="text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-muted transition-colors cursor-pointer"
             >
               <MoreHorizontal className="h-5 w-5" />
             </button>
             {showMenu && (
-              <div className="absolute right-0 mt-1 z-30 bg-white dark:bg-gray-900 border border-gray-150 dark:border-gray-800 rounded-xl shadow-lg p-1.5 min-w-[120px] flex flex-col gap-0.5 animate-scale-in">
+              <div className="absolute right-0 mt-1 z-30 bg-popover text-popover-foreground border border-border rounded-xl shadow-lg p-1.5 min-w-[120px] flex flex-col gap-0.5 animate-scale-in">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsEditing(true);
                     setShowMenu(false);
                   }}
-                  className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg text-left w-full cursor-pointer font-semibold"
+                  className="flex items-center gap-2 px-2.5 py-1.5 text-xs hover:bg-accent hover:text-accent-foreground rounded-lg text-left w-full cursor-pointer font-semibold"
                 >
                   <Pencil className="h-3.5 w-3.5" />
                   Sunting
@@ -201,7 +198,7 @@ export function PostCard({ post: rawPost }: PostCardProps) {
                     }
                     setShowMenu(false);
                   }}
-                  className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg text-left w-full cursor-pointer font-semibold"
+                  className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-destructive hover:bg-destructive/10 rounded-lg text-left w-full cursor-pointer font-semibold"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                   Hapus
@@ -215,11 +212,11 @@ export function PostCard({ post: rawPost }: PostCardProps) {
       {/* Body */}
       <div className="mb-3">
         {isEditing ? (
-          <div className="bg-gray-50 dark:bg-gray-950 p-3 rounded-2xl border border-gray-100 dark:border-gray-800/80 mb-3 flex flex-col gap-2">
+          <div className="bg-muted p-3 rounded-2xl border border-border mb-3 flex flex-col gap-2">
             <textarea
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
-              className="w-full text-[14px] bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-xl p-3 border border-gray-200 dark:border-gray-700 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-none font-medium leading-relaxed"
+              className="w-full text-[14px] bg-background text-foreground rounded-xl p-3 border border-border focus:outline-none focus:border-primary focus:ring-1 focus:ring-ring resize-none font-medium leading-relaxed"
               rows={3}
             />
             <div className="flex justify-end gap-2">
@@ -228,7 +225,7 @@ export function PostCard({ post: rawPost }: PostCardProps) {
                   setIsEditing(false);
                   setEditContent(post.content || "");
                 }}
-                className="px-3 py-1.5 text-xs font-bold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition cursor-pointer"
+                className="px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition cursor-pointer"
               >
                 Batal
               </button>
@@ -244,7 +241,7 @@ export function PostCard({ post: rawPost }: PostCardProps) {
                   }
                   setIsEditing(false);
                 }}
-                className="px-4 py-1.5 text-xs font-bold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-md shadow-indigo-600/10 hover:shadow-indigo-600/20 active:scale-[0.98] transition cursor-pointer"
+                className="px-4 py-1.5 text-xs font-bold bg-primary text-primary-foreground rounded-xl hover:opacity-90 active:scale-[0.98] transition cursor-pointer"
               >
                 Simpan
               </button>
@@ -252,7 +249,7 @@ export function PostCard({ post: rawPost }: PostCardProps) {
           </div>
         ) : (
           <Link to={ROUTES.POST_DETAIL(post.postId)} className="block group/content hover:opacity-95 transition-opacity">
-            <p className="text-gray-800 dark:text-gray-100 text-[15px] leading-relaxed mb-3 whitespace-pre-wrap line-clamp-6 font-medium">
+            <p className="text-foreground text-[15px] leading-relaxed mb-3 whitespace-pre-wrap line-clamp-6 font-medium">
               {post.content}
             </p>
           </Link>
@@ -268,7 +265,7 @@ export function PostCard({ post: rawPost }: PostCardProps) {
           <ListingCard 
             listing={listing as any} 
             isLink={true} 
-            className="mt-3 bg-gray-50/50 dark:bg-gray-800/10 hover:bg-gray-100/50 dark:hover:bg-gray-800/20 border-gray-100 dark:border-gray-800" 
+            className="mt-3 bg-muted/50 hover:bg-muted border border-border" 
           />
         )}
       </div>
@@ -281,14 +278,14 @@ export function PostCard({ post: rawPost }: PostCardProps) {
             "flex items-center gap-1.5 transition-colors group",
             liked
               ? "text-rose-500 hover:text-rose-600 animate-pulse-once"
-              : "text-gray-500 hover:text-rose-500 dark:hover:text-rose-400"
+              : "text-muted-foreground hover:text-rose-500"
           )}
         >
           <div className={cn(
             "p-1.5 rounded-full transition-colors",
             liked
-              ? "bg-rose-50/50 dark:bg-rose-950/20"
-              : "group-hover:bg-rose-50 dark:group-hover:bg-rose-900/20"
+              ? "bg-rose-500/10"
+              : "group-hover:bg-rose-500/10"
           )}>
             <Heart
               className={cn("h-5 w-5 transition-transform group-active:scale-125", liked && "fill-current")}
@@ -299,15 +296,22 @@ export function PostCard({ post: rawPost }: PostCardProps) {
         </button>
         <Link
           to={ROUTES.POST_DETAIL(post.postId)}
-          className="flex items-center gap-1.5 text-gray-500 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors group"
+          className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors group"
         >
-          <div className="p-1.5 rounded-full group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/20 transition-colors">
+          <div className="p-1.5 rounded-full group-hover:bg-primary/10 transition-colors">
             <MessageCircle className="h-5 w-5" />
           </div>
           <span className="text-xs font-medium">{post.repliesCount ?? 0}</span>
         </Link>
-        <button className="flex items-center gap-1.5 text-gray-500 hover:text-green-500 dark:hover:text-green-400 transition-colors group ml-auto">
-          <div className="p-1.5 rounded-full group-hover:bg-green-50 dark:group-hover:bg-green-900/20 transition-colors">
+        <button 
+          onClick={() => shareObject({
+            title: `Karya dari ${post.authorDisplayName || post.authorUsername}`,
+            text: post.content,
+            url: ROUTES.POST_DETAIL(post.postId)
+          })}
+          className="flex items-center gap-1.5 text-muted-foreground hover:text-success transition-colors group ml-auto cursor-pointer"
+        >
+          <div className="p-1.5 rounded-full group-hover:bg-success/10 transition-colors">
             <Share2 className="h-5 w-5" />
           </div>
         </button>
@@ -369,7 +373,7 @@ function MediaCarousel({ media }: { media: MediaItem[] }) {
     const url = resolveMediaUrl(item.url || (item as any).objectKey);
     return (
       <>
-        <div className="rounded-2xl overflow-hidden bg-gray-50/80 dark:bg-gray-950/40 border border-gray-100 dark:border-gray-800/80 mt-3 shadow-sm flex items-center justify-center max-h-[512px] w-full cursor-zoom-in group/media">
+        <div className="rounded-2xl overflow-hidden bg-muted border border-border mt-3 shadow-sm flex items-center justify-center max-h-[512px] w-full cursor-zoom-in group/media">
           <img
             src={url || ""}
             alt={item.fileName || "Post media"}
@@ -411,7 +415,7 @@ function MediaCarousel({ media }: { media: MediaItem[] }) {
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 aspect-video w-full"
+          className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar rounded-2xl border border-border bg-muted aspect-video w-full"
         >
           {media.map((item, i) => {
             const url = resolveMediaUrl(item.url || (item as any).objectKey);

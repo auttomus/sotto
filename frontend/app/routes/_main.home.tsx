@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, Bell } from "lucide-react";
 import { PostCard } from "~/features/feed/components/PostCard";
 import { FeedEmptyState } from "~/features/feed/components/FeedEmptyState";
 import { Link } from "react-router";
@@ -9,6 +9,7 @@ import { useInfiniteFeed } from "~/features/feed/hooks/useInfiniteFeed";
 import { ROUTES } from "~/core/constants/ROUTES";
 import { useScrollDirection } from "~/core/hooks/useScrollDirection";
 import { useInfiniteScroll } from "~/core/hooks/useInfiniteScroll";
+import { PageHeader } from "~/components/layout/PageHeader";
 
 export default function FeedTimelineRoute() {
   const [activeTab, setActiveTab] = useState<"for-you" | "following">("for-you");
@@ -51,46 +52,46 @@ export default function FeedTimelineRoute() {
 
   return (
     <div className="pb-20 relative min-h-screen">
-      {/* Sticky Premium Header */}
-      <header
-        className={`sticky z-30 bg-white/85 dark:bg-gray-900/85 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 transition-all duration-300 ${
-          showHeader
-            ? "top-16 translate-y-0"
-            : "top-0 max-md:-translate-y-full"
-        } md:top-0`}
-      >
-        <div className="flex flex-col">
-          <div className="hidden md:flex items-center justify-between px-6 pt-4 pb-2">
-            <h1 className="text-xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
-              Beranda
-            </h1>
-          </div>
-
-          {/* Tabs selector */}
-          <div className="flex w-full border-t border-gray-50 dark:border-gray-800/40 md:border-t-0">
+      <PageHeader
+        title={
+          <>
+            <span className="md:hidden text-xl font-bold tracking-tight text-primary font-serif italic">
+              Sotto
+            </span>
+            <span className="hidden md:inline">Beranda</span>
+          </>
+        }
+        rightAction={
+          <button className="p-2 -mr-1 rounded-full hover:bg-muted transition relative md:hidden cursor-pointer">
+            <Bell className="h-5 w-5" />
+            <span className="absolute top-1.5 right-1.5 block h-2 w-2 rounded-full bg-destructive ring-2 ring-card" />
+          </button>
+        }
+        tabs={
+          <div className="flex w-full border-t border-border">
             <button
               onClick={() => setActiveTab("for-you")}
-              className={`flex-1 py-3.5 text-center text-sm transition-all duration-200 ${
+              className={`flex-1 py-3 text-center text-sm font-semibold transition-all duration-200 cursor-pointer ${
                 activeTab === "for-you"
-                  ? "font-bold text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400"
-                  : "font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50/50 dark:hover:bg-gray-800/20"
+                  ? "text-primary border-b-2 border-primary"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Untuk Anda
             </button>
             <button
               onClick={() => setActiveTab("following")}
-              className={`flex-1 py-3.5 text-center text-sm transition-all duration-200 ${
+              className={`flex-1 py-3 text-center text-sm font-semibold transition-all duration-200 cursor-pointer ${
                 activeTab === "following"
-                  ? "font-bold text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400"
-                  : "font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50/50 dark:hover:bg-gray-800/20"
+                  ? "text-primary border-b-2 border-primary"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Mengikuti
             </button>
           </div>
-        </div>
-      </header>
+        }
+      />
 
       {/* Posts */}
       <div className="flex flex-col">
@@ -108,13 +109,13 @@ export default function FeedTimelineRoute() {
             {/* Loading more indicator */}
             {isLoadingMore && (
               <div className="flex justify-center py-6">
-                <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
               </div>
             )}
 
             {/* End of feed */}
             {!hasMore && posts.length > 0 && (
-              <div className="text-center py-8 text-sm text-gray-400 dark:text-gray-500">
+              <div className="text-center py-8 text-sm text-muted-foreground">
                 Sudah di ujung linimasa
               </div>
             )}
@@ -125,7 +126,7 @@ export default function FeedTimelineRoute() {
       {/* FAB — Create Post */}
       <Link
         to={ROUTES.WORKSPACE_CREATE}
-        className="fixed bottom-20 right-4 md:hidden z-40 bg-indigo-600 text-white h-14 w-14 rounded-full flex items-center justify-center shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 hover:scale-105 active:scale-95 transition-all"
+        className="fixed bottom-20 right-4 md:hidden z-40 bg-primary text-primary-foreground h-14 w-14 rounded-full flex items-center justify-center shadow-lg shadow-primary/30 hover:opacity-90 hover:scale-105 active:scale-95 transition-all"
         aria-label="Buat Postingan Baru"
       >
         <Plus className="h-6 w-6" />

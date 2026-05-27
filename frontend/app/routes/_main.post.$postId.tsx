@@ -22,7 +22,7 @@ export default function PostDetailRoute() {
 
   if (postLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-955">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
       </div>
     );
@@ -30,9 +30,9 @@ export default function PostDetailRoute() {
 
   if (!post) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-955 gap-4">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 gap-4">
         <p className="text-gray-500">Post tidak ditemukan.</p>
-        <button onClick={() => navigate("/")} className="text-indigo-500 font-medium hover:underline">
+        <button onClick={() => navigate("/")} className="text-indigo-500 font-medium hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer">
           Kembali ke Beranda
         </button>
       </div>

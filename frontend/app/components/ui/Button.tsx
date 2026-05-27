@@ -9,25 +9,25 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "primary", size = "md", ...props }, ref) => {
     const variants = {
-      primary: "bg-indigo-600 text-white hover:bg-indigo-700 active:bg-indigo-800",
-      secondary: "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700 active:bg-gray-300",
-      outline: "border border-gray-200 dark:border-gray-700 bg-transparent hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100",
-      ghost: "bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300",
-      danger: "bg-red-500 text-white hover:bg-red-600 active:bg-red-700",
+      primary: "bg-primary text-primary-foreground hover:opacity-90 active:opacity-80 shadow-sm",
+      secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/90",
+      outline: "border border-border bg-background hover:bg-accent hover:text-accent-foreground text-foreground",
+      ghost: "bg-transparent hover:bg-accent hover:text-accent-foreground text-foreground",
+      danger: "bg-destructive text-destructive-foreground hover:opacity-90 active:opacity-80",
     };
 
     const sizes = {
-      sm: "h-8 px-3 text-xs",
-      md: "h-10 px-4 py-2 text-sm",
-      lg: "h-12 px-6 text-base",
-      icon: "h-10 w-10 p-2 flex items-center justify-center",
+      sm: "h-8 px-3 text-xs rounded-lg",
+      md: "h-10 px-4 py-2 text-sm rounded-xl",
+      lg: "h-12 px-6 text-base rounded-xl",
+      icon: "h-10 w-10 p-2 flex items-center justify-center rounded-xl",
     };
 
     return (
       <button
         ref={ref}
         className={cn(
-          "inline-flex items-center justify-center rounded-xl font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:pointer-events-none",
+          "inline-flex items-center justify-center font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]",
           variants[variant],
           sizes[size],
           className

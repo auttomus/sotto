@@ -40,31 +40,31 @@ export default function ChatRoute() {
 
   if (loading && !allMessages.length) {
     return (
-      <div className="flex flex-col h-[100dvh] bg-gray-50 dark:bg-gray-950 w-full max-w-lg mx-auto border-x border-gray-100 dark:border-gray-800 justify-center items-center">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+      <div className="flex flex-col h-[100dvh] bg-background w-full max-w-lg mx-auto border-x border-border justify-center items-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-gray-50 dark:bg-gray-950 w-full max-w-lg mx-auto border-x border-gray-100 dark:border-gray-800 relative text-gray-900 dark:text-gray-100">
+    <div className="flex flex-col h-[100dvh] bg-background w-full max-w-lg mx-auto border-x border-border relative text-foreground">
       {/* Header */}
-      <header className="shrink-0 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-10 px-3 h-16 flex items-center justify-between shadow-sm">
+      <header className="shrink-0 bg-card border-b border-border sticky top-0 z-10 px-3 h-16 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3">
-          <Link to="/chats" className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-            <ArrowLeft className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+          <Link to="/chats" className="p-2 -ml-2 rounded-full hover:bg-muted transition">
+            <ArrowLeft className="h-5 w-5 text-foreground" />
           </Link>
           <div className="flex items-center gap-2.5">
             <div className="relative">
               <Avatar src={recipient ? resolveMediaUrl(recipient.avatarObjectKey) : ""} size="sm" alt={recipient?.displayName || "User"} />
             </div>
             <div className="flex flex-col">
-              <span className="font-semibold text-gray-900 dark:text-gray-100 text-sm leading-none">{recipient?.displayName || 'Percakapan'}</span>
+              <span className="font-semibold text-foreground text-sm leading-none">{recipient?.displayName || 'Percakapan'}</span>
             </div>
           </div>
         </div>
-        <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-          <MoreVertical className="h-5 w-5 text-gray-500" />
+        <button className="p-2 rounded-full hover:bg-muted transition">
+          <MoreVertical className="h-5 w-5 text-muted-foreground" />
         </button>
       </header>
 
@@ -72,7 +72,7 @@ export default function ChatRoute() {
       <div className="flex-1 overflow-y-auto p-4 space-y-4 flex flex-col">
         {/* Date Divider */}
         <div className="flex justify-center my-2">
-          <span className="text-[10px] font-medium bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-3 py-1 rounded-full">
+          <span className="text-[10px] font-medium bg-muted text-muted-foreground px-3 py-1 rounded-full">
             Hari ini
           </span>
         </div>

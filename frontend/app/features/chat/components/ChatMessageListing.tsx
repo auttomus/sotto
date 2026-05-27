@@ -15,8 +15,8 @@ export function ChatMessageListing({ listingId }: ChatMessageListingProps) {
 
   if (loading) {
     return (
-      <div className="mt-2 p-3 bg-gray-50/50 dark:bg-gray-800/50 rounded-2xl border border-gray-150 dark:border-gray-700/50 flex items-center justify-center min-h-[80px] w-full">
-        <Loader2 className="h-5 w-5 animate-spin text-indigo-500" />
+      <div className="mt-2 p-3 bg-muted/50 rounded-2xl border border-border flex items-center justify-center min-h-[80px] w-full">
+        <Loader2 className="h-5 w-5 animate-spin text-primary" />
       </div>
     );
   }
@@ -28,7 +28,7 @@ export function ChatMessageListing({ listingId }: ChatMessageListingProps) {
     <ListingCard
       listing={listing as any}
       isLink={true}
-      className="mt-2 bg-white dark:bg-gray-900 border-gray-150 dark:border-gray-800 shadow-sm max-w-sm rounded-2xl p-2.5"
+      className="mt-2 bg-card border-border shadow-sm max-w-sm rounded-2xl p-2.5"
     />
   );
 }

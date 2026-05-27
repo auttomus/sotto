@@ -3,7 +3,7 @@ import * as React from "react";
 function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={`animate-pulse rounded-md bg-gray-200 dark:bg-gray-800 ${className}`}
+      className={`animate-pulse rounded-md bg-muted ${className}`}
       {...props}
     />
   );
@@ -13,7 +13,7 @@ export { Skeleton };
 
 export function PostCardSkeleton() {
   return (
-    <article className="bg-white dark:bg-gray-900 p-4 border-b border-gray-100 dark:border-gray-800">
+    <article className="bg-card p-4 border-b border-border">
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
@@ -48,7 +48,7 @@ export function PostCardSkeleton() {
 
 export function ListingDetailSkeleton() {
   return (
-    <div className="pb-24 bg-white dark:bg-gray-950 min-h-screen">
+    <div className="pb-24 bg-background min-h-screen">
       {/* Media Skeleton */}
       <Skeleton className="w-full aspect-square md:aspect-video rounded-none" />
       
@@ -62,7 +62,7 @@ export function ListingDetailSkeleton() {
           <Skeleton className="h-8 w-32" />
         </div>
 
-        <div className="py-6 border-y border-gray-100 dark:border-gray-800 space-y-3">
+        <div className="py-6 border-y border-border space-y-3">
           <Skeleton className="h-6 w-32 mb-4" />
           <Skeleton className="h-4 w-full" />
           <Skeleton className="h-4 w-[90%]" />
@@ -72,7 +72,7 @@ export function ListingDetailSkeleton() {
 
         <div className="py-6">
           <Skeleton className="h-6 w-40 mb-4" />
-          <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-gray-800 rounded-xl">
+          <div className="flex items-center gap-4 p-4 border border-border rounded-xl">
             <Skeleton className="h-14 w-14 rounded-full" />
             <div className="space-y-2 flex-1">
               <Skeleton className="h-5 w-40" />

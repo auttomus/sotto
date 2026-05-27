@@ -74,10 +74,10 @@ export function EditProfileForm({ profile, onCancel, onSuccess }: EditProfileFor
     <div className="w-full">
       {/* Action Buttons Top Right (Absolute or relative to parent in ProfileLayout) */}
       <div className="flex justify-end gap-2 mb-4 absolute right-4 -top-12" style={{ zIndex: 30 }}>
-        <button onClick={onCancel} className="p-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-          <X className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+        <button onClick={onCancel} className="p-2 border border-border bg-card rounded-full hover:bg-muted transition">
+          <X className="h-5 w-5 text-foreground" />
         </button>
-        <Button variant="primary" onClick={handleSaveProfile} disabled={updateLoading || isUploading} className="font-bold px-4 rounded-full shadow-md shadow-indigo-500/20">
+        <Button variant="primary" onClick={handleSaveProfile} disabled={updateLoading || isUploading} className="font-bold px-4 rounded-full shadow-md shadow-primary/20">
           {updateLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
         </Button>
       </div>
@@ -85,7 +85,7 @@ export function EditProfileForm({ profile, onCancel, onSuccess }: EditProfileFor
       {/* Avatar Edit */}
       <div className="relative -mt-16 mb-4">
         <div className="relative inline-block">
-          <div className="rounded-full border-4 border-white dark:border-gray-950 bg-white dark:bg-gray-900">
+          <div className="rounded-full border-4 border-background bg-card">
             <Avatar 
               src={resolveMediaUrl(editForm.avatarObjectKey) || resolveMediaUrl(profile.avatarObjectKey)} 
               alt={profile.displayName} 
@@ -96,7 +96,7 @@ export function EditProfileForm({ profile, onCancel, onSuccess }: EditProfileFor
           <button 
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
-            className="absolute bottom-1 right-1 p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-md transition-colors"
+            className="absolute bottom-1 right-1 p-2 bg-primary hover:opacity-90 text-primary-foreground rounded-full shadow-md transition-colors"
           >
             {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
           </button>
@@ -110,30 +110,30 @@ export function EditProfileForm({ profile, onCancel, onSuccess }: EditProfileFor
         </div>
       </div>
 
-      <div className="mt-2 space-y-4 bg-gray-50 dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800">
+      <div className="mt-2 space-y-4 bg-muted/30 p-5 rounded-2xl border border-border">
         <div>
-          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 block">Nama Tampilan</label>
+          <label className="form-label mb-1.5 block">Nama Tampilan</label>
           <input 
             type="text" 
             value={editForm.displayName} 
             onChange={(e) => setEditForm(prev => ({ ...prev, displayName: e.target.value }))}
-            className="w-full bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl p-3 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-shadow"
+            className="form-input w-full p-3 text-sm"
             placeholder="Nama lengkap atau panggilan"
           />
         </div>
         <div>
-          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 block">Jurusan / Keahlian</label>
-          <div className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-800 rounded-xl p-3 text-sm text-gray-500 dark:text-gray-400 cursor-not-allowed">
+          <label className="form-label mb-1.5 block">Jurusan / Keahlian</label>
+          <div className="w-full bg-muted border border-border rounded-xl p-3 text-sm text-muted-foreground cursor-not-allowed">
             {profile.major || "Belum ditentukan"}
           </div>
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Jurusan dikelola oleh administrator sekolah.</p>
+          <p className="text-xs text-muted-foreground mt-1">Jurusan dikelola oleh administrator sekolah.</p>
         </div>
         <div>
-          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 block">Bio / Catatan</label>
+          <label className="form-label mb-1.5 block">Bio / Catatan</label>
           <textarea 
             value={editForm.note} 
             onChange={(e) => setEditForm(prev => ({ ...prev, note: e.target.value }))}
-            className="w-full bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl p-3 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-shadow min-h-[100px] resize-y"
+            className="form-input w-full p-3 text-sm min-h-[100px] resize-y"
             placeholder="Ceritakan sedikit tentang diri Anda..."
           />
         </div>

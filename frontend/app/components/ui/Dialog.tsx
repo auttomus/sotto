@@ -44,24 +44,24 @@ export function Dialog({
       onClick={onClose}
     >
       <div 
-        className={`bg-white dark:bg-gray-900 rounded-3xl border border-gray-150 dark:border-gray-800 shadow-2xl w-full ${maxWidthClass} overflow-hidden relative transition-all duration-300 transform scale-100 animate-zoom-in`}
+        className={`bg-card text-foreground rounded-3xl border border-border shadow-2xl w-full ${maxWidthClass} overflow-hidden relative transition-all duration-300 transform scale-100 animate-zoom-in`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex justify-between items-center px-6 pt-6 pb-2">
-          <h2 className="text-base font-extrabold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+          <h2 className="text-base font-extrabold text-foreground flex items-center gap-2">
             {title}
           </h2>
           <button 
             onClick={onClose}
-            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full text-gray-400 hover:text-gray-650 dark:hover:text-gray-200 transition cursor-pointer"
+            className="p-1.5 hover:bg-muted rounded-full text-muted-foreground hover:text-foreground transition cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
+        <div className="px-6 py-4 text-sm text-muted-foreground">
           {children}
         </div>
 

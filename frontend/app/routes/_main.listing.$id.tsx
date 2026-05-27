@@ -21,11 +21,11 @@ export default function ListingRoute() {
   if (error || !data?.listing) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] p-4 text-center">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Penawaran tidak ditemukan</h2>
-        <p className="text-gray-500 dark:text-gray-400 mb-6">Mungkin penawaran sudah dihapus atau link tidak valid.</p>
+        <h2 className="text-xl font-bold text-foreground mb-2">Penawaran tidak ditemukan</h2>
+        <p className="text-muted-foreground mb-6">Mungkin penawaran sudah dihapus atau link tidak valid.</p>
         <button 
           onClick={() => navigate(-1)}
-          className="px-6 py-2 bg-indigo-600 text-white rounded-full font-medium hover:bg-indigo-700 transition"
+          className="px-6 py-2 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition"
         >
           Kembali
         </button>

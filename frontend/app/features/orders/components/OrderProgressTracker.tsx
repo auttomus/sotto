@@ -32,8 +32,8 @@ export function OrderProgressTracker({ status }: OrderProgressTrackerProps) {
 
   if (isCancelled) {
     return (
-      <div className="px-6 py-4 pb-5 bg-red-50/20 border-b border-red-100/50 dark:bg-red-950/5 dark:border-red-900/10 flex justify-center">
-        <span className="text-xs font-bold text-red-600 dark:text-red-400 tracking-wide uppercase">
+      <div className="px-6 py-4 pb-5 bg-destructive/10 border-b border-destructive/20 flex justify-center">
+        <span className="text-xs font-bold text-destructive tracking-wide uppercase">
           Pesanan Ini Telah Dibatalkan
         </span>
       </div>
@@ -50,10 +50,10 @@ export function OrderProgressTracker({ status }: OrderProgressTrackerProps) {
   return (
     <div className="px-6 py-4 pb-6">
       <div className="relative flex items-center justify-between w-full">
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-200 dark:bg-gray-800 rounded-full z-0"></div>
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-muted rounded-full z-0"></div>
         {/* Active Line */}
         <div
-          className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-indigo-500 rounded-full z-0 transition-all duration-500"
+          className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-primary rounded-full z-0 transition-all duration-500"
           style={{ width: activeWidth }}
         ></div>
 
@@ -63,10 +63,10 @@ export function OrderProgressTracker({ status }: OrderProgressTrackerProps) {
             <div
               className={`h-6 w-6 rounded-full flex items-center justify-center border-2 transition-colors duration-300 ${
                 step.done
-                  ? "bg-indigo-500 border-indigo-500 text-white"
+                  ? "bg-primary border-primary text-primary-foreground"
                   : step.active
-                  ? "bg-white dark:bg-gray-900 border-indigo-500 text-indigo-500 ring-4 ring-indigo-500/20"
-                  : "bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-300 dark:text-gray-700"
+                  ? "bg-card border-primary text-primary ring-4 ring-primary/20"
+                  : "bg-card border-border text-muted-foreground"
               }`}
             >
               {step.done ? (
@@ -78,8 +78,8 @@ export function OrderProgressTracker({ status }: OrderProgressTrackerProps) {
             <span
               className={`absolute -bottom-5 text-[9px] font-bold uppercase tracking-wider whitespace-nowrap transition-colors duration-300 ${
                 step.done || step.active
-                  ? "text-indigo-600 dark:text-indigo-400"
-                  : "text-gray-400 dark:text-gray-500"
+                  ? "text-primary"
+                  : "text-muted-foreground"
               }`}
             >
               {step.label}

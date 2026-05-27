@@ -15,7 +15,7 @@ export function Avatar({ className, src, alt, fallback, size = "md", ...props }:
   };
 
   return (
-    <div className={cn("relative inline-flex items-center justify-center shrink-0 rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden", sizes[size], className)}>
+    <div className={cn("relative inline-flex items-center justify-center shrink-0 rounded-full bg-muted border border-border overflow-hidden", sizes[size], className)}>
       {src ? (
         <img
           src={src}
@@ -24,7 +24,7 @@ export function Avatar({ className, src, alt, fallback, size = "md", ...props }:
           {...props}
         />
       ) : (
-        <span className="font-medium text-gray-500 dark:text-gray-400 uppercase">
+        <span className="font-semibold text-muted-foreground uppercase">
           {fallback || alt?.charAt(0) || "?"}
         </span>
       )}

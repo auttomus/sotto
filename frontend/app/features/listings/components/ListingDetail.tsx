@@ -8,7 +8,9 @@ import { ROUTES } from "~/core/constants/ROUTES";
 import { useCreateOrderMutation, useCreateConversationMutation } from "~/core/apollo/generated";
 import { useAuthStore } from "~/core/store/useAuthStore";
 import { useToastStore } from "~/core/store/useToastStore";
+import { shareObject } from "~/core/utils/share";
 import type { GetListingDetailQuery } from "~/core/apollo/generated";
+import { PageHeader } from "~/components/layout/PageHeader";
 
 type RawListingDetail = NonNullable<GetListingDetailQuery["listing"]>;
 
@@ -96,23 +98,27 @@ export function ListingDetail({ listing }: ListingDetailProps) {
 
   return (
     <div className="flex flex-col min-h-[100dvh] bg-white dark:bg-gray-950 relative text-gray-900 dark:text-gray-100">
-      {/* Header Mobile / Navigation */}
-      <header className="sticky top-0 z-40 bg-white/85 dark:bg-gray-900/85 backdrop-blur-md px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between shrink-0">
-        <button 
-          onClick={() => navigate(-1)} 
-          className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-        >
-          <ArrowLeft className="h-6 w-6 text-gray-900 dark:text-gray-100" />
-        </button>
-        <div className="flex gap-2">
-          <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-900 dark:text-gray-100">
-            <Heart className="h-5 w-5" />
-          </button>
-          <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-900 dark:text-gray-100">
-            <Share2 className="h-5 w-5" />
-          </button>
-        </div>
-      </header>
+      <PageHeader
+        title=""
+        showBackButton
+        rightAction={
+          <div className="flex gap-2">
+            <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-900 dark:text-gray-100 cursor-pointer">
+              <Heart className="h-5 w-5" />
+            </button>
+            <button 
+              onClick={() => shareObject({
+                title: listing.title,
+                text: listing.description || undefined,
+                url: `/listing/${listing.id}`
+              })}
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-900 dark:text-gray-100 cursor-pointer"
+            >
+              <Share2 className="h-5 w-5" />
+            </button>
+          </div>
+        }
+      />
 
       {/* Main Content */}
       <div className="flex-grow w-full">

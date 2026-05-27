@@ -18,7 +18,7 @@ export default function LoginRoute() {
   }, [isAuthenticated, navigate, initTheme]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans">
+    <div className="min-h-screen bg-background text-foreground flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <LoginForm />
     </div>
   );

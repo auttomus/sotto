@@ -83,11 +83,11 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffe
             className="mt-auto shrink-0 h-6 w-6"
           />
         )}
-        <div className="bg-gray-150 dark:bg-gray-800/40 p-3 rounded-2xl rounded-bl-sm dark:border dark:border-gray-800/60 shadow-sm w-full select-none">
-          <p className="text-xs italic text-gray-400 dark:text-gray-500 font-medium">
+        <div className="bg-muted p-3 rounded-2xl rounded-bl-sm border border-border shadow-sm w-full select-none">
+          <p className="text-xs italic text-muted-foreground font-medium">
             Pesan ini telah dihapus
           </p>
-          <div className="flex justify-end items-center mt-1.5 text-[8px] text-gray-400 dark:text-gray-500">
+          <div className="flex justify-end items-center mt-1.5 text-[8px] text-muted-foreground">
             {new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
           </div>
         </div>
@@ -110,18 +110,18 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffe
             className="mt-auto shrink-0 h-6 w-6"
           />
         )}
-        <div className="bg-white dark:bg-gray-900 border-2 border-indigo-500/20 dark:border-indigo-500/10 p-4 rounded-3xl shadow-md w-full relative overflow-hidden">
-          <div className="absolute -top-10 -right-10 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl pointer-events-none" />
+        <div className="bg-card border border-border p-4 rounded-3xl shadow-md w-full relative overflow-hidden">
+          <div className="absolute -top-10 -right-10 w-24 h-24 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
 
-          <div className="flex items-center justify-between mb-3 border-b border-gray-100 dark:border-gray-800 pb-2">
-            <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 tracking-wide uppercase">
+          <div className="flex items-center justify-between mb-3 border-b border-border pb-2">
+            <span className="text-[10px] font-bold text-primary tracking-wide uppercase">
               Penawaran Khusus
             </span>
             <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
-              offer.status === "PENDING" ? "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" :
-              offer.status === "ACCEPTED" ? "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400" :
-              offer.status === "REJECTED" ? "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400" :
-              "bg-gray-100 text-gray-500 dark:bg-gray-850 dark:text-gray-400"
+              offer.status === "PENDING" ? "bg-primary/10 text-primary" :
+              offer.status === "ACCEPTED" ? "bg-success/10 text-success" :
+              offer.status === "REJECTED" ? "bg-destructive/10 text-destructive" :
+              "bg-muted text-muted-foreground"
             }`}>
               {offer.status === "PENDING" ? "Menunggu" :
                offer.status === "ACCEPTED" ? "Disetujui" :
@@ -129,18 +129,18 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffe
             </span>
           </div>
 
-          <p className="text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed mb-4 font-medium">
+          <p className="text-xs text-foreground whitespace-pre-wrap leading-relaxed mb-4 font-medium">
             {offer.description}
           </p>
 
-          <div className="grid grid-cols-2 gap-3 mb-4 bg-gray-50 dark:bg-gray-850 p-3 rounded-2xl border border-gray-100/50 dark:border-gray-800/30">
+          <div className="grid grid-cols-2 gap-3 mb-4 bg-muted p-3 rounded-2xl border border-border">
             <div className="flex flex-col">
-              <span className="text-[8px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Harga Kesepakatan</span>
-              <span className="text-xs font-extrabold text-indigo-600 dark:text-indigo-400">Rp {formattedPrice}</span>
+              <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider">Harga Kesepakatan</span>
+              <span className="text-xs font-extrabold text-primary">Rp {formattedPrice}</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-[8px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Durasi Pengiriman</span>
-              <span className="text-xs font-bold text-gray-800 dark:text-gray-200">{offer.deliveryTimeDays} Hari</span>
+              <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider">Durasi Pengiriman</span>
+              <span className="text-xs font-bold text-foreground">{offer.deliveryTimeDays} Hari</span>
             </div>
           </div>
 
@@ -151,14 +151,14 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffe
                   <button
                     onClick={() => rejectOffer({ variables: { offerId: offer.id } })}
                     disabled={actionLoading}
-                    className="flex-1 py-2 text-center text-[11px] font-bold text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/40 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition cursor-pointer disabled:opacity-50"
+                    className="flex-1 py-2 text-center text-[11px] font-bold text-destructive border border-destructive/30 hover:bg-destructive/10 rounded-xl transition cursor-pointer disabled:opacity-50"
                   >
                     Tolak
                   </button>
                   <button
                     onClick={() => acceptOffer({ variables: { offerId: offer.id } })}
                     disabled={actionLoading}
-                    className="flex-[2] py-2 text-center text-[11px] font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md shadow-indigo-600/10 hover:shadow-indigo-600/20 active:scale-[0.99] transition cursor-pointer disabled:opacity-50"
+                    className="flex-[2] py-2 text-center text-[11px] font-bold bg-primary hover:opacity-90 text-primary-foreground rounded-xl shadow-md shadow-primary/10 active:scale-[0.99] transition cursor-pointer disabled:opacity-50"
                   >
                     Terima & Bayar
                   </button>
@@ -167,7 +167,7 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffe
                 <button
                   onClick={() => withdrawOffer({ variables: { offerId: offer.id } })}
                   disabled={actionLoading}
-                  className="w-full py-2 text-center text-[11px] font-bold text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-850 rounded-xl transition cursor-pointer disabled:opacity-50"
+                  className="w-full py-2 text-center text-[11px] font-bold text-muted-foreground border border-border hover:bg-muted rounded-xl transition cursor-pointer disabled:opacity-50"
                 >
                   Tarik Penawaran
                 </button>
@@ -178,13 +178,13 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffe
           {offer.status === "ACCEPTED" && offer.orderId && !isSeller && (
             <button
               onClick={() => navigate(`/workspace/order/${offer.orderId}`)}
-              className="w-full py-2 text-center text-[11px] font-bold text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-900/40 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 rounded-xl transition cursor-pointer"
+              className="w-full py-2 text-center text-[11px] font-bold text-primary border border-primary/30 hover:bg-primary/5 rounded-xl transition cursor-pointer"
             >
               Lihat Detail Order
             </button>
           )}
 
-          <div className="flex justify-end items-center mt-2.5 text-[8px] text-gray-400 dark:text-gray-500">
+          <div className="flex justify-end items-center mt-2.5 text-[8px] text-muted-foreground">
             {new Date(offer.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
           </div>
         </div>
@@ -210,20 +210,20 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffe
               e.stopPropagation();
               setShowMenu(!showMenu);
             }} 
-            className="p-1 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition cursor-pointer"
+            className="p-1 hover:bg-muted rounded-full text-muted-foreground hover:text-foreground transition cursor-pointer"
           >
             <MoreHorizontal className="h-4 w-4" />
           </button>
 
           {showMenu && (
-            <div className="absolute bottom-full right-0 mb-1 z-30 bg-white dark:bg-gray-900 border border-gray-150 dark:border-gray-800 rounded-xl shadow-lg p-1 min-w-[90px] flex flex-col gap-0.5">
+            <div className="absolute bottom-full right-0 mb-1 z-30 bg-card border border-border rounded-xl shadow-lg p-1 min-w-[90px] flex flex-col gap-0.5">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsEditing(true);
                   setShowMenu(false);
                 }}
-                className="flex items-center gap-1.5 px-2 py-1.5 text-[11px] font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg text-left w-full cursor-pointer"
+                className="flex items-center gap-1.5 px-2 py-1.5 text-[11px] font-bold text-foreground hover:bg-muted rounded-lg text-left w-full cursor-pointer"
               >
                 <Pencil className="h-3 w-3" />
                 Ubah
@@ -237,7 +237,7 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffe
                   }
                   setShowMenu(false);
                 }}
-                className="flex items-center gap-1.5 px-2 py-1.5 text-[11px] font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg text-left w-full cursor-pointer"
+                className="flex items-center gap-1.5 px-2 py-1.5 text-[11px] font-bold text-destructive hover:bg-destructive/10 rounded-lg text-left w-full cursor-pointer"
               >
                 <Trash2 className="h-3 w-3" />
                 Hapus
@@ -247,13 +247,13 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffe
         </div>
       )}
 
-      <div className={`${isMine ? 'bg-indigo-600 rounded-br-sm' : 'bg-white dark:bg-gray-800 rounded-bl-sm border border-gray-100 dark:border-gray-700/50'} p-3 rounded-2xl shadow-sm w-full`}>
+      <div className={`${isMine ? 'bg-primary text-primary-foreground rounded-br-sm' : 'bg-card border border-border rounded-bl-sm'} p-3 rounded-2xl shadow-sm w-full`}>
         {isEditing ? (
           <div className="flex flex-col gap-2 min-w-[200px]">
             <textarea
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
-              className="w-full text-sm bg-black/10 dark:bg-black/20 text-white rounded-xl p-2 border border-white/20 focus:outline-none focus:border-white/50 resize-none font-medium"
+              className="w-full text-sm bg-muted text-foreground rounded-xl p-2 border border-border focus:outline-none focus:border-primary/50 resize-none font-medium"
               rows={2}
             />
             <div className="flex justify-end gap-1">
@@ -262,7 +262,7 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffe
                   setIsEditing(false);
                   setEditContent(cleanContent || "");
                 }}
-                className="px-2.5 py-1 text-[11px] font-bold text-indigo-200 hover:text-white transition cursor-pointer"
+                className="px-2.5 py-1 text-[11px] font-bold text-muted-foreground hover:text-foreground transition cursor-pointer"
               >
                 Batal
               </button>
@@ -278,7 +278,7 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffe
                   }
                   setIsEditing(false);
                 }}
-                className="px-3 py-1 text-[11px] font-bold bg-white text-indigo-600 rounded-lg hover:bg-indigo-50 shadow-sm active:scale-[0.98] transition cursor-pointer"
+                className="px-3 py-1 text-[11px] font-bold bg-primary text-primary-foreground rounded-lg hover:opacity-90 shadow-sm active:scale-[0.98] transition cursor-pointer"
               >
                 Simpan
               </button>
@@ -286,7 +286,7 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffe
           </div>
         ) : (
           cleanContent && (
-            <p className={`text-sm ${isMine ? 'text-white font-medium' : 'text-gray-800 dark:text-gray-200'} whitespace-pre-wrap break-words`}>
+            <p className={`text-sm ${isMine ? 'text-primary-foreground font-medium' : 'text-foreground'} whitespace-pre-wrap break-words`}>
               {cleanContent}
             </p>
           )
@@ -303,7 +303,7 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffe
               return (
                 <div 
                   key={item.id} 
-                  className="rounded-xl overflow-hidden max-w-full bg-gray-50 border border-gray-150 dark:border-gray-800 max-h-[220px] flex items-center justify-center cursor-zoom-in group/media"
+                  className="rounded-xl overflow-hidden max-w-full bg-muted border border-border max-h-[220px] flex items-center justify-center cursor-zoom-in group/media"
                   onClick={() => window.open(url, '_blank')}
                 >
                   <img
@@ -317,16 +317,16 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffe
           </div>
         )}
 
-        <div className={`flex items-center justify-end gap-1 mt-1.5 ${!isMine ? 'text-right' : ''}`}>
+        <div className="flex items-center justify-end gap-1 mt-1.5">
           {msg.editedAt && (
-            <span className={`text-[8px] italic mr-1 ${isMine ? 'text-indigo-200' : 'text-gray-400'}`}>
+            <span className={`text-[8px] italic mr-1 ${isMine ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
               (diedit)
             </span>
           )}
-          <span className={`text-[9px] ${isMine ? 'text-indigo-200' : 'text-gray-400'}`}>
+          <span className={`text-[9px] ${isMine ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
             {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
-          {isMine && <Check className="h-3 w-3 text-white" />}
+          {isMine && <Check className="h-3 w-3 text-primary-foreground" />}
         </div>
       </div>
     </div>

@@ -17,14 +17,14 @@ export default function ProfileRoute() {
   if (profileLoading && !profileData) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   if (profileError || !profileData?.myProfile) {
     return (
-      <div className="p-4 text-center text-red-500 mt-10">
+      <div className="p-4 text-center text-destructive mt-10">
         <p>Gagal memuat profil: {profileError?.message || "Profil tidak ditemukan"}</p>
       </div>
     );

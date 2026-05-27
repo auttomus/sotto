@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useLogin } from '../hooks/useLogin';
 import { ROUTES } from '~/core/constants/ROUTES';
+import { Button } from '~/components/ui/Button';
 
 export default function LoginForm() {
   const [email, setEmail] = useState('');
@@ -17,23 +18,23 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800">
+    <div className="w-full max-w-md mx-auto p-6 bg-card text-foreground rounded-2xl shadow-sm border border-border">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-indigo-600 dark:text-indigo-400 font-serif italic mb-2">
+        <h1 className="text-3xl font-bold tracking-tight text-primary font-serif italic mb-2">
           Sotto
         </h1>
-        <p className="text-gray-500 dark:text-gray-400">Masuk untuk melanjutkan karya Anda</p>
+        <p className="text-muted-foreground">Masuk untuk melanjutkan karya Anda</p>
       </div>
 
       <form onSubmit={onSubmit} className="space-y-4">
         {error && (
-          <div className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 rounded-lg">
+          <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg">
             {error}
           </div>
         )}
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="email">
+          <label className="form-label" htmlFor="email">
             Email
           </label>
           <input
@@ -42,14 +43,14 @@ export default function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={isLoading}
-            className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all disabled:opacity-50"
+            className="form-input"
             placeholder="nama@email.com"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="password">
+          <label className="form-label" htmlFor="password">
             Kata Sandi
           </label>
           <div className="relative">
@@ -59,32 +60,32 @@ export default function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}
-              className="w-full px-4 py-2 pr-10 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all disabled:opacity-50"
+              className="form-input pr-10"
               placeholder="••••••••"
               required
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground"
             >
               {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
             </button>
           </div>
         </div>
 
-        <button
+        <Button
           type="submit"
           disabled={isLoading || !email || !password}
-          className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-lg font-medium transition-colors flex justify-center items-center gap-2"
+          className="w-full py-2.5"
         >
           {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Masuk'}
-        </button>
+        </Button>
       </form>
 
-      <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
+      <div className="mt-6 text-center text-sm text-muted-foreground">
         Belum punya akun?{' '}
-        <Link to={ROUTES.REGISTER} className="text-indigo-600 dark:text-indigo-400 font-medium hover:underline">
+        <Link to={ROUTES.REGISTER} className="text-primary font-medium hover:underline">
           Daftar sekarang
         </Link>
       </div>

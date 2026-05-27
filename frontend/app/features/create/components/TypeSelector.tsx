@@ -8,43 +8,43 @@ export function TypeSelector() {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col min-h-[100dvh] bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 w-full max-w-lg mx-auto border-x border-gray-100 dark:border-gray-800 relative transition-colors duration-200">
-      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 px-4 h-14 flex items-center justify-between sticky top-0 z-10">
-        <h1 className="font-bold text-gray-900 dark:text-gray-100">Buat Baru</h1>
-        <button onClick={() => navigate(-1)} className="p-2 -mr-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-          <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+    <div className="flex flex-col min-h-[100dvh] bg-background text-foreground w-full max-w-lg mx-auto border-x border-border relative transition-colors duration-200">
+      <header className="bg-card/85 backdrop-blur-md border-b border-border px-4 h-14 flex items-center justify-between sticky top-0 z-10">
+        <h1 className="font-bold text-foreground">Buat Baru</h1>
+        <button onClick={() => navigate(-1)} className="p-2 -mr-2 rounded-full hover:bg-muted transition">
+          <X className="h-5 w-5 text-muted-foreground" />
         </button>
       </header>
       
       <div className="p-4 space-y-3 mt-2">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 px-1">Apa yang ingin kamu bagikan?</h2>
+        <h2 className="text-lg font-bold text-foreground mb-4 px-1">Apa yang ingin kamu bagikan?</h2>
         
         <button 
           onClick={() => setSelectedType("portfolio")}
-          className="w-full bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-200 dark:border-gray-800 flex items-center gap-4 hover:border-indigo-500 hover:ring-1 hover:ring-indigo-500/50 transition-all text-left shadow-sm group"
+          className="w-full bg-card p-4 rounded-2xl border border-border flex items-center gap-4 hover:border-primary hover:ring-1 hover:ring-primary/50 transition-all text-left shadow-sm group"
         >
-          <div className="h-12 w-12 rounded-full bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center shrink-0">
-            <ImageIcon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+          <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+            <ImageIcon className="h-6 w-6 text-primary" />
           </div>
           <div className="flex-1">
-            <h3 className="font-bold text-gray-900 dark:text-gray-100">Karya, Portofolio & Pengalaman</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Unggah hasil kerjamu, desain, screenshot kode, atau ceritakan perjalanan karir & tips.</p>
+            <h3 className="font-bold text-foreground">Karya, Portofolio & Pengalaman</h3>
+            <p className="text-xs text-muted-foreground mt-1">Unggah hasil kerjamu, desain, screenshot kode, atau ceritakan perjalanan karir & tips.</p>
           </div>
-          <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-indigo-500 transition-colors" />
+          <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
         </button>
         
         <button 
           onClick={() => setSelectedType("penawaran")}
-          className="w-full bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-200 dark:border-gray-800 flex items-center gap-4 hover:border-indigo-500 hover:ring-1 hover:ring-indigo-500/50 transition-all text-left shadow-sm group mt-3"
+          className="w-full bg-card p-4 rounded-2xl border border-border flex items-center gap-4 hover:border-primary hover:ring-1 hover:ring-primary/50 transition-all text-left shadow-sm group mt-3"
         >
-          <div className="h-12 w-12 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
-            <Briefcase className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+          <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+            <Briefcase className="h-6 w-6 text-primary" />
           </div>
           <div className="flex-1">
-            <h3 className="font-bold text-gray-900 dark:text-gray-100">Penawaran & Produk</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Tawarkan jasa pengerjaan atau jual produk digital instan.</p>
+            <h3 className="font-bold text-foreground">Penawaran & Produk</h3>
+            <p className="text-xs text-muted-foreground mt-1">Tawarkan jasa pengerjaan atau jual produk digital instan.</p>
           </div>
-          <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
+          <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
         </button>
       </div>
     </div>

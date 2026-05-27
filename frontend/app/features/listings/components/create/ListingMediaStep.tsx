@@ -14,17 +14,17 @@ export function ListingMediaStep({ handleFileSelect, removeFile }: ListingMediaS
   return (
     <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
       <div>
-        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">Galeri Media</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400">Tambahkan foto penawaran agar lebih menarik.</p>
+        <h2 className="text-xl font-bold text-foreground mb-1">Galeri Media</h2>
+        <p className="text-sm text-muted-foreground">Tambahkan foto penawaran agar lebih menarik.</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 pt-2">
         {files.map((file: File, i: number) => (
-          <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 group">
+          <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-border group">
             <img src={URL.createObjectURL(file)} alt="preview" className="w-full h-full object-cover" />
             <button 
               onClick={() => removeFile(i)}
-              className="absolute top-2 right-2 p-1.5 bg-black/60 hover:bg-black text-white rounded-full transition"
+              className="absolute top-2 right-2 p-1.5 bg-black/60 hover:bg-black text-white rounded-full transition cursor-pointer"
             >
               <X className="h-4 w-4" />
             </button>
@@ -34,7 +34,7 @@ export function ListingMediaStep({ handleFileSelect, removeFile }: ListingMediaS
         {files.length < 5 && (
           <button 
             onClick={() => fileInputRef.current?.click()}
-            className="aspect-square rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700 flex flex-col items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-800 transition text-gray-400 hover:text-indigo-500"
+            className="aspect-square rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center hover:bg-muted transition text-muted-foreground hover:text-primary cursor-pointer"
           >
             <ImageIcon className="h-8 w-8 mb-2" />
             <span className="text-sm font-medium">Tambah Foto</span>
