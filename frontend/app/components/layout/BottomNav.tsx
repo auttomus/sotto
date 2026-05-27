@@ -13,16 +13,17 @@ export default function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 pb-safe">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border pb-safe">
       <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
         {navItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
+            end={item.to === "/profile"}
             className={({ isActive }) =>
               cn(
                 "flex flex-col items-center justify-center w-full h-full space-y-1 relative group transition-colors",
-                isActive ? "text-indigo-600 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
               )
             }
           >
@@ -31,7 +32,7 @@ export default function BottomNav() {
                 <div className="relative">
                   <item.icon className={cn("h-6 w-6 transition-transform", isActive && "scale-110")} strokeWidth={isActive ? 2.5 : 2} />
                   {item.hasBadge && (
-                    <span className="absolute -top-1 -right-1 block h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-900" />
+                    <span className="absolute -top-1 -right-1 block h-2.5 w-2.5 rounded-full bg-destructive ring-2 ring-card" />
                   )}
                 </div>
                 <span className={cn("text-[10px] font-medium transition-all", isActive ? "opacity-100" : "opacity-70 group-hover:opacity-100")}>

@@ -3,6 +3,8 @@ query GetFeed($limit: Int) {
     postId
     content
     createdAt
+    editedAt
+    deletedAt
     authorId
     authorDisplayName
     authorUsername
@@ -57,6 +59,8 @@ query GetPost($postId: String!) {
     postId
     content
     createdAt
+    editedAt
+    deletedAt
     authorId
     authorDisplayName
     authorUsername
@@ -86,6 +90,8 @@ query GetReplies($postId: String!) {
     postId
     content
     createdAt
+    editedAt
+    deletedAt
     authorId
     authorDisplayName
     authorUsername
@@ -115,6 +121,8 @@ query GetGlobalFeed($limit: Int) {
     postId
     content
     createdAt
+    editedAt
+    deletedAt
     authorId
     authorDisplayName
     authorUsername
@@ -139,3 +147,16 @@ query GetGlobalFeed($limit: Int) {
   }
 }
 
+mutation UpdatePost($postId: String!, $input: UpdatePostInput!) {
+  updatePost(postId: $postId, input: $input) {
+    postId
+    content
+    createdAt
+    editedAt
+    deletedAt
+  }
+}
+
+mutation DeletePost($postId: String!) {
+  deletePost(postId: $postId)
+}

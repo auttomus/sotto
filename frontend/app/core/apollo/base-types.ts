@@ -1,3 +1,6 @@
+/* eslint-disable */
+// @ts-nocheck
+
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 /** All built-in and custom scalars, mapped to their actual values */
@@ -33,6 +36,7 @@ export type AccountModel = {
 
 export type AccountPartial = {
   __typename?: 'AccountPartial';
+  avatarObjectKey?: Maybe<Scalars['String']['output']>;
   displayName: Scalars['String']['output'];
   major?: Maybe<Scalars['String']['output']>;
   trustScore: Scalars['Float']['output'];
@@ -56,6 +60,7 @@ export type ConversationParticipant = {
   accountId: Scalars['ID']['output'];
   avatarObjectKey?: Maybe<Scalars['String']['output']>;
   displayName: Scalars['String']['output'];
+  username?: Maybe<Scalars['String']['output']>;
 };
 
 export enum ConversationType {
@@ -179,6 +184,8 @@ export type MessageModel = {
   content: Scalars['String']['output'];
   conversationId: Scalars['String']['output'];
   createdAt: Scalars['DateTime']['output'];
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  editedAt?: Maybe<Scalars['DateTime']['output']>;
   media?: Maybe<Array<MediaAttachmentModel>>;
   messageId: Scalars['String']['output'];
   senderAvatarObjectKey?: Maybe<Scalars['String']['output']>;
@@ -201,6 +208,8 @@ export type Mutation = {
   createTag: TagModel;
   deleteListing: Scalars['Boolean']['output'];
   deleteMedia: Scalars['Boolean']['output'];
+  deleteMessage: Scalars['Boolean']['output'];
+  deletePost: Scalars['Boolean']['output'];
   follow: Scalars['Boolean']['output'];
   getMidtransSnapToken: Scalars['String']['output'];
   markAllNotificationsAsRead: Scalars['Boolean']['output'];
@@ -212,6 +221,8 @@ export type Mutation = {
   trackEvent: Scalars['Boolean']['output'];
   unfollow: Scalars['Boolean']['output'];
   updateListing: ListingModel;
+  updateMessage: MessageModel;
+  updatePost: PostModel;
   updateProfile: AccountModel;
   withdrawOffer: CustomOfferModel;
 };
@@ -285,6 +296,17 @@ export type MutationDeleteMediaArgs = {
 };
 
 
+export type MutationDeleteMessageArgs = {
+  conversationId: Scalars['ID']['input'];
+  messageId: Scalars['ID']['input'];
+};
+
+
+export type MutationDeletePostArgs = {
+  postId: Scalars['String']['input'];
+};
+
+
 export type MutationFollowArgs = {
   targetAccountId: Scalars['ID']['input'];
 };
@@ -329,6 +351,19 @@ export type MutationUnfollowArgs = {
 export type MutationUpdateListingArgs = {
   id: Scalars['ID']['input'];
   input: UpdateListingInput;
+};
+
+
+export type MutationUpdateMessageArgs = {
+  conversationId: Scalars['ID']['input'];
+  input: UpdateMessageInput;
+  messageId: Scalars['ID']['input'];
+};
+
+
+export type MutationUpdatePostArgs = {
+  input: UpdatePostInput;
+  postId: Scalars['String']['input'];
 };
 
 
@@ -397,6 +432,8 @@ export type PostModel = {
   authorUsername?: Maybe<Scalars['String']['output']>;
   content: Scalars['String']['output'];
   createdAt: Scalars['DateTime']['output'];
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  editedAt?: Maybe<Scalars['DateTime']['output']>;
   inReplyToPostId?: Maybe<Scalars['String']['output']>;
   likedByMe: Scalars['Boolean']['output'];
   likesCount: Scalars['Int']['output'];
@@ -606,8 +643,20 @@ export type UpdateListingInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   isUnlimited?: InputMaybe<Scalars['Boolean']['input']>;
   maxActiveOrders?: InputMaybe<Scalars['Int']['input']>;
+  mediaIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   tagIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   title?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateMessageInput = {
+  content?: InputMaybe<Scalars['String']['input']>;
+  mediaIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+};
+
+export type UpdatePostInput = {
+  content?: InputMaybe<Scalars['String']['input']>;
+  mediaIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+  tagIds?: InputMaybe<Array<Scalars['ID']['input']>>;
 };
 
 export type UpdateProfileInput = {

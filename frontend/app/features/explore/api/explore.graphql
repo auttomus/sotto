@@ -4,6 +4,10 @@ query SearchAccounts($query: String!) {
     displayName
     username
     avatarObjectKey
+    schoolName
+    major
+    trustScore
+    note
   }
 }
 

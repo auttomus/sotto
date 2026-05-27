@@ -1,3 +1,6 @@
+/* eslint-disable */
+// @ts-nocheck
+
 /** Internal type. DO NOT USE DIRECTLY. */
 type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 /** Internal type. DO NOT USE DIRECTLY. */
@@ -25,7 +28,7 @@ export type MajorsBySchoolQuery = { majorsBySchool: Array<{ id: string, name: st
 export type GetConversationsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetConversationsQuery = { conversations: Array<{ id: string, type: Types.ConversationType, createdAt: string, updatedAt: string, lastMessageContent: string | null, lastMessageAt: string | null, participants: Array<{ accountId: string, displayName: string, avatarObjectKey: string | null }> | null, activeOrder: { id: string, status: Types.OrderStatus, agreedPrice: number, createdAt: string } | null }> };
+export type GetConversationsQuery = { conversations: Array<{ id: string, type: Types.ConversationType, createdAt: string, updatedAt: string, lastMessageContent: string | null, lastMessageAt: string | null, participants: Array<{ accountId: string, displayName: string, avatarObjectKey: string | null, username: string | null }> | null, activeOrder: { id: string, status: Types.OrderStatus, agreedPrice: number, createdAt: string } | null }> };
 
 export type GetMessagesQueryVariables = Exact<{
   conversationId: string | number;
@@ -33,7 +36,7 @@ export type GetMessagesQueryVariables = Exact<{
 }>;
 
 
-export type GetMessagesQuery = { messages: Array<{ messageId: string, senderId: string, content: string, createdAt: string, media: Array<{ id: string, fileName: string, contentType: string, url: string | null }> | null }> };
+export type GetMessagesQuery = { messages: Array<{ messageId: string, senderId: string, content: string, createdAt: string, editedAt: string | null, deletedAt: string | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null }> | null }> };
 
 export type CreateConversationMutationVariables = Exact<{
   input: Types.CreateConversationInput;
@@ -41,6 +44,23 @@ export type CreateConversationMutationVariables = Exact<{
 
 
 export type CreateConversationMutation = { createConversation: { id: string, type: Types.ConversationType, createdAt: string } };
+
+export type UpdateMessageMutationVariables = Exact<{
+  conversationId: string | number;
+  messageId: string | number;
+  input: Types.UpdateMessageInput;
+}>;
+
+
+export type UpdateMessageMutation = { updateMessage: { messageId: string, content: string, editedAt: string | null } };
+
+export type DeleteMessageMutationVariables = Exact<{
+  conversationId: string | number;
+  messageId: string | number;
+}>;
+
+
+export type DeleteMessageMutation = { deleteMessage: boolean };
 
 export type SearchTagsQueryVariables = Exact<{
   query: string;
@@ -61,7 +81,7 @@ export type SearchAccountsQueryVariables = Exact<{
 }>;
 
 
-export type SearchAccountsQuery = { searchAccounts: Array<{ id: string, displayName: string, username: string, avatarObjectKey: string | null }> };
+export type SearchAccountsQuery = { searchAccounts: Array<{ id: string, displayName: string, username: string, avatarObjectKey: string | null, schoolName: string | null, major: string | null, trustScore: number, note: string | null }> };
 
 export type SearchListingsQueryVariables = Exact<{
   query: string;
@@ -82,7 +102,7 @@ export type GetFeedQueryVariables = Exact<{
 }>;
 
 
-export type GetFeedQuery = { feed: Array<{ postId: string, content: string, createdAt: string, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, repliesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null }> };
+export type GetFeedQuery = { feed: Array<{ postId: string, content: string, createdAt: string, editedAt: string | null, deletedAt: string | null, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, repliesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null }> };
 
 export type CreatePostMutationVariables = Exact<{
   input: Types.CreatePostInput;
@@ -103,33 +123,48 @@ export type GetPostQueryVariables = Exact<{
 }>;
 
 
-export type GetPostQuery = { post: { postId: string, content: string, createdAt: string, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, repliesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null } | null };
+export type GetPostQuery = { post: { postId: string, content: string, createdAt: string, editedAt: string | null, deletedAt: string | null, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, repliesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null } | null };
 
 export type GetRepliesQueryVariables = Exact<{
   postId: string;
 }>;
 
 
-export type GetRepliesQuery = { replies: Array<{ postId: string, content: string, createdAt: string, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, repliesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null }> };
+export type GetRepliesQuery = { replies: Array<{ postId: string, content: string, createdAt: string, editedAt: string | null, deletedAt: string | null, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, repliesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null }> };
 
 export type GetGlobalFeedQueryVariables = Exact<{
   limit?: number | null | undefined;
 }>;
 
 
-export type GetGlobalFeedQuery = { globalFeed: Array<{ postId: string, content: string, createdAt: string, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, repliesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null }> };
+export type GetGlobalFeedQuery = { globalFeed: Array<{ postId: string, content: string, createdAt: string, editedAt: string | null, deletedAt: string | null, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, repliesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null }> };
+
+export type UpdatePostMutationVariables = Exact<{
+  postId: string;
+  input: Types.UpdatePostInput;
+}>;
+
+
+export type UpdatePostMutation = { updatePost: { postId: string, content: string, createdAt: string, editedAt: string | null, deletedAt: string | null } };
+
+export type DeletePostMutationVariables = Exact<{
+  postId: string;
+}>;
+
+
+export type DeletePostMutation = { deletePost: boolean };
 
 export type GetListingsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetListingsQuery = { listings: Array<{ id: string, title: string, description: string, price: number, status: Types.ListingStatus, createdAt: string, accountId: string, account: { displayName: string, major: string | null, trustScore: number, username: string | null } | null }> };
+export type GetListingsQuery = { listings: Array<{ id: string, title: string, description: string, price: number, status: Types.ListingStatus, createdAt: string, updatedAt: string, accountId: string, account: { displayName: string, major: string | null, trustScore: number, username: string | null, avatarObjectKey: string | null } | null }> };
 
 export type GetListingDetailQueryVariables = Exact<{
   id: string | number;
 }>;
 
 
-export type GetListingDetailQuery = { listing: { id: string, title: string, description: string, price: number, status: Types.ListingStatus, type: Types.ListingType, isUnlimited: boolean, deliveryTimeDays: number | null, createdAt: string, accountId: string, account: { displayName: string, major: string | null, trustScore: number, username: string | null } | null, media: Array<{ id: string, fileName: string, contentType: string, objectKey: string, url: string | null, isPrivate: boolean }> | null } | null };
+export type GetListingDetailQuery = { listing: { id: string, title: string, description: string, price: number, status: Types.ListingStatus, type: Types.ListingType, isUnlimited: boolean, deliveryTimeDays: number | null, createdAt: string, updatedAt: string, accountId: string, account: { displayName: string, major: string | null, trustScore: number, username: string | null, avatarObjectKey: string | null } | null, media: Array<{ id: string, fileName: string, contentType: string, objectKey: string, url: string | null, isPrivate: boolean }> | null } | null };
 
 export type CreateListingMutationVariables = Exact<{
   input: Types.CreateListingInput;
@@ -144,7 +179,7 @@ export type UpdateListingMutationVariables = Exact<{
 }>;
 
 
-export type UpdateListingMutation = { updateListing: { id: string, title: string, description: string, price: number, status: Types.ListingStatus } };
+export type UpdateListingMutation = { updateListing: { id: string, title: string, description: string, price: number, status: Types.ListingStatus, updatedAt: string } };
 
 export type DeleteListingMutationVariables = Exact<{
   id: string | number;
@@ -257,7 +292,7 @@ export type GetListingsByAccountQueryVariables = Exact<{
 }>;
 
 
-export type GetListingsByAccountQuery = { listingsByAccount: Array<{ id: string, title: string, description: string, price: number, isUnlimited: boolean, deliveryTimeDays: number | null, status: Types.ListingStatus, type: Types.ListingType, media: Array<{ id: string, url: string | null, objectKey: string, fileName: string, contentType: string }> | null }> };
+export type GetListingsByAccountQuery = { listingsByAccount: Array<{ id: string, title: string, description: string, price: number, isUnlimited: boolean, deliveryTimeDays: number | null, status: Types.ListingStatus, type: Types.ListingType, createdAt: string, updatedAt: string, media: Array<{ id: string, url: string | null, objectKey: string, fileName: string, contentType: string }> | null }> };
 
 export type FollowAccountMutationVariables = Exact<{
   targetAccountId: string | number;
@@ -394,6 +429,7 @@ export const GetConversationsDocument = gql`
       accountId
       displayName
       avatarObjectKey
+      username
     }
     lastMessageContent
     lastMessageAt
@@ -448,6 +484,8 @@ export const GetMessagesDocument = gql`
     senderId
     content
     createdAt
+    editedAt
+    deletedAt
     media {
       id
       fileName
@@ -529,6 +567,79 @@ export function useCreateConversationMutation(baseOptions?: ApolloReactHooks.Mut
 export type CreateConversationMutationHookResult = ReturnType<typeof useCreateConversationMutation>;
 export type CreateConversationMutationResult = Apollo.MutationResult<CreateConversationMutation>;
 export type CreateConversationMutationOptions = Apollo.BaseMutationOptions<CreateConversationMutation, CreateConversationMutationVariables>;
+export const UpdateMessageDocument = gql`
+    mutation UpdateMessage($conversationId: ID!, $messageId: ID!, $input: UpdateMessageInput!) {
+  updateMessage(
+    conversationId: $conversationId
+    messageId: $messageId
+    input: $input
+  ) {
+    messageId
+    content
+    editedAt
+  }
+}
+    `;
+export type UpdateMessageMutationFn = Apollo.MutationFunction<UpdateMessageMutation, UpdateMessageMutationVariables>;
+
+/**
+ * __useUpdateMessageMutation__
+ *
+ * To run a mutation, you first call `useUpdateMessageMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateMessageMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateMessageMutation, { data, loading, error }] = useUpdateMessageMutation({
+ *   variables: {
+ *      conversationId: // value for 'conversationId'
+ *      messageId: // value for 'messageId'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateMessageMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateMessageMutation, UpdateMessageMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<UpdateMessageMutation, UpdateMessageMutationVariables>(UpdateMessageDocument, options);
+      }
+export type UpdateMessageMutationHookResult = ReturnType<typeof useUpdateMessageMutation>;
+export type UpdateMessageMutationResult = Apollo.MutationResult<UpdateMessageMutation>;
+export type UpdateMessageMutationOptions = Apollo.BaseMutationOptions<UpdateMessageMutation, UpdateMessageMutationVariables>;
+export const DeleteMessageDocument = gql`
+    mutation DeleteMessage($conversationId: ID!, $messageId: ID!) {
+  deleteMessage(conversationId: $conversationId, messageId: $messageId)
+}
+    `;
+export type DeleteMessageMutationFn = Apollo.MutationFunction<DeleteMessageMutation, DeleteMessageMutationVariables>;
+
+/**
+ * __useDeleteMessageMutation__
+ *
+ * To run a mutation, you first call `useDeleteMessageMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteMessageMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteMessageMutation, { data, loading, error }] = useDeleteMessageMutation({
+ *   variables: {
+ *      conversationId: // value for 'conversationId'
+ *      messageId: // value for 'messageId'
+ *   },
+ * });
+ */
+export function useDeleteMessageMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteMessageMutation, DeleteMessageMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<DeleteMessageMutation, DeleteMessageMutationVariables>(DeleteMessageDocument, options);
+      }
+export type DeleteMessageMutationHookResult = ReturnType<typeof useDeleteMessageMutation>;
+export type DeleteMessageMutationResult = Apollo.MutationResult<DeleteMessageMutation>;
+export type DeleteMessageMutationOptions = Apollo.BaseMutationOptions<DeleteMessageMutation, DeleteMessageMutationVariables>;
 export const SearchTagsDocument = gql`
     query SearchTags($query: String!) {
   searchTags(query: $query) {
@@ -616,6 +727,10 @@ export const SearchAccountsDocument = gql`
     displayName
     username
     avatarObjectKey
+    schoolName
+    major
+    trustScore
+    note
   }
 }
     `;
@@ -777,6 +892,8 @@ export const GetFeedDocument = gql`
     postId
     content
     createdAt
+    editedAt
+    deletedAt
     authorId
     authorDisplayName
     authorUsername
@@ -922,6 +1039,8 @@ export const GetPostDocument = gql`
     postId
     content
     createdAt
+    editedAt
+    deletedAt
     authorId
     authorDisplayName
     authorUsername
@@ -988,6 +1107,8 @@ export const GetRepliesDocument = gql`
     postId
     content
     createdAt
+    editedAt
+    deletedAt
     authorId
     authorDisplayName
     authorUsername
@@ -1054,6 +1175,8 @@ export const GetGlobalFeedDocument = gql`
     postId
     content
     createdAt
+    editedAt
+    deletedAt
     authorId
     authorDisplayName
     authorUsername
@@ -1114,6 +1237,75 @@ export type GetGlobalFeedQueryHookResult = ReturnType<typeof useGetGlobalFeedQue
 export type GetGlobalFeedLazyQueryHookResult = ReturnType<typeof useGetGlobalFeedLazyQuery>;
 export type GetGlobalFeedSuspenseQueryHookResult = ReturnType<typeof useGetGlobalFeedSuspenseQuery>;
 export type GetGlobalFeedQueryResult = Apollo.QueryResult<GetGlobalFeedQuery, GetGlobalFeedQueryVariables>;
+export const UpdatePostDocument = gql`
+    mutation UpdatePost($postId: String!, $input: UpdatePostInput!) {
+  updatePost(postId: $postId, input: $input) {
+    postId
+    content
+    createdAt
+    editedAt
+    deletedAt
+  }
+}
+    `;
+export type UpdatePostMutationFn = Apollo.MutationFunction<UpdatePostMutation, UpdatePostMutationVariables>;
+
+/**
+ * __useUpdatePostMutation__
+ *
+ * To run a mutation, you first call `useUpdatePostMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdatePostMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updatePostMutation, { data, loading, error }] = useUpdatePostMutation({
+ *   variables: {
+ *      postId: // value for 'postId'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdatePostMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdatePostMutation, UpdatePostMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<UpdatePostMutation, UpdatePostMutationVariables>(UpdatePostDocument, options);
+      }
+export type UpdatePostMutationHookResult = ReturnType<typeof useUpdatePostMutation>;
+export type UpdatePostMutationResult = Apollo.MutationResult<UpdatePostMutation>;
+export type UpdatePostMutationOptions = Apollo.BaseMutationOptions<UpdatePostMutation, UpdatePostMutationVariables>;
+export const DeletePostDocument = gql`
+    mutation DeletePost($postId: String!) {
+  deletePost(postId: $postId)
+}
+    `;
+export type DeletePostMutationFn = Apollo.MutationFunction<DeletePostMutation, DeletePostMutationVariables>;
+
+/**
+ * __useDeletePostMutation__
+ *
+ * To run a mutation, you first call `useDeletePostMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeletePostMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deletePostMutation, { data, loading, error }] = useDeletePostMutation({
+ *   variables: {
+ *      postId: // value for 'postId'
+ *   },
+ * });
+ */
+export function useDeletePostMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeletePostMutation, DeletePostMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<DeletePostMutation, DeletePostMutationVariables>(DeletePostDocument, options);
+      }
+export type DeletePostMutationHookResult = ReturnType<typeof useDeletePostMutation>;
+export type DeletePostMutationResult = Apollo.MutationResult<DeletePostMutation>;
+export type DeletePostMutationOptions = Apollo.BaseMutationOptions<DeletePostMutation, DeletePostMutationVariables>;
 export const GetListingsDocument = gql`
     query GetListings {
   listings {
@@ -1123,12 +1315,14 @@ export const GetListingsDocument = gql`
     price
     status
     createdAt
+    updatedAt
     accountId
     account {
       displayName
       major
       trustScore
       username
+      avatarObjectKey
     }
   }
 }
@@ -1180,12 +1374,14 @@ export const GetListingDetailDocument = gql`
     isUnlimited
     deliveryTimeDays
     createdAt
+    updatedAt
     accountId
     account {
       displayName
       major
       trustScore
       username
+      avatarObjectKey
     }
     media {
       id
@@ -1279,6 +1475,7 @@ export const UpdateListingDocument = gql`
     description
     price
     status
+    updatedAt
   }
 }
     `;
@@ -1920,6 +2117,8 @@ export const GetListingsByAccountDocument = gql`
     deliveryTimeDays
     status
     type
+    createdAt
+    updatedAt
     media {
       id
       url

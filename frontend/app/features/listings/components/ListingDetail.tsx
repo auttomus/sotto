@@ -8,7 +8,9 @@ import { ROUTES } from "~/core/constants/ROUTES";
 import { useCreateOrderMutation, useCreateConversationMutation } from "~/core/apollo/generated";
 import { useAuthStore } from "~/core/store/useAuthStore";
 import { useToastStore } from "~/core/store/useToastStore";
+import { shareObject } from "~/core/utils/share";
 import type { GetListingDetailQuery } from "~/core/apollo/generated";
+import { PageHeader } from "~/components/layout/PageHeader";
 
 type RawListingDetail = NonNullable<GetListingDetailQuery["listing"]>;
 
@@ -96,23 +98,27 @@ export function ListingDetail({ listing }: ListingDetailProps) {
 
   return (
     <div className="flex flex-col min-h-[100dvh] bg-white dark:bg-gray-950 relative text-gray-900 dark:text-gray-100">
-      {/* Header Mobile / Navigation */}
-      <header className="sticky top-0 z-40 bg-white/85 dark:bg-gray-900/85 backdrop-blur-md px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between shrink-0">
-        <button 
-          onClick={() => navigate(-1)} 
-          className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-        >
-          <ArrowLeft className="h-6 w-6 text-gray-900 dark:text-gray-100" />
-        </button>
-        <div className="flex gap-2">
-          <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-900 dark:text-gray-100">
-            <Heart className="h-5 w-5" />
-          </button>
-          <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-900 dark:text-gray-100">
-            <Share2 className="h-5 w-5" />
-          </button>
-        </div>
-      </header>
+      <PageHeader
+        title=""
+        showBackButton
+        rightAction={
+          <div className="flex gap-2">
+            <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-900 dark:text-gray-100 cursor-pointer">
+              <Heart className="h-5 w-5" />
+            </button>
+            <button 
+              onClick={() => shareObject({
+                title: listing.title,
+                text: listing.description || undefined,
+                url: `/listing/${listing.id}`
+              })}
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-900 dark:text-gray-100 cursor-pointer"
+            >
+              <Share2 className="h-5 w-5" />
+            </button>
+          </div>
+        }
+      />
 
       {/* Main Content */}
       <div className="flex-grow w-full">
@@ -178,10 +184,14 @@ export function ListingDetail({ listing }: ListingDetailProps) {
           
           <div className="flex items-center gap-2 mb-6 text-sm text-gray-600 dark:text-gray-400">
             <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
-            <span className="font-medium text-gray-900 dark:text-gray-100">5.0</span>
-            <span>(0 ulasan)</span>
-            <span>·</span>
-            <span>0 Terjual</span>
+            <span className="font-semibold text-gray-900 dark:text-gray-100">
+              {listing.account?.trustScore !== undefined && listing.account?.trustScore !== null
+                ? Number(listing.account.trustScore).toFixed(1)
+                : "0.0"}
+            </span>
+            <span className="text-xs px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-500 font-bold border border-amber-500/20">
+              Trust Score
+            </span>
           </div>
 
           <div className="flex flex-col gap-1 pb-6 border-b border-gray-100 dark:border-gray-800">
@@ -206,7 +216,7 @@ export function ListingDetail({ listing }: ListingDetailProps) {
               <Link to={listing.account.username ? ROUTES.PROFILE_PUBLIC(listing.account.username) : "#"} className="flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 transition">
                 <div className="flex items-center gap-3">
                   <Avatar 
-                    src={resolveMediaUrl((listing.account as any).avatarObjectKey)} 
+                    src={resolveMediaUrl(listing.account.avatarObjectKey)} 
                     alt={listing.account.displayName} 
                     size="lg" 
                   />

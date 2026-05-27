@@ -22,6 +22,7 @@ type AccountModel {
 }
 
 type AccountPartial {
+  avatarObjectKey: String
   displayName: String!
   major: String
   trustScore: Float!
@@ -43,6 +44,7 @@ type ConversationParticipant {
   accountId: ID!
   avatarObjectKey: String
   displayName: String!
+  username: String
 }
 
 enum ConversationType {
@@ -100,11 +102,11 @@ type CustomOfferModel {
   expiresAt: DateTime
   id: ID!
   listingId: String
+  orderId: String
   proposedPrice: Float!
   sellerAccountId: String!
   status: OfferStatus!
   updatedAt: DateTime!
-  orderId: String
 }
 
 """
@@ -166,6 +168,8 @@ type MessageModel {
   content: String!
   conversationId: String!
   createdAt: DateTime!
+  deletedAt: DateTime
+  editedAt: DateTime
   media: [MediaAttachmentModel!]
   messageId: String!
   senderAvatarObjectKey: String
@@ -187,7 +191,10 @@ type Mutation {
   createTag(name: String!): TagModel!
   deleteListing(id: ID!): Boolean!
   deleteMedia(id: ID!): Boolean!
+  deleteMessage(conversationId: ID!, messageId: ID!): Boolean!
+  deletePost(postId: String!): Boolean!
   follow(targetAccountId: ID!): Boolean!
+  getMidtransSnapToken(orderId: ID!): String!
   markAllNotificationsAsRead: Boolean!
   markNotificationAsRead(id: ID!): Boolean!
   rejectOffer(offerId: ID!): CustomOfferModel!
@@ -198,9 +205,10 @@ type Mutation {
   trackEvent(actionType: String!, targetId: String!): Boolean!
   unfollow(targetAccountId: ID!): Boolean!
   updateListing(id: ID!, input: UpdateListingInput!): ListingModel!
+  updateMessage(conversationId: ID!, input: UpdateMessageInput!, messageId: ID!): MessageModel!
+  updatePost(input: UpdatePostInput!, postId: String!): PostModel!
   updateProfile(input: UpdateProfileInput!): AccountModel!
   withdrawOffer(offerId: ID!): CustomOfferModel!
-  getMidtransSnapToken(orderId: ID!): String!
 }
 
 type NotificationModel {
@@ -256,6 +264,8 @@ type PostModel {
   authorUsername: String
   content: String!
   createdAt: DateTime!
+  deletedAt: DateTime
+  editedAt: DateTime
   inReplyToPostId: String
   likedByMe: Boolean!
   likesCount: Int!
@@ -344,8 +354,20 @@ input UpdateListingInput {
   description: String
   isUnlimited: Boolean
   maxActiveOrders: Int
+  mediaIds: [ID!]
   tagIds: [ID!]
   title: String
+}
+
+input UpdateMessageInput {
+  content: String
+  mediaIds: [ID!]
+}
+
+input UpdatePostInput {
+  content: String
+  mediaIds: [ID!]
+  tagIds: [ID!]
 }
 
 input UpdateProfileInput {

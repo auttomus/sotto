@@ -11,6 +11,7 @@ import {
 import { ChatService, type SerializedMessage } from './chat.service';
 import { ConversationModel, MessageModel } from './models/chat.model';
 import { CreateConversationInput } from './dto/create-conversation.input';
+import { UpdateMessageInput } from './dto/update-message.input';
 import {
   CurrentUser,
   type CurrentUserPayload,
@@ -26,6 +27,7 @@ import { OrderStatus } from '@prisma/client';
 type ParticipantRow = {
   account: {
     id: string;
+    username: string;
     displayName: string;
     avatarObjectKey: string | null;
   };
@@ -47,6 +49,38 @@ export class ChatMessageResolver {
     // Validasi bahwa user adalah peserta
     await this.chatService.validateParticipant(conversationId, user.accountId);
     return this.chatService.getMessages(conversationId, limit);
+  }
+
+  @Mutation(() => MessageModel)
+  async updateMessage(
+    @CurrentUser() user: CurrentUserPayload,
+    @Args('conversationId', { type: () => ID }) conversationId: string,
+    @Args('messageId', { type: () => ID }) messageId: string,
+    @Args('input') input: UpdateMessageInput,
+  ): Promise<SerializedMessage> {
+    const msg = await this.chatService.getMessage(conversationId, messageId);
+    const contentToUpdate = input.content ?? msg.content;
+
+    return this.chatService.updateMessage(
+      conversationId,
+      messageId,
+      user.accountId,
+      contentToUpdate,
+      input.mediaIds,
+    );
+  }
+
+  @Mutation(() => Boolean)
+  async deleteMessage(
+    @CurrentUser() user: CurrentUserPayload,
+    @Args('conversationId', { type: () => ID }) conversationId: string,
+    @Args('messageId', { type: () => ID }) messageId: string,
+  ): Promise<boolean> {
+    return this.chatService.deleteMessage(
+      conversationId,
+      messageId,
+      user.accountId,
+    );
   }
 
   @ResolveField(() => [MediaAttachmentModel])
@@ -84,6 +118,7 @@ export class ChatConversationResolver {
         accountId: p.account.id,
         displayName: p.account.displayName,
         avatarObjectKey: p.account.avatarObjectKey ?? undefined,
+        username: p.account.username,
       })),
     };
   }
@@ -102,6 +137,7 @@ export class ChatConversationResolver {
         accountId: p.account.id,
         displayName: p.account.displayName,
         avatarObjectKey: p.account.avatarObjectKey ?? undefined,
+        username: p.account.username,
       })),
     }));
   }
@@ -155,7 +191,12 @@ export class ChatConversationResolver {
     @Parent() conversation: ConversationModel,
   ): Promise<string | null> {
     const messages = await this.chatService.getMessages(conversation.id, 1);
-    return messages[0]?.content || null;
+    const lastMsg = messages[0];
+    if (!lastMsg) return null;
+    if (lastMsg.deletedAt) {
+      return 'Pesan ini telah dihapus';
+    }
+    return lastMsg.content || null;
   }
 
   @ResolveField(() => Date, { nullable: true })

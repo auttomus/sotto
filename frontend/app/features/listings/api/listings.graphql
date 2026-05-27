@@ -6,12 +6,14 @@ query GetListings {
     price
     status
     createdAt
+    updatedAt
     accountId
     account {
       displayName
       major
       trustScore
       username
+      avatarObjectKey
     }
   }
 }
@@ -27,12 +29,14 @@ query GetListingDetail($id: ID!) {
     isUnlimited
     deliveryTimeDays
     createdAt
+    updatedAt
     accountId
     account {
       displayName
       major
       trustScore
       username
+      avatarObjectKey
     }
     media {
       id
@@ -62,6 +66,7 @@ mutation UpdateListing($id: ID!, $input: UpdateListingInput!) {
     description
     price
     status
+    updatedAt
   }
 }
 

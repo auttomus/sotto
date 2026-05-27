@@ -5,3 +5,4 @@ qdrant_storage
 qdrant_storage
 .env.prod
 .env.docker
+.env

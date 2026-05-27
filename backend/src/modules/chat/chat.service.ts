@@ -12,7 +12,12 @@ type ConversationWithParticipants = Prisma.ConversationGetPayload<{
     participants: {
       include: {
         account: {
-          select: { id: true; displayName: true; avatarObjectKey: true };
+          select: {
+            id: true;
+            username: true;
+            displayName: true;
+            avatarObjectKey: true;
+          };
         };
       };
     };
@@ -25,6 +30,8 @@ export type SerializedMessage = {
   senderId: string;
   content: string;
   createdAt: Date;
+  editedAt?: Date | null;
+  deletedAt?: Date | null;
   media?: any[];
 };
 
@@ -62,7 +69,12 @@ export class ChatService {
           participants: {
             include: {
               account: {
-                select: { id: true, displayName: true, avatarObjectKey: true },
+                select: {
+                  id: true,
+                  username: true,
+                  displayName: true,
+                  avatarObjectKey: true,
+                },
               },
             },
           },
@@ -85,7 +97,12 @@ export class ChatService {
         participants: {
           include: {
             account: {
-              select: { id: true, displayName: true, avatarObjectKey: true },
+              select: {
+                id: true,
+                username: true,
+                displayName: true,
+                avatarObjectKey: true,
+              },
             },
           },
         },
@@ -105,7 +122,12 @@ export class ChatService {
         participants: {
           include: {
             account: {
-              select: { id: true, displayName: true, avatarObjectKey: true },
+              select: {
+                id: true,
+                username: true,
+                displayName: true,
+                avatarObjectKey: true,
+              },
             },
           },
         },
@@ -179,8 +201,124 @@ export class ChatService {
       senderId: senderAccountId,
       content,
       createdAt: now,
+      editedAt: null,
+      deletedAt: null,
       media: mediaList,
     };
+  }
+
+  /** Ambil detail pesan tunggal */
+  async getMessage(
+    conversationId: string,
+    messageId: string,
+  ): Promise<SerializedMessage> {
+    const convoUuid = types.Uuid.fromString(conversationId);
+    const msgUuid = types.TimeUuid.fromString(messageId);
+    const result = await this.scylla.execute(
+      `SELECT * FROM messages WHERE conversation_id = ? AND message_id = ?`,
+      [convoUuid, msgUuid],
+    );
+    if (result.rows.length === 0)
+      throw new NotFoundException('Pesan tidak ditemukan');
+    const row = result.rows[0] as unknown as {
+      sender_id: { toString(): string };
+      content: string;
+      created_at: Date;
+      edited_at?: Date | null;
+      deleted_at?: Date | null;
+    };
+    const media = await this.mediaService.getMediaForObject(
+      'ScyllaMessage',
+      messageId,
+    );
+    return {
+      messageId,
+      conversationId,
+      senderId: row.sender_id.toString(),
+      content: row.content,
+      createdAt: row.created_at,
+      editedAt: row.edited_at ?? null,
+      deletedAt: row.deleted_at ?? null,
+      media,
+    };
+  }
+
+  /** Menyunting pesan yang ada */
+  async updateMessage(
+    conversationId: string,
+    messageId: string,
+    senderAccountId: string,
+    content: string,
+    mediaIds?: string[],
+  ): Promise<SerializedMessage> {
+    const convoUuid = types.Uuid.fromString(conversationId);
+    const msgUuid = types.TimeUuid.fromString(messageId);
+
+    // verify sender
+    const checkResult = await this.scylla.execute(
+      `SELECT sender_id FROM messages WHERE conversation_id = ? AND message_id = ?`,
+      [convoUuid, msgUuid],
+    );
+    if (checkResult.rows.length === 0)
+      throw new NotFoundException('Pesan tidak ditemukan');
+    const senderRow = checkResult.rows[0] as unknown as {
+      sender_id: { toString(): string };
+    };
+    if (senderRow.sender_id.toString() !== senderAccountId) {
+      throw new Error('Tidak memiliki izin untuk menyunting pesan ini');
+    }
+
+    const now = new Date();
+    await this.scylla.execute(
+      `UPDATE messages SET content = ?, edited_at = ? WHERE conversation_id = ? AND message_id = ?`,
+      [content, now, convoUuid, msgUuid],
+    );
+
+    // Media update
+    if (mediaIds !== undefined) {
+      await this.prisma.mediaAttachment.updateMany({
+        where: { attachedId: messageId, attachedType: 'ScyllaMessage' },
+        data: { attachedId: 'orphaned', attachedType: 'Orphan' },
+      });
+      if (mediaIds.length > 0) {
+        await this.prisma.mediaAttachment.updateMany({
+          where: { id: { in: mediaIds }, accountId: senderAccountId },
+          data: { attachedId: messageId, attachedType: 'ScyllaMessage' },
+        });
+      }
+    }
+
+    return this.getMessage(conversationId, messageId);
+  }
+
+  /** Menghapus pesan secara soft-delete */
+  async deleteMessage(
+    conversationId: string,
+    messageId: string,
+    senderAccountId: string,
+  ): Promise<boolean> {
+    const convoUuid = types.Uuid.fromString(conversationId);
+    const msgUuid = types.TimeUuid.fromString(messageId);
+
+    const checkResult = await this.scylla.execute(
+      `SELECT sender_id FROM messages WHERE conversation_id = ? AND message_id = ?`,
+      [convoUuid, msgUuid],
+    );
+    if (checkResult.rows.length === 0)
+      throw new NotFoundException('Pesan tidak ditemukan');
+    const senderRow = checkResult.rows[0] as unknown as {
+      sender_id: { toString(): string };
+    };
+    if (senderRow.sender_id.toString() !== senderAccountId) {
+      throw new Error('Tidak memiliki izin untuk menghapus pesan ini');
+    }
+
+    const now = new Date();
+    await this.scylla.execute(
+      `UPDATE messages SET deleted_at = ? WHERE conversation_id = ? AND message_id = ?`,
+      [now, convoUuid, msgUuid],
+    );
+    return true;
   }
 
   /** Ambil riwayat pesan untuk sebuah conversation */
@@ -189,7 +327,7 @@ export class ChatService {
     limit = 50,
   ): Promise<SerializedMessage[]> {
     const result = await this.scylla.execute(
-      `SELECT message_id, sender_id, content, created_at
+      `SELECT message_id, sender_id, content, created_at, edited_at, deleted_at
        FROM messages WHERE conversation_id = ?
        ORDER BY message_id DESC LIMIT ?`,
       [types.Uuid.fromString(conversationId), limit],
@@ -201,6 +339,8 @@ export class ChatService {
       senderId: String(row['sender_id'] as unknown),
       content: String(row['content'] as unknown),
       createdAt: row['created_at'] as Date,
+      editedAt: row['edited_at'] ? (row['edited_at'] as Date) : null,
+      deletedAt: row['deleted_at'] ? (row['deleted_at'] as Date) : null,
     }));
   }
 }

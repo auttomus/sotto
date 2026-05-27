@@ -49,4 +49,9 @@ export class UpdateListingInput {
   @IsOptional()
   @IsArray()
   tagIds?: string[];
+
+  @Field(() => [ID], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  mediaIds?: string[];
 }

@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { X } from "lucide-react";
 import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
 import { cn } from "~/core/utils/cn";
+import { LabelBadge } from "~/components/ui/LabelBadge";
 
 export interface ListingCardProps {
   listing: {
@@ -50,13 +51,11 @@ export function ListingCard({ listing, onRemove, className, isLink = true }: Lis
       </div>
 
       {/* Type Badge on Top Right */}
-      <div className={cn(
-        "absolute top-0 rounded-md border text-[9px] font-bold px-2 py-0.5 uppercase tracking-wider transition-all duration-200",
-        onRemove 
-          ? "right-8 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700" 
-          : "right-0 bg-indigo-50/80 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 border-indigo-100/50 dark:border-indigo-500/10"
-      )}>
-        {listing.type === "SERVICE" ? "JASA" : "PRODUK"}
+      <div className={cn("absolute top-0", onRemove ? "right-8" : "right-0")}>
+        <LabelBadge
+          variant={listing.type === "SERVICE" ? "listing-service" : "listing-product"}
+          value={listing.type}
+        />
       </div>
 
       {/* Close Button if onRemove provided */}

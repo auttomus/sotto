@@ -15,7 +15,6 @@ registerEnumType(ListingStatus, { name: 'ListingStatus' });
 // Model untuk Relasi Profil Penjual (ringkas)
 @ObjectType()
 export class AccountPartial {
-  // ... (rest of AccountPartial)
   @Field()
   displayName: string;
 
@@ -27,6 +26,9 @@ export class AccountPartial {
 
   @Field(() => String, { nullable: true })
   username?: string | null;
+
+  @Field(() => String, { nullable: true })
+  avatarObjectKey?: string | null;
 }
 
 // Model Utama Listing

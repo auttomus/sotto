@@ -12,10 +12,10 @@ export function ToastProvider() {
           key={toast.id}
           className={`flex items-center gap-3 p-4 rounded-lg shadow-lg border transition-all animate-in slide-in-from-bottom-5 fade-in ${
             toast.type === 'error'
-              ? 'bg-red-50 dark:bg-red-900/50 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200'
+              ? 'bg-destructive/10 border-destructive/20 text-destructive'
               : toast.type === 'success'
-              ? 'bg-green-50 dark:bg-green-900/50 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200'
-              : 'bg-blue-50 dark:bg-blue-900/50 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200'
+              ? 'bg-success/10 border-success/20 text-success'
+              : 'bg-primary/10 border-primary/20 text-primary'
           }`}
         >
           {toast.type === 'error' && <AlertCircle className="h-5 w-5 shrink-0" />}

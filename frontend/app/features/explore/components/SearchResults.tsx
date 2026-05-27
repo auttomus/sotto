@@ -1,9 +1,10 @@
 import * as React from "react";
 import { Link } from "react-router";
-import { Loader2, Hash, Briefcase, User, Sparkles } from "lucide-react";
+import { Loader2, Hash, Briefcase, User, Sparkles, Star } from "lucide-react";
 import { PostCard } from "~/features/feed/components/PostCard";
-import { ListingCard } from "~/components/ui/ListingCard";
+import { ListingCard } from "~/features/listings/components/ListingCard";
 import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
+import { LabelBadge } from "~/components/ui/LabelBadge";
 
 interface SearchResultsProps {
   isLoading: boolean;
@@ -27,7 +28,7 @@ export function SearchResults({
   if (isLoading) {
     return (
       <div className="flex justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -36,10 +37,10 @@ export function SearchResults({
 
   if (!hasResults) {
     return (
-      <div className="text-center py-16 px-4 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm">
+      <div className="text-center py-16 px-4 bg-card rounded-3xl border border-border shadow-sm">
         <div className="text-4xl mb-3">🔍</div>
-        <p className="text-gray-900 dark:text-gray-100 font-medium">Tidak ada hasil ditemukan</p>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Coba gunakan kata kunci lain untuk "{searchQuery}"</p>
+        <p className="text-foreground font-medium">Tidak ada hasil ditemukan</p>
+        <p className="text-sm text-muted-foreground mt-1">Coba gunakan kata kunci lain untuk "{searchQuery}"</p>
       </div>
     );
   }
@@ -48,19 +49,18 @@ export function SearchResults({
     <div className="space-y-8 pb-10">
       {/* 1. Tag Results */}
       {tags.length > 0 && (
-        <div className="bg-white dark:bg-gray-900 p-4 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-3 flex items-center gap-1.5">
-            <Hash className="h-3.5 w-3.5 text-indigo-500" /> Topik & Tag
+        <div className="bg-card p-4 rounded-3xl border border-border shadow-sm">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-1.5">
+            <Hash className="h-3.5 w-3.5 text-primary" /> Topik & Tag
           </h3>
           <div className="flex flex-wrap gap-2">
             {tags.map((tag) => (
               <button
                 key={tag.id}
                 onClick={() => onTagClick?.(tag.name)}
-                className="flex items-center gap-1 px-3.5 py-1.5 rounded-full text-sm font-medium bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-100 dark:border-gray-700/80 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950/30 dark:hover:text-indigo-400 transition cursor-pointer"
+                className="hover:-translate-y-0.5 hover:shadow-sm transition-all cursor-pointer"
               >
-                <Hash className="h-3.5 w-3.5 opacity-60" />
-                <span>{tag.name}</span>
+                <LabelBadge variant="tag" value={tag.name} />
               </button>
             ))}
           </div>
@@ -70,17 +70,17 @@ export function SearchResults({
       {/* 2. Accounts Results */}
       {accounts.length > 0 && (
         <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-3 flex items-center gap-1.5 px-1">
-            <User className="h-3.5 w-3.5 text-indigo-500" /> Talenta & Kreator
+          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-1.5 px-1">
+            <User className="h-3.5 w-3.5 text-primary" /> Talenta & Kreator
           </h3>
           <div className="grid grid-cols-2 gap-3">
             {accounts.map((account) => (
               <Link 
                 to={`/profile/${account.username}`} 
                 key={account.id} 
-                className="bg-white dark:bg-gray-900 rounded-3xl p-5 border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col items-center text-center hover:shadow-md transition-all hover:-translate-y-0.5 cursor-pointer group"
+                className="bg-card rounded-3xl p-5 border border-border shadow-sm flex flex-col items-center text-center hover:shadow-md hover:bg-accent/5 transition-all hover:-translate-y-0.5 cursor-pointer group"
               >
-                <div className="h-16 w-16 rounded-full bg-gray-200 mb-3 overflow-hidden border-2 border-indigo-50 dark:border-indigo-950/50 shadow-inner shrink-0 group-hover:scale-105 transition duration-200">
+                <div className="h-16 w-16 rounded-full bg-muted mb-3 overflow-hidden border-2 border-border shadow-inner shrink-0 group-hover:scale-105 transition duration-200">
                   {account.avatarObjectKey ? (
                     <img 
                       src={resolveMediaUrl(account.avatarObjectKey)} 
@@ -88,19 +88,37 @@ export function SearchResults({
                       className="h-full w-full object-cover" 
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-indigo-50 text-indigo-600 dark:bg-indigo-950/20 dark:text-indigo-400 font-bold text-lg">
+                    <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary font-bold text-lg">
                       {account.displayName?.charAt(0).toUpperCase()}
                     </div>
                   )}
                 </div>
-                <h4 className="font-semibold text-gray-900 dark:text-gray-100 text-sm group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-1">
+                
+                <h4 className="font-semibold text-foreground text-sm group-hover:text-primary transition-colors line-clamp-1">
                   {account.displayName}
                 </h4>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">@{account.username}</p>
-                {account.schoolName && (
-                  <span className="text-[10px] mt-2 px-2 py-0.5 bg-gray-50 dark:bg-gray-800/80 rounded-md border border-gray-100/50 dark:border-gray-700/50 text-gray-500 dark:text-gray-400 truncate max-w-full">
-                    {account.schoolName}
+                <p className="text-xs text-muted-foreground mt-0.5">@{account.username}</p>
+
+                {/* Trust Score Badge */}
+                {account.trustScore !== undefined && account.trustScore !== null && (
+                  <div className="flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-amber-500/10 text-[10px] font-bold text-amber-600 dark:text-amber-500 border border-amber-500/20">
+                    <Star className="h-2.5 w-2.5 fill-current shrink-0" />
+                    <span>{Number(account.trustScore).toFixed(1)}</span>
+                  </div>
+                )}
+
+                {/* School/Institution & Major */}
+                {(account.major || account.schoolName) && (
+                  <span className="text-[10px] mt-2 px-2.5 py-0.5 bg-muted rounded-md border border-border text-muted-foreground truncate max-w-full normal-case font-medium">
+                    {account.major ? `${account.major} · ` : ""}{account.schoolName || ""}
                   </span>
+                )}
+
+                {/* Short Biography Note */}
+                {account.note && (
+                  <p className="text-[10px] text-muted-foreground/80 mt-3 px-2 line-clamp-2 leading-relaxed italic border-t border-border/50 pt-2 w-full text-center">
+                    "{account.note}"
+                  </p>
                 )}
               </Link>
             ))}
@@ -111,8 +129,8 @@ export function SearchResults({
       {/* 3. Listings Results */}
       {listings.length > 0 && (
         <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-3 flex items-center gap-1.5 px-1">
-            <Briefcase className="h-3.5 w-3.5 text-indigo-500" /> Penawaran & Jasa
+          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-1.5 px-1">
+            <Briefcase className="h-3.5 w-3.5 text-primary" /> Penawaran & Jasa
           </h3>
           <div className="space-y-3">
             {listings.map((listing) => (
@@ -128,10 +146,10 @@ export function SearchResults({
       {/* 4. Posts Results */}
       {posts.length > 0 && (
         <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-3 flex items-center gap-1.5 px-1">
-            <Sparkles className="h-3.5 w-3.5 text-indigo-500" /> Karya & Showcase
+          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-1.5 px-1">
+            <Sparkles className="h-3.5 w-3.5 text-primary" /> Karya & Showcase
           </h3>
-          <div className="space-y-px bg-white dark:bg-gray-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm divide-y divide-gray-100 dark:divide-gray-800/80">
+          <div className="space-y-px bg-card rounded-3xl overflow-hidden border border-border shadow-sm divide-y divide-border">
             {posts.map((post) => (
               <PostCard key={post.postId} post={post} />
             ))}

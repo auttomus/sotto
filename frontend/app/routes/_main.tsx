@@ -19,16 +19,13 @@ export default function MainLayout() {
   }, [initTheme, isAuthenticated, navigate]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans transition-colors duration-300">
+    <div className="min-h-screen bg-background text-foreground font-sans transition-colors duration-300">
       <div className="max-w-[960px] mx-auto flex w-full relative min-h-screen">
         <DesktopSidebar />
 
         <div className="flex-1 flex flex-col transition-all w-full min-w-0">
-          <div className="md:hidden">
-            <TopHeader />
-          </div>
 
-          <main className="flex-1 w-full bg-white dark:bg-gray-900 shadow-sm min-h-screen border-x border-gray-100 dark:border-gray-800 md:border-l-0 relative pb-16 md:pb-0 transition-colors duration-300">
+          <main className="flex-1 w-full bg-card shadow-sm min-h-screen border-x border-border md:border-l-0 relative pb-16 md:pb-0 transition-colors duration-300">
             <Outlet />
           </main>
 

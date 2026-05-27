@@ -66,12 +66,12 @@ export function ListingWizard() {
   const isStep2Valid = listingData.price > 0 && (listingData.type === 'DIGITAL_PRODUCT' || listingData.deliveryTimeDays > 0);
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-950 w-full max-w-lg mx-auto border-x border-gray-100 dark:border-gray-800 relative">
+    <div className="flex flex-col min-h-screen bg-background w-full max-w-lg mx-auto border-x border-border relative">
       {showDraftDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowDraftDialog(false)}>
-          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">Simpan sebagai Draft?</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Kamu memiliki perubahan yang belum disimpan. Ingin menyimpannya untuk dilanjutkan nanti?</p>
+          <div className="bg-card rounded-2xl border border-border shadow-xl p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-bold text-foreground mb-2">Simpan sebagai Draft?</h3>
+            <p className="text-sm text-muted-foreground mb-6">Kamu memiliki perubahan yang belum disimpan. Ingin menyimpannya untuk dilanjutkan nanti?</p>
             <div className="flex flex-col gap-2">
               <Button variant="primary" onClick={handleSaveDraft} className="w-full">Simpan sebagai Draft</Button>
               <Button variant="danger" onClick={handleDiscard} className="w-full">Hapus dan Keluar</Button>
@@ -81,22 +81,22 @@ export function ListingWizard() {
         </div>
       )}
 
-      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 px-4 h-14 flex items-center justify-between sticky top-0 z-10">
+      <header className="bg-card/85 backdrop-blur-md border-b border-border px-4 h-14 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-3">
-          <button onClick={handleBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-            <ArrowLeft className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+          <button onClick={handleBack} className="p-2 -ml-2 rounded-full hover:bg-muted transition cursor-pointer">
+            <ArrowLeft className="h-5 w-5 text-foreground" />
           </button>
           <div className="flex flex-col">
-            <h1 className="font-bold text-gray-900 dark:text-gray-100 text-sm leading-tight">Buat Penawaran</h1>
-            <span className="text-[10px] font-medium text-gray-500 uppercase tracking-widest">Langkah {step} dari 3</span>
+            <h1 className="font-bold text-foreground text-sm leading-tight">Buat Penawaran</h1>
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">Langkah {step} dari 3</span>
           </div>
         </div>
       </header>
 
       {/* Progress Bar */}
-      <div className="w-full bg-gray-200 dark:bg-gray-800 h-1">
+      <div className="w-full bg-muted h-1">
         <div 
-          className="bg-indigo-600 dark:bg-indigo-500 h-full transition-all duration-300 ease-out" 
+          className="bg-primary h-full transition-all duration-300 ease-out" 
           style={{ width: `${(step / 3) * 100}%` }}
         />
       </div>
@@ -108,11 +108,11 @@ export function ListingWizard() {
       </div>
 
       {/* Bottom Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 max-w-lg mx-auto bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-t border-gray-100 dark:border-gray-800 p-4 pb-safe z-10">
+      <div className="fixed bottom-0 left-0 right-0 max-w-lg mx-auto bg-card/85 backdrop-blur-md border-t border-border p-4 pb-safe z-10">
         {step === 1 && (
           <Button 
             variant="primary" 
-            className="w-full h-12 text-base font-bold rounded-xl shadow-lg shadow-indigo-500/20"
+            className="w-full h-12 text-base font-bold rounded-xl shadow-lg shadow-primary/20"
             onClick={nextStep}
             disabled={!isStep1Valid}
           >
@@ -123,7 +123,7 @@ export function ListingWizard() {
         {step === 2 && (
           <Button 
             variant="primary" 
-            className="w-full h-12 text-base font-bold rounded-xl shadow-lg shadow-indigo-500/20"
+            className="w-full h-12 text-base font-bold rounded-xl shadow-lg shadow-primary/20"
             onClick={nextStep}
             disabled={!isStep2Valid}
           >
@@ -134,7 +134,7 @@ export function ListingWizard() {
         {step === 3 && (
           <Button 
             variant="primary" 
-            className="w-full h-12 text-base font-bold rounded-xl shadow-lg shadow-indigo-500/20"
+            className="w-full h-12 text-base font-bold rounded-xl shadow-lg shadow-primary/20"
             onClick={() => submitListing(listingData, files)}
             disabled={isSubmitting}
           >

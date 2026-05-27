@@ -14,9 +14,9 @@ export default function DesktopSidebar() {
   ];
 
   return (
-    <aside className="hidden md:flex flex-col w-64 lg:w-72 h-screen sticky top-0 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 px-4 py-8 z-40">
+    <aside className="hidden md:flex flex-col w-64 lg:w-72 h-screen sticky top-0 border-r border-border bg-card px-4 py-8 z-40">
       <Link to="/home" className="flex items-center gap-2 mb-10 px-2">
-        <span className="text-2xl font-bold tracking-tight text-indigo-600 dark:text-indigo-400 font-serif italic">
+        <span className="text-2xl font-bold tracking-tight text-primary font-serif italic">
           Sotto
         </span>
       </Link>
@@ -26,12 +26,13 @@ export default function DesktopSidebar() {
           <NavLink
             key={item.to}
             to={item.to}
+            end={item.to === "/profile"}
             className={({ isActive }) =>
               cn(
                 "flex items-center gap-4 px-3 py-3 rounded-xl transition-all group relative",
                 isActive 
-                  ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 font-bold" 
-                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium"
+                  ? "bg-primary/10 text-primary font-bold" 
+                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground font-medium"
               )
             }
           >
@@ -43,7 +44,7 @@ export default function DesktopSidebar() {
                     strokeWidth={isActive ? 2.5 : 2} 
                   />
                   {item.hasBadge && (
-                    <span className="absolute -top-1 -right-1 block h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-900" />
+                    <span className="absolute -top-1 -right-1 block h-2.5 w-2.5 rounded-full bg-destructive ring-2 ring-card" />
                   )}
                 </div>
                 <span className="text-base">{item.label}</span>
@@ -59,8 +60,8 @@ export default function DesktopSidebar() {
             cn(
               "flex items-center gap-4 px-3 py-3 rounded-xl transition-all group relative mt-4",
               isActive 
-                ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 font-bold" 
-                : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium"
+                ? "bg-primary/10 text-primary font-bold" 
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground font-medium"
             )
           }
         >
@@ -83,8 +84,8 @@ export default function DesktopSidebar() {
             cn(
               "flex items-center gap-4 px-3 py-3 rounded-xl transition-all group relative",
               isActive 
-                ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 font-bold" 
-                : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium"
+                ? "bg-primary/10 text-primary font-bold" 
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground font-medium"
             )
           }
         >
