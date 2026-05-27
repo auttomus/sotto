@@ -70,6 +70,12 @@ export class ListingModel {
   @Field(() => [MediaAttachmentModel], { nullable: true })
   media?: MediaAttachmentModel[];
 
+  @Field(() => Boolean, { defaultValue: false })
+  isLikedByMe?: boolean;
+
+  @Field(() => Int, { defaultValue: 0 })
+  likesCount?: number;
+
   @Field()
   createdAt: Date;
 

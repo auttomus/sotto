@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Check, MoreHorizontal, Pencil, Trash2, X } from "lucide-react";
+import { Check, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { Avatar } from "~/components/ui/Avatar";
 import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
@@ -11,6 +11,10 @@ import {
   useWithdrawOfferMutation,
 } from "~/core/apollo/generated";
 import { useToastStore } from "~/core/store/useToastStore";
+import { formatMentions } from "~/core/utils/formatMentions";
+import { DeletedMessageTombstone } from "./message/DeletedMessageTombstone";
+import { CustomOfferCard } from "./message/CustomOfferCard";
+import { ChatMessageMedia } from "./message/ChatMessageMedia";
 
 interface MessageBubbleProps {
   msg: any;
@@ -28,26 +32,8 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffe
 
   const [showMenu, setShowMenu] = React.useState(false);
   const [isEditing, setIsEditing] = React.useState(false);
-  const [lightboxUrl, setLightboxUrl] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
-    if (lightboxUrl) {
-      document.body.style.overflow = "hidden";
-      const handleEscape = (e: KeyboardEvent) => {
-        if (e.key === "Escape") setLightboxUrl(null);
-      };
-      window.addEventListener("keydown", handleEscape);
-      return () => {
-        window.removeEventListener("keydown", handleEscape);
-        document.body.style.overflow = "unset";
-      };
-    }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [lightboxUrl]);
-  
-  // Regex to parse UUID of mentioned listing or post in text
+  // Regex untuk memilah UUID Listing atau Postingan yang disebut di dalam pesan
   const listingRegex = /\s*\/listing\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\s*/g;
   const postRegex = /\s*\/post\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\s*/g;
 
@@ -103,120 +89,27 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffe
   // Render deleted message tombstone
   if (msg.deletedAt) {
     return (
-      <div className={`flex gap-2 max-w-[85%] ${isMine ? "self-end flex-row-reverse" : ""} animate-fade-in`}>
-        {!isMine && (
-          <Avatar
-            src={recipientAvatar ? resolveMediaUrl(recipientAvatar) : ""}
-            size="sm"
-            className="mt-auto shrink-0 h-6 w-6"
-          />
-        )}
-        <div className="bg-muted p-3 rounded-2xl rounded-bl-sm border border-border shadow-sm w-full select-none">
-          <p className="text-xs italic text-muted-foreground font-medium">
-            Pesan ini telah dihapus
-          </p>
-          <div className="flex justify-end items-center mt-1.5 text-[8px] text-muted-foreground">
-            {new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-          </div>
-        </div>
-      </div>
+      <DeletedMessageTombstone
+        msg={msg}
+        isMine={isMine}
+        recipientAvatar={recipientAvatar}
+      />
     );
   }
 
   // Render Custom Offer Card
   if (msg.isCustomOffer) {
-    const offer = msg.offerData;
-    const isSeller = offer.sellerAccountId === userAccountId;
-    const formattedPrice = Number(offer.proposedPrice).toLocaleString("id-ID");
-
     return (
-      <div className={`flex gap-2 max-w-[85%] ${isSeller ? "self-end" : ""} w-full animate-fade-in`}>
-        {!isSeller && (
-          <Avatar
-            src={recipientAvatar ? resolveMediaUrl(recipientAvatar) : ""}
-            size="sm"
-            className="mt-auto shrink-0 h-6 w-6"
-          />
-        )}
-        <div className="bg-card border border-border p-4 rounded-3xl shadow-md w-full relative overflow-hidden">
-          <div className="absolute -top-10 -right-10 w-24 h-24 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
-
-          <div className="flex items-center justify-between mb-3 border-b border-border pb-2">
-            <span className="text-[10px] font-bold text-primary tracking-wide uppercase">
-              Penawaran Khusus
-            </span>
-            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
-              offer.status === "PENDING" ? "bg-primary/10 text-primary" :
-              offer.status === "ACCEPTED" ? "bg-success/10 text-success" :
-              offer.status === "REJECTED" ? "bg-destructive/10 text-destructive" :
-              "bg-muted text-muted-foreground"
-            }`}>
-              {offer.status === "PENDING" ? "Menunggu" :
-               offer.status === "ACCEPTED" ? "Disetujui" :
-               offer.status === "REJECTED" ? "Ditolak" : "Ditarik"}
-            </span>
-          </div>
-
-          <p className="text-xs text-foreground whitespace-pre-wrap leading-relaxed mb-4 font-medium">
-            {offer.description}
-          </p>
-
-          <div className="grid grid-cols-2 gap-3 mb-4 bg-muted p-3 rounded-2xl border border-border">
-            <div className="flex flex-col">
-              <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider">Harga Kesepakatan</span>
-              <span className="text-xs font-extrabold text-primary">Rp {formattedPrice}</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider">Durasi Pengiriman</span>
-              <span className="text-xs font-bold text-foreground">{offer.deliveryTimeDays} Hari</span>
-            </div>
-          </div>
-
-          {offer.status === "PENDING" && (
-            <div className="flex gap-2">
-              {!isSeller ? (
-                <>
-                  <button
-                    onClick={() => rejectOffer({ variables: { offerId: offer.id } })}
-                    disabled={actionLoading}
-                    className="flex-1 py-2 text-center text-[11px] font-bold text-destructive border border-destructive/30 hover:bg-destructive/10 rounded-xl transition cursor-pointer disabled:opacity-50"
-                  >
-                    Tolak
-                  </button>
-                  <button
-                    onClick={() => acceptOffer({ variables: { offerId: offer.id } })}
-                    disabled={actionLoading}
-                    className="flex-[2] py-2 text-center text-[11px] font-bold bg-primary hover:opacity-90 text-primary-foreground rounded-xl shadow-md shadow-primary/10 active:scale-[0.99] transition cursor-pointer disabled:opacity-50"
-                  >
-                    Terima & Bayar
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={() => withdrawOffer({ variables: { offerId: offer.id } })}
-                  disabled={actionLoading}
-                  className="w-full py-2 text-center text-[11px] font-bold text-muted-foreground border border-border hover:bg-muted rounded-xl transition cursor-pointer disabled:opacity-50"
-                >
-                  Tarik Penawaran
-                </button>
-              )}
-            </div>
-          )}
-
-          {offer.status === "ACCEPTED" && offer.orderId && !isSeller && (
-            <button
-              onClick={() => navigate(`/workspace/order/${offer.orderId}`)}
-              className="w-full py-2 text-center text-[11px] font-bold text-primary border border-primary/30 hover:bg-primary/5 rounded-xl transition cursor-pointer"
-            >
-              Lihat Detail Order
-            </button>
-          )}
-
-          <div className="flex justify-end items-center mt-2.5 text-[8px] text-muted-foreground">
-            {new Date(offer.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-          </div>
-        </div>
-      </div>
+      <CustomOfferCard
+        msg={msg}
+        userAccountId={userAccountId || ""}
+        recipientAvatar={recipientAvatar}
+        actionLoading={actionLoading}
+        rejectOffer={rejectOffer}
+        acceptOffer={acceptOffer}
+        withdrawOffer={withdrawOffer}
+        navigate={navigate}
+      />
     );
   }
 
@@ -231,42 +124,44 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffe
           />
         )}
         
-        {/* Edit/Delete options menu for own messages */}
+        {/* Menu opsi ubah/hapus untuk pesan sendiri */}
         {isMine && !msg.isCustomOffer && !isEditing && (
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center shrink-0 relative">
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center shrink-0 relative animate-fade-in">
             <button 
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 setShowMenu(!showMenu);
-              }} 
-              className="p-1 hover:bg-muted rounded-full text-muted-foreground hover:text-foreground transition cursor-pointer"
+              }}
+              className="p-1 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition cursor-pointer"
             >
               <MoreHorizontal className="h-4 w-4" />
             </button>
-
             {showMenu && (
-              <div className="absolute bottom-full right-0 mb-1 z-30 bg-card border border-border rounded-xl shadow-lg p-1 min-w-[90px] flex flex-col gap-0.5">
+              <div 
+                className="absolute right-0 bottom-full mb-1 z-35 bg-popover text-popover-foreground border border-border rounded-xl shadow-lg p-1 min-w-[100px] flex flex-col gap-0.5 animate-scale-in"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
+                  type="button"
+                  onClick={() => {
                     setIsEditing(true);
                     setShowMenu(false);
                   }}
-                  className="flex items-center gap-1.5 px-2 py-1.5 text-[11px] font-bold text-foreground hover:bg-muted rounded-lg text-left w-full cursor-pointer"
+                  className="flex items-center gap-1.5 px-2 py-1.5 text-[10px] font-bold hover:bg-accent hover:text-accent-foreground rounded-lg text-left w-full cursor-pointer"
                 >
                   <Pencil className="h-3 w-3" />
-                  Ubah
+                  Sunting
                 </button>
                 <button
-                  onClick={async (e) => {
-                    e.stopPropagation();
+                  type="button"
+                  onClick={async () => {
                     if (confirm("Apakah Anda yakin ingin menghapus pesan ini?")) {
                       await onDelete?.(msg.messageId);
-                      addToast("success", "Pesan berhasil dihapus");
                     }
                     setShowMenu(false);
                   }}
-                  className="flex items-center gap-1.5 px-2 py-1.5 text-[11px] font-bold text-destructive hover:bg-destructive/10 rounded-lg text-left w-full cursor-pointer"
+                  className="flex items-center gap-1.5 px-2 py-1.5 text-[10px] font-bold text-destructive hover:bg-destructive/10 rounded-lg text-left w-full cursor-pointer"
                 >
                   <Trash2 className="h-3 w-3" />
                   Hapus
@@ -276,41 +171,41 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffe
           </div>
         )}
 
-        <div className={`${isMine ? 'bg-primary text-primary-foreground rounded-br-sm' : 'bg-card border border-border rounded-bl-sm'} p-3 rounded-2xl shadow-sm w-full`}>
+        {/* Kotak gelembung pesan */}
+        <div className={`p-3 rounded-2xl shadow-sm ${
+          isMine 
+            ? 'bg-primary text-primary-foreground rounded-br-sm' 
+            : 'bg-card border border-border text-foreground rounded-bl-sm'
+        }`}>
           {isEditing ? (
-            <div className="flex flex-col gap-2 min-w-[200px]">
-              <textarea
+            <div className="flex flex-col gap-2 min-w-[200px]" onClick={(e) => e.stopPropagation()}>
+              <input
+                type="text"
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
-                className="w-full text-sm bg-muted text-foreground rounded-xl p-2 border border-border focus:outline-none focus:border-primary/50 resize-none font-medium"
-                rows={2}
+                className="w-full bg-background text-foreground border border-border rounded-xl px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-ring"
+                autoFocus
               />
-              <div className="flex justify-end gap-1">
+              <div className="flex justify-end gap-1.5">
                 <button
+                  type="button"
                   onClick={() => {
                     setIsEditing(false);
                     setEditContent(cleanContent || "");
                   }}
-                  className="px-2.5 py-1 text-[11px] font-bold text-muted-foreground hover:text-foreground transition cursor-pointer"
+                  className="px-2.5 py-1 text-[10px] font-bold text-muted-foreground hover:text-foreground transition cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
+                  type="button"
                   onClick={async () => {
-                    let finalContent = editContent.trim();
-                    if (listingId) {
-                      finalContent = `${finalContent}\n/listing/${listingId}`;
-                    }
-                    if (postId) {
-                      finalContent = `${finalContent}\n/post/${postId}`;
-                    }
-                    if (finalContent && finalContent !== msg.content) {
-                      await onEdit?.(msg.messageId, finalContent);
-                      addToast("success", "Pesan berhasil diubah");
+                    if (editContent.trim() && editContent.trim() !== cleanContent) {
+                      await onEdit?.(msg.messageId, editContent.trim());
                     }
                     setIsEditing(false);
                   }}
-                  className="px-3 py-1 text-[11px] font-bold bg-primary text-primary-foreground rounded-lg hover:opacity-90 shadow-sm active:scale-[0.98] transition cursor-pointer"
+                  className="px-3 py-1 text-[10px] font-bold bg-primary text-primary-foreground rounded-lg hover:opacity-90 active:scale-[0.97] transition cursor-pointer"
                 >
                   Simpan
                 </button>
@@ -319,38 +214,19 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffe
           ) : (
             cleanContent && (
               <p className={`text-sm ${isMine ? 'text-primary-foreground font-medium' : 'text-foreground'} whitespace-pre-wrap break-words`}>
-                {cleanContent}
+                {formatMentions(cleanContent, isMine)}
               </p>
             )
           )}
 
-          {/* Display listing attachment if mentioned */}
+          {/* Render tautan Listing yang disematkan */}
           {listingId && <ChatMessageListing listingId={listingId} />}
 
-          {/* Display post attachment if mentioned */}
+          {/* Render tautan Postingan yang disematkan */}
           {postId && <ChatMessagePost postId={postId} />}
 
-          {/* Display media attachments (Images) */}
-          {!msg.deletedAt && msg.media && msg.media.length > 0 && (
-            <div className="mt-2 space-y-2">
-              {msg.media.map((item: any) => {
-                const url = resolveMediaUrl(item.url || item.objectKey);
-                return (
-                  <div 
-                    key={item.id} 
-                    className="rounded-xl overflow-hidden max-w-full bg-muted border border-border max-h-[220px] flex items-center justify-center cursor-zoom-in group/media"
-                    onClick={() => setLightboxUrl(url ?? null)}
-                  >
-                    <img
-                      src={url || ""}
-                      alt={item.fileName || "Gambar chat"}
-                      className="w-full h-auto max-h-[220px] object-cover rounded-xl select-none group-hover/media:brightness-95 transition-all duration-200"
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          )}
+          {/* Render lampiran gambar-gambar */}
+          <ChatMessageMedia media={msg.media} />
 
           <div className="flex items-center justify-end gap-1 mt-1.5">
             {msg.editedAt && (
@@ -365,28 +241,6 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffe
           </div>
         </div>
       </div>
-
-      {lightboxUrl && (
-        <div
-          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center transition-all animate-fade-in duration-200"
-          onClick={() => setLightboxUrl(null)}
-        >
-          <button
-            onClick={() => setLightboxUrl(null)}
-            className="absolute top-6 right-6 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all hover:scale-105 active:scale-95 z-55 cursor-pointer"
-          >
-            <X className="h-6 w-6" />
-          </button>
-          <div className="max-w-[95vw] max-h-[95vh] flex items-center justify-center p-4">
-            <img
-              src={lightboxUrl}
-              alt="Enlarged media"
-              className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl animate-zoom-in select-none"
-              onClick={(e) => e.stopPropagation()}
-            />
-          </div>
-        </div>
-      )}
     </>
   );
 }

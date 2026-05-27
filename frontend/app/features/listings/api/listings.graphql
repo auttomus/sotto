@@ -8,6 +8,8 @@ query GetListings {
     createdAt
     updatedAt
     accountId
+    isLikedByMe
+    likesCount
     account {
       displayName
       major
@@ -31,6 +33,8 @@ query GetListingDetail($id: ID!) {
     createdAt
     updatedAt
     accountId
+    isLikedByMe
+    likesCount
     account {
       displayName
       major
@@ -72,4 +76,8 @@ mutation UpdateListing($id: ID!, $input: UpdateListingInput!) {
 
 mutation DeleteListing($id: ID!) {
   deleteListing(id: $id)
+}
+
+mutation ToggleLikeListing($id: ID!) {
+  toggleLikeListing(id: $id)
 }

@@ -7,7 +7,7 @@ interface UseProfileLayoutOptions {
 }
 
 export function useProfileLayout({ profile }: UseProfileLayoutOptions) {
-  const [activeTab, setActiveTab] = useState<"posts" | "listings" | "replies">("posts");
+  const [activeTab, setActiveTab] = useState<"posts" | "listings" | "replies" | "likes">("posts");
   const [isEditing, setIsEditing] = useState(false);
   const addToast = useToastStore(s => s.addToast);
 

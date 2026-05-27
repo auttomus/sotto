@@ -9,6 +9,7 @@ import { useSearchTagsQuery, useGetMyProfileQuery, useGetListingsByAccountQuery 
 import { useCreatePostLogic } from "../../hooks/useCreatePost";
 import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
 import { ListingCard } from "~/features/listings/components/ListingCard";
+import { MentionSuggestions } from "~/components/ui/MentionSuggestions";
 
 export function PostWizard() {
   const { 
@@ -30,6 +31,7 @@ export function PostWizard() {
   const [showDraftDialog, setShowDraftDialog] = React.useState(false);
   const [showListingSelector, setShowListingSelector] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
   const { submitPost, isSubmitting, handleCreateNewTag, isCreatingTag } = useCreatePostLogic(reset);
 
@@ -121,7 +123,14 @@ export function PostWizard() {
         <Button 
           variant="primary" 
           size="sm" 
-          onClick={() => submitPost(content, files, tags)}
+          onClick={() => {
+            const matches = content.match(/\B@[a-zA-Z0-9_]{3,30}\b/g) || [];
+            if (matches.length > 5) {
+              addToast("error", "Maksimal 5 tag orang diperbolehkan per postingan/pesan");
+              return;
+            }
+            submitPost(content, files, tags);
+          }}
           disabled={isSubmitting || (!content.trim() && files.length === 0)}
           className="h-8 rounded-lg px-4 shadow-md shadow-primary/20"
         >
@@ -148,10 +157,16 @@ export function PostWizard() {
         {/* Text Area */}
         <div className="mb-4 relative">
           <textarea 
+            ref={textareaRef}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             className="w-full bg-transparent text-foreground text-lg placeholder-muted-foreground focus:outline-none resize-none min-h-[120px]"
             placeholder="Ceritakan proses pembuatan karyamu atau pengalamanmu..."
+          />
+          <MentionSuggestions 
+            value={content} 
+            onChange={setContent} 
+            inputRef={textareaRef} 
           />
           <span className={`absolute bottom-2 right-2 text-xs font-medium ${content.length > 500 ? 'text-destructive' : 'text-muted-foreground'}`}>
             {content.length}/500
@@ -160,14 +175,26 @@ export function PostWizard() {
 
         <PostTagsInput 
           tags={tags} 
-          addTag={addTag} 
+          addTag={(tag) => {
+            if (tags.length >= 5) {
+              addToast('error', 'Maksimal 5 tag diperbolehkan per postingan');
+              return;
+            }
+            addTag(tag);
+          }} 
           removeTag={removeTag}
           inputValue={tagInput}
           onInputChange={setTagInput}
           searchResults={tagsData?.searchTags || []}
           isLoading={tagsLoading}
           isCreating={isCreatingTag}
-          onCreateNewTag={(name) => handleCreateNewTag(name, addTag)}
+          onCreateNewTag={(name) => {
+            if (tags.length >= 5) {
+              addToast('error', 'Maksimal 5 tag diperbolehkan per postingan');
+              return;
+            }
+            handleCreateNewTag(name, addTag);
+          }}
         />
 
         {/* Linked Listing Section */}

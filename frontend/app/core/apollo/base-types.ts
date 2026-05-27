@@ -134,7 +134,9 @@ export type ListingModel = {
   deliveryTimeDays?: Maybe<Scalars['Int']['output']>;
   description: Scalars['String']['output'];
   id: Scalars['ID']['output'];
+  isLikedByMe: Scalars['Boolean']['output'];
   isUnlimited: Scalars['Boolean']['output'];
+  likesCount: Scalars['Int']['output'];
   maxActiveOrders?: Maybe<Scalars['Int']['output']>;
   media?: Maybe<Array<MediaAttachmentModel>>;
   price: Scalars['Float']['output'];
@@ -216,6 +218,7 @@ export type Mutation = {
   markNotificationAsRead: Scalars['Boolean']['output'];
   rejectOffer: CustomOfferModel;
   requestUploadUrl: PresignedUploadResult;
+  toggleLikeListing: Scalars['Boolean']['output'];
   toggleLikePost: Scalars['Boolean']['output'];
   /** Catat interaksi user (view, click, like) */
   trackEvent: Scalars['Boolean']['output'];
@@ -329,6 +332,11 @@ export type MutationRejectOfferArgs = {
 
 export type MutationRequestUploadUrlArgs = {
   input: RequestUploadInput;
+};
+
+
+export type MutationToggleLikeListingArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -455,6 +463,8 @@ export type Query = {
   conversations: Array<ConversationModel>;
   feed: Array<PostModel>;
   globalFeed: Array<PostModel>;
+  likedListings: Array<ListingModel>;
+  likedPosts: Array<PostModel>;
   listing?: Maybe<ListingModel>;
   listings: Array<ListingModel>;
   listingsByAccount: Array<ListingModel>;

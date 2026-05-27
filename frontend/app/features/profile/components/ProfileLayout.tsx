@@ -10,7 +10,9 @@ import {
   useUpdateListingMutation, 
   useDeleteListingMutation,
   useGetPostsByAccountQuery,
-  useGetRepliesByAccountQuery
+  useGetRepliesByAccountQuery,
+  useGetLikedListingsQuery,
+  useGetLikedPostsQuery
 } from "~/core/apollo/generated";
 import { formatDate } from "~/core/utils/formatDate";
 import { useNavigate, Link } from "react-router";
@@ -21,6 +23,7 @@ import { useAuthStore } from "~/core/store/useAuthStore";
 import { useToastStore } from "~/core/store/useToastStore";
 import { ROUTES } from "~/core/constants/ROUTES";
 import { PostCard } from "~/features/feed/components/PostCard";
+import { ListingCard } from "~/features/listings/components/ListingCard";
 
 interface ProfileLayoutProps {
   profile: any; // Using any or extended type since it can be myProfile or userProfile
@@ -78,6 +81,18 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
     handleFollowToggle,
     isFollowLoading
   } = useProfileLayout({ profile });
+
+  const { data: likedListingsData, loading: likedListingsLoading } = useGetLikedListingsQuery({
+    skip: !isOwnProfile,
+    fetchPolicy: "network-only"
+  });
+
+  const { data: likedPostsData, loading: likedPostsLoading } = useGetLikedPostsQuery({
+    skip: !isOwnProfile,
+    fetchPolicy: "network-only"
+  });
+
+  const [likesSubTab, setLikesSubTab] = React.useState<"posts" | "listings">("posts");
 
   const [createConversation, { loading: chatLoading }] = useCreateConversationMutation({
     onCompleted: (data: any) => {
@@ -278,6 +293,19 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
             )}
           </div>
         </button>
+        {isOwnProfile && (
+          <button
+            onClick={() => setActiveTab("likes")}
+            className="flex-1 hover:bg-muted transition-colors relative"
+          >
+            <div className={`py-3.5 text-sm font-bold w-fit mx-auto relative ${activeTab === "likes" ? "text-foreground" : "text-muted-foreground"}`}>
+              Disukai
+              {activeTab === "likes" && (
+                <div className="absolute bottom-0 left-0 w-full h-1 bg-primary rounded-full"></div>
+              )}
+            </div>
+          </button>
+        )}
       </div>
 
       {/* Tab Content */}
@@ -299,87 +327,45 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
         )}
 
         {activeTab === "listings" && (
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-4 p-4">
             {listings.length === 0 ? (
               <div className="text-center p-8 text-muted-foreground">Belum ada penawaran.</div>
             ) : (
               listings.map((item) => (
-                <Link 
-                  key={item.id} 
-                  to={`/listing/${item.id}`}
-                  className="p-4 border-b border-border hover:bg-accent/5 transition cursor-pointer flex gap-4 block"
-                >
-                  <Avatar src={resolveMediaUrl(profile.avatarObjectKey)} size="sm" className="hidden sm:block shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5 mb-1 hidden sm:flex">
-                      <span className="font-bold text-foreground text-sm">{profile.displayName}</span>
-                      <span className="text-muted-foreground text-sm">@{profile.username}</span>
-                    </div>
-                    
-                    <div className="bg-card rounded-2xl border border-border overflow-hidden mt-1 group">
-                      {item.media && item.media.length > 0 && (
-                        <div className="h-40 sm:h-48 w-full overflow-hidden relative">
-                          <img src={resolveMediaUrl(item.media[0].url || (item.media[0] as any).objectKey)} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
-                          <div className="absolute top-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-md rounded-md text-[10px] font-bold text-white uppercase tracking-wider">
-                            {item.type === 'SERVICE' ? 'Jasa' : 'Produk Digital'}
-                          </div>
-                        </div>
+                <div key={item.id} className="flex flex-col gap-3 p-4 bg-white dark:bg-gray-900 border border-border rounded-3xl hover:shadow-sm transition">
+                  <ListingCard listing={item as any} isLink={true} className="border-0 p-0 shadow-none hover:shadow-none bg-transparent" />
+                  {isOwnProfile && (
+                    <div className="flex gap-2 pl-2 border-t border-border pt-3">
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleEditListing(item);
+                        }}
+                        className="px-3 py-1.5 text-[11px] font-bold bg-muted text-foreground rounded-xl hover:bg-accent hover:text-accent-foreground flex items-center gap-1 transition cursor-pointer"
+                      >
+                        <Pencil className="h-3 w-3" />
+                        Sunting
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setDeletingListingId(item.id);
+                        }}
+                        className="px-3 py-1.5 text-[11px] font-bold bg-destructive/10 text-destructive rounded-xl hover:bg-destructive/20 flex items-center gap-1 transition cursor-pointer"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                        Hapus
+                      </button>
+                      {item.updatedAt && new Date(item.updatedAt).getTime() > new Date(item.createdAt || 0).getTime() + 1000 && (
+                        <span className="text-[10px] italic text-muted-foreground font-medium ml-auto self-center">
+                          (diperbarui)
+                        </span>
                       )}
-                      <div className="p-4">
-                        <h3 className="font-bold text-foreground text-lg leading-tight mb-1">{item.title}</h3>
-                        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{item.description}</p>
-                        
-                        <div className="flex items-center justify-between border-t border-border pt-3">
-                          <div>
-                            <span className="text-xs text-muted-foreground block mb-0.5">Harga</span>
-                            <span className="font-black text-primary text-base">Rp {item.price.toLocaleString("id-ID")}</span>
-                          </div>
-                          {item.type === 'DIGITAL_PRODUCT' ? (
-                            <div className="text-right">
-                              <span className="text-xs text-muted-foreground block mb-0.5">Akses Instan</span>
-                            </div>
-                          ) : (
-                            <div className="text-right">
-                              <span className="text-xs text-muted-foreground block mb-0.5">Estimasi</span>
-                              <span className="font-medium text-foreground text-sm">{item.deliveryTimeDays} Hari</span>
-                            </div>
-                          )}
-                        </div>
-                        {isOwnProfile && (
-                          <div className="flex gap-2 mt-3 pt-3 border-t border-border">
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                handleEditListing(item);
-                              }}
-                              className="px-3 py-1.5 text-[11px] font-bold bg-muted text-foreground rounded-xl hover:bg-accent hover:text-accent-foreground flex items-center gap-1 transition cursor-pointer"
-                            >
-                              <Pencil className="h-3 w-3" />
-                              Sunting
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setDeletingListingId(item.id);
-                              }}
-                              className="px-3 py-1.5 text-[11px] font-bold bg-destructive/10 text-destructive rounded-xl hover:bg-destructive/20 flex items-center gap-1 transition cursor-pointer"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                              Hapus
-                            </button>
-                            {item.updatedAt && new Date(item.updatedAt).getTime() > new Date(item.createdAt || 0).getTime() + 1000 && (
-                              <span className="text-[10px] italic text-muted-foreground font-medium ml-auto self-center">
-                                (diperbarui)
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </div>
                     </div>
-                  </div>
-                </Link>
+                  )}
+                </div>
               ))
             )}
           </div>
@@ -397,6 +383,65 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
               repliesData.repliesByAccount.map((post: any) => (
                 <PostCard key={post.postId} post={post} />
               ))
+            )}
+          </div>
+        )}
+
+        {activeTab === "likes" && isOwnProfile && (
+          <div className="flex flex-col p-4 gap-4">
+            {/* Sub Tabs Pills */}
+            <div className="flex gap-2 border-b border-border pb-3">
+              <button
+                onClick={() => setLikesSubTab("posts")}
+                className={`px-4 py-1.5 text-xs font-bold rounded-full transition-all cursor-pointer ${
+                  likesSubTab === "posts"
+                    ? "bg-primary text-primary-foreground shadow"
+                    : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                }`}
+              >
+                Postingan
+              </button>
+              <button
+                onClick={() => setLikesSubTab("listings")}
+                className={`px-4 py-1.5 text-xs font-bold rounded-full transition-all cursor-pointer ${
+                  likesSubTab === "listings"
+                    ? "bg-primary text-primary-foreground shadow"
+                    : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                }`}
+              >
+                Penawaran
+              </button>
+            </div>
+
+            {/* Sub Tab Content */}
+            {likesSubTab === "posts" ? (
+              <div className="flex flex-col">
+                {likedPostsLoading ? (
+                  <div className="flex justify-center items-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  </div>
+                ) : !likedPostsData?.likedPosts || likedPostsData.likedPosts.length === 0 ? (
+                  <div className="text-center p-8 text-muted-foreground">Belum ada postingan disukai.</div>
+                ) : (
+                  likedPostsData.likedPosts.map((post: any) => (
+                    <PostCard key={post.postId} post={post} />
+                  ))
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4">
+                {likedListingsLoading ? (
+                  <div className="flex justify-center items-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  </div>
+                ) : !likedListingsData?.likedListings || likedListingsData.likedListings.length === 0 ? (
+                  <div className="text-center p-8 text-muted-foreground">Belum ada penawaran disukai.</div>
+                ) : (
+                  likedListingsData.likedListings.map((item: any) => (
+                    <ListingCard key={item.id} listing={item} isLink={true} className="bg-card shadow-none hover:shadow-sm" />
+                  ))
+                )}
+              </div>
             )}
           </div>
         )}

@@ -5,6 +5,8 @@ import { Avatar } from "~/components/ui/Avatar";
 import { PostCard } from "~/features/feed/components/PostCard";
 import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
 import { PageHeader } from "~/components/layout/PageHeader";
+import { MentionSuggestions } from "~/components/ui/MentionSuggestions";
+import { useToastStore } from "~/core/store/useToastStore";
 
 interface ThreadDetailProps {
   post: any;
@@ -28,6 +30,18 @@ export function ThreadDetail({
   currentUser,
 }: ThreadDetailProps) {
   const navigate = useNavigate();
+  const addToast = useToastStore((s) => s.addToast);
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const matches = replyText.match(/\B@[a-zA-Z0-9_]{3,30}\b/g) || [];
+    if (matches.length > 5) {
+      addToast("error", "Maksimal 5 tag orang diperbolehkan per postingan/pesan");
+      return;
+    }
+    handleReplySubmit(e);
+  };
 
   return (
     <div className="pb-20 bg-white dark:bg-gray-900 min-h-screen">
@@ -41,15 +55,21 @@ export function ThreadDetail({
       {/* Input reply (X-style) */}
       {currentUser && (
         <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-900/10">
-          <form onSubmit={handleReplySubmit} className="flex gap-3 items-start">
+          <form onSubmit={onSubmit} className="flex gap-3 items-start">
             <Avatar src={resolveMediaUrl(currentUser.avatarObjectKey)} size="sm" />
-            <div className="flex-1">
+            <div className="flex-1 relative">
               <textarea
+                ref={textareaRef}
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
                 placeholder="Balas postingan ini..."
                 rows={2}
-                className="w-full bg-transparent border-0 resize-none text-gray-800 dark:text-gray-100 placeholder-gray-400 focus:ring-0 text-sm focus:outline-none font-medium leading-relaxed"
+                className="w-full bg-transparent border-0 resize-none text-gray-800 dark:text-gray-100 placeholder-gray-400 focus:ring-0 text-sm focus:outline-none font-medium leading-relaxed mb-1"
+              />
+              <MentionSuggestions
+                value={replyText}
+                onChange={setReplyText}
+                inputRef={textareaRef}
               />
               <div className="flex justify-end border-t border-gray-100 dark:border-gray-800/85 pt-2.5 mt-1">
                 <button

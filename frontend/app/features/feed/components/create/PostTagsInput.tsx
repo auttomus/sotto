@@ -91,8 +91,9 @@ export function PostTagsInput({
             setIsOpen(true);
           }}
           onKeyDown={handleKeyDown}
-          className="form-input w-full pl-10 pr-3 py-2.5 text-sm"
-          placeholder="Cari atau buat tag baru..."
+          disabled={tags.length >= 5}
+          className="form-input w-full pl-10 pr-3 py-2.5 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+          placeholder={tags.length >= 5 ? "Maksimal 5 tag telah tercapai" : "Cari atau buat tag baru..."}
         />
 
         {isOpen && inputValue.trim().length > 0 && (

@@ -6,6 +6,7 @@ import {
   ID,
   ResolveField,
   Parent,
+  Int,
 } from '@nestjs/graphql';
 import { ListingsService } from './listings.service';
 import { ListingModel } from './models/listing.model';
@@ -76,5 +77,34 @@ export class ListingsResolver {
   @ResolveField(() => [MediaAttachmentModel])
   async media(@Parent() listing: ListingModel) {
     return this.mediaService.getMediaForObject('Listing', listing.id);
+  }
+
+  @ResolveField(() => Boolean)
+  async isLikedByMe(
+    @Parent() listing: ListingModel,
+    @CurrentUser() user?: CurrentUserPayload,
+  ): Promise<boolean> {
+    if (!user) return false;
+    return this.listingsService.isLikedByUser(listing.id, user.accountId);
+  }
+
+  @ResolveField(() => Int)
+  async likesCount(@Parent() listing: ListingModel): Promise<number> {
+    return this.listingsService.getLikesCount(listing.id);
+  }
+
+  @Mutation(() => Boolean)
+  async toggleLikeListing(
+    @CurrentUser() user: CurrentUserPayload,
+    @Args('id', { type: () => ID }) id: string,
+  ): Promise<boolean> {
+    return this.listingsService.toggleLike(user.accountId, id);
+  }
+
+  @Query(() => [ListingModel], { name: 'likedListings' })
+  async getLikedListings(
+    @CurrentUser() user: CurrentUserPayload,
+  ): Promise<ListingModel[]> {
+    return this.listingsService.findLikedListings(user.accountId);
   }
 }
