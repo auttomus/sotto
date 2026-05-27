@@ -184,10 +184,14 @@ export function ListingDetail({ listing }: ListingDetailProps) {
           
           <div className="flex items-center gap-2 mb-6 text-sm text-gray-600 dark:text-gray-400">
             <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
-            <span className="font-medium text-gray-900 dark:text-gray-100">5.0</span>
-            <span>(0 ulasan)</span>
-            <span>·</span>
-            <span>0 Terjual</span>
+            <span className="font-semibold text-gray-900 dark:text-gray-100">
+              {listing.account?.trustScore !== undefined && listing.account?.trustScore !== null
+                ? Number(listing.account.trustScore).toFixed(1)
+                : "0.0"}
+            </span>
+            <span className="text-xs px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-500 font-bold border border-amber-500/20">
+              Trust Score
+            </span>
           </div>
 
           <div className="flex flex-col gap-1 pb-6 border-b border-gray-100 dark:border-gray-800">

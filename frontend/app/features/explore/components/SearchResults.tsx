@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Link } from "react-router";
-import { Loader2, Hash, Briefcase, User, Sparkles } from "lucide-react";
+import { Loader2, Hash, Briefcase, User, Sparkles, Star } from "lucide-react";
 import { PostCard } from "~/features/feed/components/PostCard";
 import { ListingCard } from "~/features/listings/components/ListingCard";
 import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
@@ -93,14 +93,32 @@ export function SearchResults({
                     </div>
                   )}
                 </div>
+                
                 <h4 className="font-semibold text-foreground text-sm group-hover:text-primary transition-colors line-clamp-1">
                   {account.displayName}
                 </h4>
                 <p className="text-xs text-muted-foreground mt-0.5">@{account.username}</p>
-                {account.schoolName && (
-                  <span className="text-[10px] mt-2 px-2 py-0.5 bg-muted rounded-md border border-border text-muted-foreground truncate max-w-full">
-                    {account.schoolName}
+
+                {/* Trust Score Badge */}
+                {account.trustScore !== undefined && account.trustScore !== null && (
+                  <div className="flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-amber-500/10 text-[10px] font-bold text-amber-600 dark:text-amber-500 border border-amber-500/20">
+                    <Star className="h-2.5 w-2.5 fill-current shrink-0" />
+                    <span>{Number(account.trustScore).toFixed(1)}</span>
+                  </div>
+                )}
+
+                {/* School/Institution & Major */}
+                {(account.major || account.schoolName) && (
+                  <span className="text-[10px] mt-2 px-2.5 py-0.5 bg-muted rounded-md border border-border text-muted-foreground truncate max-w-full normal-case font-medium">
+                    {account.major ? `${account.major} · ` : ""}{account.schoolName || ""}
                   </span>
+                )}
+
+                {/* Short Biography Note */}
+                {account.note && (
+                  <p className="text-[10px] text-muted-foreground/80 mt-3 px-2 line-clamp-2 leading-relaxed italic border-t border-border/50 pt-2 w-full text-center">
+                    "{account.note}"
+                  </p>
                 )}
               </Link>
             ))}

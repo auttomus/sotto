@@ -81,7 +81,7 @@ export type SearchAccountsQueryVariables = Exact<{
 }>;
 
 
-export type SearchAccountsQuery = { searchAccounts: Array<{ id: string, displayName: string, username: string, avatarObjectKey: string | null }> };
+export type SearchAccountsQuery = { searchAccounts: Array<{ id: string, displayName: string, username: string, avatarObjectKey: string | null, schoolName: string | null, major: string | null, trustScore: number, note: string | null }> };
 
 export type SearchListingsQueryVariables = Exact<{
   query: string;
@@ -726,6 +726,10 @@ export const SearchAccountsDocument = gql`
     displayName
     username
     avatarObjectKey
+    schoolName
+    major
+    trustScore
+    note
   }
 }
     `;

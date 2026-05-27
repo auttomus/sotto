@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useSearchParams } from "react-router";
 import { 
   useSearchAccountsQuery, 
   useSearchListingsQuery,
@@ -9,10 +9,25 @@ import {
 import { useDebounce } from "~/core/hooks/useDebounce";
 
 export function useExplore() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchQuery = searchParams.get("query") || "";
   const debouncedQuery = useDebounce(searchQuery, 500);
 
   const isSearching = debouncedQuery.length > 0;
+
+  const setSearchQuery = (newQuery: string) => {
+    setSearchParams(
+      (prev) => {
+        if (newQuery) {
+          prev.set("query", newQuery);
+        } else {
+          prev.delete("query");
+        }
+        return prev;
+      },
+      { replace: true }
+    );
+  };
 
   // Profil user saat ini untuk menyembunyikan akun sendiri dari rekomendasi
   const { data: myProfileData } = useGetMyProfileQuery({

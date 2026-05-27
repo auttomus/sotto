@@ -127,20 +127,25 @@ export function PostCard({ post: rawPost }: PostCardProps) {
     <article className="bg-card p-5 border-b border-border hover:bg-accent/5 transition-all duration-200">
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
-        <Link
-          to={post.authorUsername ? ROUTES.PROFILE_PUBLIC(post.authorUsername) : "#"}
-          className="flex items-center gap-3 group"
-        >
-          <Avatar
-            src={avatarUrl}
-            alt={post.authorDisplayName || post.authorUsername || ""}
-            size="md"
-          />
+        <div className="flex items-start gap-3">
+          <Link
+            to={post.authorUsername ? ROUTES.PROFILE_PUBLIC(post.authorUsername) : "#"}
+            className="shrink-0 group"
+          >
+            <Avatar
+              src={avatarUrl}
+              alt={post.authorDisplayName || post.authorUsername || ""}
+              size="md"
+            />
+          </Link>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-foreground text-sm group-hover:text-primary transition-colors">
+              <Link
+                to={post.authorUsername ? ROUTES.PROFILE_PUBLIC(post.authorUsername) : "#"}
+                className="font-semibold text-foreground text-sm hover:text-primary transition-colors"
+              >
                 {post.authorDisplayName || post.authorUsername}
-              </h3>
+              </Link>
               <span className="text-xs text-muted-foreground flex items-center gap-1">
                 · {formatDate(post.createdAt as string)}
                 {post.editedAt && (
@@ -151,21 +156,31 @@ export function PostCard({ post: rawPost }: PostCardProps) {
               </span>
             </div>
             {post.authorSchoolName && (
-              <LabelBadge variant="school" value={post.authorSchoolName} className="mt-0.5" />
+              <div className="mt-0.5">
+                <Link to={post.authorUsername ? ROUTES.PROFILE_PUBLIC(post.authorUsername) : "#"}>
+                  <LabelBadge variant="school" value={post.authorSchoolName} />
+                </Link>
+              </div>
             )}
             {post.tags && post.tags.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-1.5">
                 {post.tags.map((tag: any) => (
-                  <LabelBadge
+                  <Link
                     key={tag.id}
-                    variant="tag"
-                    value={tag.name}
-                  />
+                    to={`/explore?query=${encodeURIComponent(tag.name)}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="hover:-translate-y-0.5 hover:shadow-sm transition-all cursor-pointer"
+                  >
+                    <LabelBadge
+                      variant="tag"
+                      value={tag.name}
+                    />
+                  </Link>
                 ))}
               </div>
             )}
           </div>
-        </Link>
+        </div>
         {isMine && (
           <div className="relative">
             <button 

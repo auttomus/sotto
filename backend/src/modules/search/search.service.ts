@@ -15,6 +15,7 @@ export class SearchService {
     return this.prisma.listing.findMany({
       where: {
         status: 'ACTIVE',
+        deletedAt: null,
         AND: [
           {
             OR: [
