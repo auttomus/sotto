@@ -100,7 +100,7 @@ export function ListingSelectionModal({
                   <ListingCard 
                     listing={listing} 
                     isLink={false} 
-                    className="bg-muted hover:bg-primary/5 hover:border-primary/50" 
+                    className="hover:bg-primary/5 hover:border-primary/50" 
                   />
                 </div>
               ))
@@ -125,7 +125,7 @@ export function ListingSelectionModal({
                   <ListingCard 
                     listing={listing} 
                     isLink={false} 
-                    className="bg-muted hover:bg-primary/5 hover:border-primary/50" 
+                    className="hover:bg-primary/5 hover:border-primary/50" 
                   />
                 </div>
               ))

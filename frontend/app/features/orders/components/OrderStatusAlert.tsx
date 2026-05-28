@@ -11,7 +11,7 @@ export function OrderStatusAlert({ status, isBuyer }: OrderStatusAlertProps) {
   switch (status) {
     case OrderStatus.PendingPayment:
       return (
-        <div className="bg-primary/10 border border-primary/20 rounded-3xl p-4 flex gap-3 animate-fade-in">
+        <div className="bg-primary/10 border border-primary/20 rounded-sm p-4 flex gap-3 animate-fade-in">
           <Clock className="h-5 w-5 text-primary shrink-0 mt-0.5" />
           <div className="space-y-0.5">
             <h4 className="font-bold text-foreground text-sm">Menunggu Pembayaran</h4>
@@ -26,7 +26,7 @@ export function OrderStatusAlert({ status, isBuyer }: OrderStatusAlertProps) {
 
     case OrderStatus.InProgress:
       return (
-        <div className="bg-warning/10 border border-warning/20 rounded-3xl p-4 flex gap-3 animate-fade-in">
+        <div className="bg-warning/10 border border-warning/20 rounded-sm p-4 flex gap-3 animate-fade-in">
           <Clock className="h-5 w-5 text-warning shrink-0 mt-0.5" />
           <div className="space-y-0.5">
             <h4 className="font-bold text-foreground text-sm">
@@ -43,7 +43,7 @@ export function OrderStatusAlert({ status, isBuyer }: OrderStatusAlertProps) {
 
     case OrderStatus.Completed:
       return (
-        <div className="bg-success/10 border border-success/20 rounded-3xl p-4 flex gap-3 animate-fade-in">
+        <div className="bg-success/10 border border-success/20 rounded-sm p-4 flex gap-3 animate-fade-in">
           <CheckCircle className="h-5 w-5 text-success shrink-0 mt-0.5" />
           <div className="space-y-0.5">
             <h4 className="font-bold text-foreground text-sm">Pesanan Selesai</h4>
@@ -58,7 +58,7 @@ export function OrderStatusAlert({ status, isBuyer }: OrderStatusAlertProps) {
 
     case OrderStatus.Cancelled:
       return (
-        <div className="bg-destructive/10 border border-destructive/20 rounded-3xl p-4 flex gap-3 animate-fade-in">
+        <div className="bg-destructive/10 border border-destructive/20 rounded-sm p-4 flex gap-3 animate-fade-in">
           <AlertCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
           <div className="space-y-0.5">
             <h4 className="font-bold text-foreground text-sm">Pesanan Dibatalkan</h4>

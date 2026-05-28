@@ -25,7 +25,7 @@ export function OrderDetailCard({ order, isBuyer, getStatusLabel }: OrderDetailC
   });
 
   return (
-    <div className="bg-card p-4 rounded-3xl border border-border shadow-sm space-y-4">
+    <div className="bg-card p-4 rounded-sm border border-border shadow-sm space-y-4">
       {order.listing && (
         <div className="border-b border-border pb-3">
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">

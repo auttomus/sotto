@@ -129,15 +129,15 @@ export function useExplore() {
     accounts: isSearching 
       ? (accountsData?.searchAccounts || []) 
       : (defaultAccountsData?.searchAccounts || []).filter(acc => acc.id !== myAccountId),
-    listings: isSearching 
+    listings: (isSearching 
       ? (listingsData?.searchListings || []) 
-      : (defaultListingsData?.searchListings || []),
-    posts: isSearching
+      : (defaultListingsData?.searchListings || [])).slice(0, 5),
+    posts: (isSearching
       ? (postsData?.searchPosts || [])
-      : (defaultPostsData?.searchPosts || []),
-    tags: isSearching
+      : (defaultPostsData?.searchPosts || [])).slice(0, 5),
+    tags: (isSearching
       ? (tagsData?.searchTags || [])
-      : (defaultTagsData?.searchTags || []),
+      : (defaultTagsData?.searchTags || [])).slice(0, 10),
   };
 
   return {

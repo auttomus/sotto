@@ -15,7 +15,7 @@
   --primary: #4f46e5; /* Indigo-600 */
   --primary-foreground: #ffffff;
   
-  --secondary: #f3f4f6; /* Gray-100 */
+  --secondary: #ffffff;
   --secondary-foreground: #111827;
   
   --muted: #f3f4f6;
@@ -41,38 +41,38 @@
 }
 
 .dark {
-  --background: #090d16;
-  --foreground: #f3f4f6;
+  --background: #09090b; /* Zinc-950 */
+  --foreground: #fafafa; /* Zinc-50 */
   
-  --card: #0f172a; /* Slate-900 */
-  --card-foreground: #f3f4f6;
+  --card: #09090b; /* Zinc-950 (Same as Background) */
+  --card-foreground: #fafafa;
   
-  --popover: #0f172a;
-  --popover-foreground: #f3f4f6;
+  --popover: #09090b; /* Zinc-950 (Same as Background) */
+  --popover-foreground: #fafafa;
   
-  --primary: #6366f1; /* Indigo-500 */
+  --primary: #6366f1; /* Brand Indigo-500 */
   --primary-foreground: #ffffff;
   
-  --secondary: #1e293b; /* Slate-800 */
-  --secondary-foreground: #f3f4f6;
+  --secondary: #09090b; /* Zinc-950 */
+  --secondary-foreground: #fafafa;
   
-  --muted: #1e293b;
-  --muted-foreground: #9ca3af;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa; /* Zinc-400 */
   
-  --accent: #1e1b4b; /* Indigo-950 */
-  --accent-foreground: #a5b4fc;
+  --accent: #27272a;
+  --accent-foreground: #fafafa;
   
-  --destructive: #f87171; /* Red-400 */
+  --destructive: #ef4444; /* Red-500 */
   --destructive-foreground: #ffffff;
   
-  --success: #34d399;
-  --success-foreground: #090d16;
+  --success: #22c55e; /* Green-500 */
+  --success-foreground: #ffffff;
   
-  --warning: #fbbf24;
-  --warning-foreground: #090d16;
+  --warning: #eab308; /* Yellow-500 */
+  --warning-foreground: #09090b;
   
-  --border: #1e293b;
-  --input: #1e293b;
+  --border: #27272a;
+  --input: #27272a;
   --ring: #4f46e5;
 }
 
@@ -149,7 +149,7 @@ body {
 }
 
 @utility form-input {
-  @apply w-full px-4 py-2 border border-border rounded-xl bg-background text-foreground transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary disabled:opacity-50;
+  @apply w-full px-4 py-2 border border-border rounded-sm bg-background text-foreground transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary disabled:opacity-50;
 }
 
 @utility form-label {

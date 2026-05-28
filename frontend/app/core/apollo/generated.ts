@@ -157,14 +157,14 @@ export type DeletePostMutation = { deletePost: boolean };
 export type GetListingsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetListingsQuery = { listings: Array<{ id: string, title: string, description: string, price: number, status: Types.ListingStatus, createdAt: string, updatedAt: string, accountId: string, account: { displayName: string, major: string | null, trustScore: number, username: string | null, avatarObjectKey: string | null } | null }> };
+export type GetListingsQuery = { listings: Array<{ id: string, title: string, description: string, price: number, status: Types.ListingStatus, createdAt: string, updatedAt: string, accountId: string, isLikedByMe: boolean, likesCount: number, account: { displayName: string, major: string | null, trustScore: number, username: string | null, avatarObjectKey: string | null } | null }> };
 
 export type GetListingDetailQueryVariables = Exact<{
   id: string | number;
 }>;
 
 
-export type GetListingDetailQuery = { listing: { id: string, title: string, description: string, price: number, status: Types.ListingStatus, type: Types.ListingType, isUnlimited: boolean, deliveryTimeDays: number | null, createdAt: string, updatedAt: string, accountId: string, account: { displayName: string, major: string | null, trustScore: number, username: string | null, avatarObjectKey: string | null } | null, media: Array<{ id: string, fileName: string, contentType: string, objectKey: string, url: string | null, isPrivate: boolean }> | null } | null };
+export type GetListingDetailQuery = { listing: { id: string, title: string, description: string, price: number, status: Types.ListingStatus, type: Types.ListingType, isUnlimited: boolean, deliveryTimeDays: number | null, createdAt: string, updatedAt: string, accountId: string, isLikedByMe: boolean, likesCount: number, account: { displayName: string, major: string | null, trustScore: number, username: string | null, avatarObjectKey: string | null } | null, media: Array<{ id: string, fileName: string, contentType: string, objectKey: string, url: string | null, isPrivate: boolean }> | null } | null };
 
 export type CreateListingMutationVariables = Exact<{
   input: Types.CreateListingInput;
@@ -187,6 +187,13 @@ export type DeleteListingMutationVariables = Exact<{
 
 
 export type DeleteListingMutation = { deleteListing: boolean };
+
+export type ToggleLikeListingMutationVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type ToggleLikeListingMutation = { toggleLikeListing: boolean };
 
 export type GetMyOrdersQueryVariables = Exact<{
   role: string;
@@ -328,6 +335,16 @@ export type GetRepliesByAccountQueryVariables = Exact<{
 
 
 export type GetRepliesByAccountQuery = { repliesByAccount: Array<{ postId: string, content: string, createdAt: string, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, repliesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null }> };
+
+export type GetLikedListingsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetLikedListingsQuery = { likedListings: Array<{ id: string, title: string, description: string, price: number, status: Types.ListingStatus, type: Types.ListingType, isUnlimited: boolean, deliveryTimeDays: number | null, createdAt: string, updatedAt: string, accountId: string, isLikedByMe: boolean, likesCount: number, account: { displayName: string, major: string | null, trustScore: number, username: string | null, avatarObjectKey: string | null } | null, media: Array<{ id: string, fileName: string, contentType: string, objectKey: string, url: string | null, isPrivate: boolean }> | null }> };
+
+export type GetLikedPostsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetLikedPostsQuery = { likedPosts: Array<{ postId: string, content: string, createdAt: string, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, repliesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null }> };
 
 
 export const SearchSchoolsDocument = gql`
@@ -1317,6 +1334,8 @@ export const GetListingsDocument = gql`
     createdAt
     updatedAt
     accountId
+    isLikedByMe
+    likesCount
     account {
       displayName
       major
@@ -1376,6 +1395,8 @@ export const GetListingDetailDocument = gql`
     createdAt
     updatedAt
     accountId
+    isLikedByMe
+    likesCount
     account {
       displayName
       major
@@ -1537,6 +1558,37 @@ export function useDeleteListingMutation(baseOptions?: ApolloReactHooks.Mutation
 export type DeleteListingMutationHookResult = ReturnType<typeof useDeleteListingMutation>;
 export type DeleteListingMutationResult = Apollo.MutationResult<DeleteListingMutation>;
 export type DeleteListingMutationOptions = Apollo.BaseMutationOptions<DeleteListingMutation, DeleteListingMutationVariables>;
+export const ToggleLikeListingDocument = gql`
+    mutation ToggleLikeListing($id: ID!) {
+  toggleLikeListing(id: $id)
+}
+    `;
+export type ToggleLikeListingMutationFn = Apollo.MutationFunction<ToggleLikeListingMutation, ToggleLikeListingMutationVariables>;
+
+/**
+ * __useToggleLikeListingMutation__
+ *
+ * To run a mutation, you first call `useToggleLikeListingMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useToggleLikeListingMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [toggleLikeListingMutation, { data, loading, error }] = useToggleLikeListingMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useToggleLikeListingMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ToggleLikeListingMutation, ToggleLikeListingMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<ToggleLikeListingMutation, ToggleLikeListingMutationVariables>(ToggleLikeListingDocument, options);
+      }
+export type ToggleLikeListingMutationHookResult = ReturnType<typeof useToggleLikeListingMutation>;
+export type ToggleLikeListingMutationResult = Apollo.MutationResult<ToggleLikeListingMutation>;
+export type ToggleLikeListingMutationOptions = Apollo.BaseMutationOptions<ToggleLikeListingMutation, ToggleLikeListingMutationVariables>;
 export const GetMyOrdersDocument = gql`
     query GetMyOrders($role: String!, $status: String) {
   myOrders(role: $role, status: $status) {
@@ -2399,3 +2451,137 @@ export type GetRepliesByAccountQueryHookResult = ReturnType<typeof useGetReplies
 export type GetRepliesByAccountLazyQueryHookResult = ReturnType<typeof useGetRepliesByAccountLazyQuery>;
 export type GetRepliesByAccountSuspenseQueryHookResult = ReturnType<typeof useGetRepliesByAccountSuspenseQuery>;
 export type GetRepliesByAccountQueryResult = Apollo.QueryResult<GetRepliesByAccountQuery, GetRepliesByAccountQueryVariables>;
+export const GetLikedListingsDocument = gql`
+    query GetLikedListings {
+  likedListings {
+    id
+    title
+    description
+    price
+    status
+    type
+    isUnlimited
+    deliveryTimeDays
+    createdAt
+    updatedAt
+    accountId
+    isLikedByMe
+    likesCount
+    account {
+      displayName
+      major
+      trustScore
+      username
+      avatarObjectKey
+    }
+    media {
+      id
+      fileName
+      contentType
+      objectKey
+      url
+      isPrivate
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetLikedListingsQuery__
+ *
+ * To run a query within a React component, call `useGetLikedListingsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetLikedListingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetLikedListingsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetLikedListingsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetLikedListingsQuery, GetLikedListingsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetLikedListingsQuery, GetLikedListingsQueryVariables>(GetLikedListingsDocument, options);
+      }
+export function useGetLikedListingsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetLikedListingsQuery, GetLikedListingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetLikedListingsQuery, GetLikedListingsQueryVariables>(GetLikedListingsDocument, options);
+        }
+// @ts-ignore
+export function useGetLikedListingsSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<GetLikedListingsQuery, GetLikedListingsQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetLikedListingsQuery, GetLikedListingsQueryVariables>;
+export function useGetLikedListingsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetLikedListingsQuery, GetLikedListingsQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetLikedListingsQuery | undefined, GetLikedListingsQueryVariables>;
+export function useGetLikedListingsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetLikedListingsQuery, GetLikedListingsQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetLikedListingsQuery, GetLikedListingsQueryVariables>(GetLikedListingsDocument, options);
+        }
+export type GetLikedListingsQueryHookResult = ReturnType<typeof useGetLikedListingsQuery>;
+export type GetLikedListingsLazyQueryHookResult = ReturnType<typeof useGetLikedListingsLazyQuery>;
+export type GetLikedListingsSuspenseQueryHookResult = ReturnType<typeof useGetLikedListingsSuspenseQuery>;
+export type GetLikedListingsQueryResult = Apollo.QueryResult<GetLikedListingsQuery, GetLikedListingsQueryVariables>;
+export const GetLikedPostsDocument = gql`
+    query GetLikedPosts {
+  likedPosts {
+    postId
+    content
+    createdAt
+    authorId
+    authorDisplayName
+    authorUsername
+    authorAvatarObjectKey
+    authorSchoolName
+    linkedServiceId
+    inReplyToPostId
+    likesCount
+    repliesCount
+    likedByMe
+    tags {
+      id
+      name
+    }
+    media {
+      id
+      fileName
+      contentType
+      url
+      objectKey
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetLikedPostsQuery__
+ *
+ * To run a query within a React component, call `useGetLikedPostsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetLikedPostsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetLikedPostsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetLikedPostsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetLikedPostsQuery, GetLikedPostsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetLikedPostsQuery, GetLikedPostsQueryVariables>(GetLikedPostsDocument, options);
+      }
+export function useGetLikedPostsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetLikedPostsQuery, GetLikedPostsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetLikedPostsQuery, GetLikedPostsQueryVariables>(GetLikedPostsDocument, options);
+        }
+// @ts-ignore
+export function useGetLikedPostsSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<GetLikedPostsQuery, GetLikedPostsQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetLikedPostsQuery, GetLikedPostsQueryVariables>;
+export function useGetLikedPostsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetLikedPostsQuery, GetLikedPostsQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetLikedPostsQuery | undefined, GetLikedPostsQueryVariables>;
+export function useGetLikedPostsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetLikedPostsQuery, GetLikedPostsQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetLikedPostsQuery, GetLikedPostsQueryVariables>(GetLikedPostsDocument, options);
+        }
+export type GetLikedPostsQueryHookResult = ReturnType<typeof useGetLikedPostsQuery>;
+export type GetLikedPostsLazyQueryHookResult = ReturnType<typeof useGetLikedPostsLazyQuery>;
+export type GetLikedPostsSuspenseQueryHookResult = ReturnType<typeof useGetLikedPostsSuspenseQuery>;
+export type GetLikedPostsQueryResult = Apollo.QueryResult<GetLikedPostsQuery, GetLikedPostsQueryVariables>;

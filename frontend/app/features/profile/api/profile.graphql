@@ -133,3 +133,65 @@ query GetRepliesByAccount($accountId: String!) {
     }
   }
 }
+
+query GetLikedListings {
+  likedListings {
+    id
+    title
+    description
+    price
+    status
+    type
+    isUnlimited
+    deliveryTimeDays
+    createdAt
+    updatedAt
+    accountId
+    isLikedByMe
+    likesCount
+    account {
+      displayName
+      major
+      trustScore
+      username
+      avatarObjectKey
+    }
+    media {
+      id
+      fileName
+      contentType
+      objectKey
+      url
+      isPrivate
+    }
+  }
+}
+
+query GetLikedPosts {
+  likedPosts {
+    postId
+    content
+    createdAt
+    authorId
+    authorDisplayName
+    authorUsername
+    authorAvatarObjectKey
+    authorSchoolName
+    linkedServiceId
+    inReplyToPostId
+    likesCount
+    repliesCount
+    likedByMe
+    tags {
+      id
+      name
+    }
+    media {
+      id
+      fileName
+      contentType
+      url
+      objectKey
+    }
+  }
+}

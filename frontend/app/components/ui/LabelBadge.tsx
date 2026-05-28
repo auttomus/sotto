@@ -22,7 +22,7 @@ export function LabelBadge({ variant, value, className, icon }: LabelBadgeProps)
   let colorClasses = "";
 
   // Common styling for tags, school, listing types, status etc.
-  const baseClasses = "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border transition-all duration-200";
+  const baseClasses = "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider border transition-all duration-200";
 
   switch (variant) {
     case "tag":

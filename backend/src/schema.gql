@@ -121,7 +121,9 @@ type ListingModel {
   deliveryTimeDays: Int
   description: String!
   id: ID!
+  isLikedByMe: Boolean!
   isUnlimited: Boolean!
+  likesCount: Int!
   maxActiveOrders: Int
   media: [MediaAttachmentModel!]
   price: Float!
@@ -199,6 +201,7 @@ type Mutation {
   markNotificationAsRead(id: ID!): Boolean!
   rejectOffer(offerId: ID!): CustomOfferModel!
   requestUploadUrl(input: RequestUploadInput!): PresignedUploadResult!
+  toggleLikeListing(id: ID!): Boolean!
   toggleLikePost(postId: String!): Boolean!
 
   """Catat interaksi user (view, click, like)"""
@@ -285,6 +288,8 @@ type Query {
   conversations: [ConversationModel!]!
   feed(limit: Int! = 20): [PostModel!]!
   globalFeed(limit: Int! = 20): [PostModel!]!
+  likedListings: [ListingModel!]!
+  likedPosts: [PostModel!]!
   listing(id: ID!): ListingModel
   listings: [ListingModel!]!
   listingsByAccount(accountId: ID!): [ListingModel!]!

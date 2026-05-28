@@ -1,5 +1,4 @@
-import * as React from "react";
-import { useCreateStore } from "../../../create/store/useCreateStore";
+import { useCreateStore } from "~/features/create/store/useCreateStore";
 
 export function ListingBasicStep() {
   const { listingData, updateListingData } = useCreateStore();
@@ -14,7 +13,7 @@ export function ListingBasicStep() {
       <div className="grid grid-cols-2 gap-3">
         <button 
           onClick={() => updateListingData({ type: 'SERVICE' })}
-          className={`p-4 rounded-xl border-2 text-left transition-all cursor-pointer ${
+          className={`p-4 rounded-sm border-2 text-left transition-all cursor-pointer ${
             listingData.type === 'SERVICE' 
               ? 'border-primary bg-primary/5 shadow-sm' 
               : 'border-border hover:border-primary/50'
@@ -29,7 +28,7 @@ export function ListingBasicStep() {
         
         <button 
           onClick={() => updateListingData({ type: 'DIGITAL_PRODUCT' })}
-          className={`p-4 rounded-xl border-2 text-left transition-all cursor-pointer ${
+          className={`p-4 rounded-sm border-2 text-left transition-all cursor-pointer ${
             listingData.type === 'DIGITAL_PRODUCT' 
               ? 'border-primary bg-primary/5 shadow-sm' 
               : 'border-border hover:border-primary/50'

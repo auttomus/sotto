@@ -16,7 +16,7 @@ export function ThemeSelector({ isDark, toggleTheme }: ThemeSelectorProps) {
         <button 
           onClick={() => isDark && toggleTheme()}
           className={cn(
-            "flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all relative overflow-hidden group cursor-pointer",
+            "flex flex-col items-center justify-center p-6 rounded-sm border-2 transition-all relative overflow-hidden group cursor-pointer",
             !isDark 
               ? "bg-primary/5 border-primary shadow-md shadow-primary/5" 
               : "bg-card border-border hover:border-accent"
@@ -38,7 +38,7 @@ export function ThemeSelector({ isDark, toggleTheme }: ThemeSelectorProps) {
         <button 
           onClick={() => !isDark && toggleTheme()}
           className={cn(
-            "flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all relative overflow-hidden group cursor-pointer",
+            "flex flex-col items-center justify-center p-6 rounded-sm border-2 transition-all relative overflow-hidden group cursor-pointer",
             isDark 
               ? "bg-primary/5 border-primary shadow-md shadow-primary/5" 
               : "bg-card border-border hover:border-accent"

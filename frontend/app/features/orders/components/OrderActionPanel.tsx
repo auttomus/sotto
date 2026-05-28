@@ -35,7 +35,7 @@ export function OrderActionPanel({
         <div className="flex gap-3">
           <Button
             variant="secondary"
-            className="flex-1 font-bold text-xs py-2.5 rounded-xl border border-border text-foreground hover:bg-muted cursor-pointer disabled:opacity-50"
+            className="flex-1 font-bold text-xs py-2.5 rounded-sm border border-border text-foreground hover:bg-muted cursor-pointer disabled:opacity-50"
             onClick={handleCancel}
             disabled={isActionLoading}
           >
@@ -43,7 +43,7 @@ export function OrderActionPanel({
           </Button>
           <Button
             variant="primary"
-            className="flex-1 font-bold text-xs py-2.5 rounded-xl bg-success hover:opacity-90 text-success-foreground border-0 shadow-lg shadow-success/10 active:scale-[0.99] transition cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+            className="flex-1 font-bold text-xs py-2.5 rounded-sm bg-success hover:opacity-90 text-success-foreground border-0 shadow-lg shadow-success/10 active:scale-[0.99] transition cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
             onClick={handleAdvance}
             disabled={isActionLoading}
           >
@@ -71,7 +71,7 @@ export function OrderActionPanel({
         <div className="flex gap-3">
           <Button
             variant="secondary"
-            className="flex-1 font-bold text-xs py-2.5 rounded-xl border border-border text-foreground hover:bg-muted cursor-pointer disabled:opacity-50"
+            className="flex-1 font-bold text-xs py-2.5 rounded-sm border border-border text-foreground hover:bg-muted cursor-pointer disabled:opacity-50"
             onClick={handleCancel}
             disabled={isActionLoading || isPaying}
           >
@@ -81,7 +81,7 @@ export function OrderActionPanel({
           {isBuyer && onPay && (
             <Button
               variant="primary"
-              className="flex-[2] font-extrabold text-xs py-2.5 rounded-xl bg-primary hover:opacity-90 text-primary-foreground border-0 shadow-lg shadow-primary/10 active:scale-[0.99] transition cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+              className="flex-[2] font-extrabold text-xs py-2.5 rounded-sm bg-primary hover:opacity-90 text-primary-foreground border-0 shadow-lg shadow-primary/10 active:scale-[0.99] transition cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
               onClick={onPay}
               disabled={isActionLoading || isPaying}
             >

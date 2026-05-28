@@ -29,7 +29,7 @@ export default function DesktopSidebar() {
             end={item.to === "/profile"}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-4 px-3 py-3 rounded-xl transition-all group relative",
+                "flex items-center gap-4 px-3 py-3 rounded-sm transition-all group relative",
                 isActive 
                   ? "bg-primary/10 text-primary font-bold" 
                   : "text-muted-foreground hover:bg-accent hover:text-accent-foreground font-medium"
@@ -58,7 +58,7 @@ export default function DesktopSidebar() {
           to="/workspace/create"
           className={({ isActive }) =>
             cn(
-              "flex items-center gap-4 px-3 py-3 rounded-xl transition-all group relative mt-4",
+              "flex items-center gap-4 px-3 py-3 rounded-sm transition-all group relative mt-4",
               isActive 
                 ? "bg-primary/10 text-primary font-bold" 
                 : "text-muted-foreground hover:bg-accent hover:text-accent-foreground font-medium"
@@ -82,7 +82,7 @@ export default function DesktopSidebar() {
           to="/settings"
           className={({ isActive }) =>
             cn(
-              "flex items-center gap-4 px-3 py-3 rounded-xl transition-all group relative",
+              "flex items-center gap-4 px-3 py-3 rounded-sm transition-all group relative",
               isActive 
                 ? "bg-primary/10 text-primary font-bold" 
                 : "text-muted-foreground hover:bg-accent hover:text-accent-foreground font-medium"

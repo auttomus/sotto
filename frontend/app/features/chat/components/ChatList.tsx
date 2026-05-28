@@ -67,7 +67,7 @@ export function ChatList({ chats, user }: ChatListProps) {
                 <Link 
                   key={chat.id} 
                   to={`/workspace/chat/${chat.id}`} 
-                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition cursor-pointer group"
+                  className="flex items-center gap-3 p-3 rounded-sm hover:bg-muted transition cursor-pointer group"
                 >
                   <div className="relative">
                     <Avatar src={avatar} size="md" alt={displayName} />

@@ -94,6 +94,7 @@ model Account {
   customOffersSent       CustomOffer[]             @relation("OfferSender")
   customOffersReceived   CustomOffer[]             @relation("OfferReceiver")
   mediaAttachments       MediaAttachment[]
+  listingLikes           ListingLike[]
 
   @@map("accounts")
 }
@@ -125,6 +126,7 @@ model Listing {
   account      Account       @relation(fields: [accountId], references: [id], onDelete: Cascade)
   orders       Order[]
   customOffers CustomOffer[]
+  likes        ListingLike[]
 
   @@map("listings")
 }
@@ -361,4 +363,17 @@ model CustomOffer {
   @@index([conversationId])
   @@index([buyerAccountId])
   @@map("custom_offers")
+}
+
+model ListingLike {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  accountId String   @map("account_id") @db.Uuid
+  listingId String   @map("listing_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, listingId])
+  @@map("listing_likes")
 }

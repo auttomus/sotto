@@ -30,7 +30,7 @@ export function LogoutButton() {
     <section className="pt-4">
       <Button 
         variant="danger" 
-        className="w-full h-12 rounded-2xl flex items-center justify-center gap-2 font-bold shadow-lg shadow-destructive/10 text-xs cursor-pointer active:scale-[0.98]"
+        className="w-full h-12 rounded-sm flex items-center justify-center gap-2 font-bold shadow-lg shadow-destructive/10 text-xs cursor-pointer active:scale-[0.98]"
         onClick={handleLogout}
         disabled={isLoggingOut}
       >

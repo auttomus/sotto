@@ -1,5 +1,7 @@
 import * as React from "react";
 import { Paperclip, Package, Send, Loader2, X, Tag } from "lucide-react";
+import { useToastStore } from "~/core/store/useToastStore";
+import { MentionSuggestions } from "~/components/ui/MentionSuggestions";
 
 interface ChatInputAreaProps {
   inputText: string;
@@ -28,6 +30,29 @@ export function ChatInputArea({
   onOpenListingModal,
   onOpenOfferModal,
 }: ChatInputAreaProps) {
+  const addToast = useToastStore((s) => s.addToast);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  const onSend = () => {
+    const matches = inputText.match(/\B@[a-zA-Z0-9_]{3,30}\b/g) || [];
+    if (matches.length > 5) {
+      addToast("error", "Maksimal 5 tag orang diperbolehkan per postingan/pesan");
+      return;
+    }
+    handleSend();
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      const matches = inputText.match(/\B@[a-zA-Z0-9_]{3,30}\b/g) || [];
+      if (matches.length > 5) {
+        addToast("error", "Maksimal 5 tag orang diperbolehkan per postingan/pesan");
+        return;
+      }
+    }
+    handleKeyDown(e);
+  };
+
   return (
     <div className="shrink-0 bg-card border-t border-border p-3 pb-safe">
       {/* Selected Images Previews */}
@@ -36,7 +61,7 @@ export function ChatInputArea({
           {selectedImages.map((file, idx) => {
             const previewUrl = URL.createObjectURL(file);
             return (
-              <div key={idx} className="relative h-16 w-16 rounded-xl overflow-hidden shrink-0 border border-border bg-muted">
+              <div key={idx} className="relative h-16 w-16 rounded-sm overflow-hidden shrink-0 border border-border bg-muted">
                 <img src={previewUrl} className="h-full w-full object-cover" alt="Preview" />
                 <button
                   type="button"
@@ -53,7 +78,7 @@ export function ChatInputArea({
 
       {/* Selected Listing Preview */}
       {selectedListing && (
-        <div className="mb-3 p-2 bg-primary/5 rounded-2xl border border-primary/20 flex items-center justify-between gap-3 animate-fade-in">
+        <div className="mb-3 p-2 bg-primary/5 rounded-sm border border-primary/20 flex items-center justify-between gap-3 animate-fade-in">
           <div className="flex items-center gap-2.5 overflow-hidden">
             <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
               <Package className="h-5 w-5" />
@@ -83,7 +108,7 @@ export function ChatInputArea({
         </div>
       )}
 
-      <div className="flex items-center gap-2 bg-muted rounded-full pr-1.5 pl-3 py-1.5">
+      <div className="flex items-center gap-2 bg-muted rounded-full pr-1.5 pl-3 py-1.5 relative">
         {/* File Input for Images */}
         <input
           type="file"
@@ -129,17 +154,30 @@ export function ChatInputArea({
         )}
 
         <input
+          ref={inputRef}
           type="text"
           value={inputText}
           onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
+          onKeyDown={onKeyDown}
           className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2 px-1 text-foreground placeholder-muted-foreground outline-none"
           placeholder="Ketik pesan..."
           disabled={isUploading}
         />
         
+        <MentionSuggestions
+          value={inputText}
+          onChange={(val) => {
+            // Helper onChange custom for input
+            const event = {
+              target: { value: val }
+            } as React.ChangeEvent<HTMLInputElement>;
+            handleInputChange(event);
+          }}
+          inputRef={inputRef}
+        />
+        
         <button 
-          onClick={handleSend}
+          onClick={onSend}
           disabled={(!inputText.trim() && selectedImages.length === 0 && !selectedListing) || isUploading}
           className="bg-primary text-white p-2 rounded-full hover:opacity-90 transition shrink-0 shadow-sm disabled:opacity-50 cursor-pointer"
         >

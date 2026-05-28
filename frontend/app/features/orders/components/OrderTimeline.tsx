@@ -95,7 +95,7 @@ export function OrderTimeline({
                 <Link 
                   key={order.id} 
                   to={`/workspace/order/${order.id}`} 
-                  className="block bg-card p-4 rounded-2xl border border-border hover:border-primary/50 shadow-sm hover:shadow-md transition group cursor-pointer"
+                  className="block bg-card p-4 rounded-sm border border-border hover:border-primary/50 shadow-sm hover:shadow-md transition group cursor-pointer"
                 >
                   <div className="flex justify-between items-center mb-3">
                     <div className="flex items-center gap-2">

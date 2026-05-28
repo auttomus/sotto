@@ -133,6 +133,19 @@ services:
     networks:
       - platform_net
 
+  # 9. CLOUDFLARE TUNNEL (Akses Publik Tanpa VPS)
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: sotto_tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    env_file:
+      - ./infrastructure/.env.docker
+    depends_on:
+      - nginx
+    networks:
+      - platform_net
+
 networks:
   platform_net:
     driver: bridge

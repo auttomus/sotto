@@ -311,4 +311,89 @@ export class ListingsService {
     });
     return listings.map((l) => this.serializeListing(l));
   }
+
+  async toggleLike(accountId: string, listingId: string): Promise<boolean> {
+    const listing = await this.prisma.listing.findUnique({
+      where: { id: listingId, deletedAt: null },
+    });
+    if (!listing) throw new NotFoundException('Listing tidak ditemukan.');
+
+    const existingLike = await this.prisma.listingLike.findUnique({
+      where: {
+        accountId_listingId: {
+          accountId,
+          listingId,
+        },
+      },
+    });
+
+    if (existingLike) {
+      await this.prisma.listingLike.delete({
+        where: {
+          accountId_listingId: {
+            accountId,
+            listingId,
+          },
+        },
+      });
+      return false;
+    } else {
+      await this.prisma.listingLike.create({
+        data: {
+          accountId,
+          listingId,
+        },
+      });
+      return true;
+    }
+  }
+
+  async isLikedByUser(listingId: string, accountId: string): Promise<boolean> {
+    if (!accountId) return false;
+    const count = await this.prisma.listingLike.count({
+      where: {
+        accountId,
+        listingId,
+      },
+    });
+    return count > 0;
+  }
+
+  async getLikesCount(listingId: string): Promise<number> {
+    return this.prisma.listingLike.count({
+      where: {
+        listingId,
+      },
+    });
+  }
+
+  async findLikedListings(accountId: string): Promise<SerializedListing[]> {
+    const likes = await this.prisma.listingLike.findMany({
+      where: {
+        accountId,
+        listing: {
+          status: ListingStatus.ACTIVE,
+          deletedAt: null,
+        },
+      },
+      include: {
+        listing: {
+          include: {
+            account: {
+              select: {
+                displayName: true,
+                major: { select: { name: true } },
+                trustScore: true,
+                username: true,
+                avatarObjectKey: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return likes.map((like) => this.serializeListing(like.listing));
+  }
 }

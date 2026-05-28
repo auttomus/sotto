@@ -12,7 +12,7 @@ export function PostMediaGallery({ files, removeFile, fileInputRef }: PostMediaG
     return (
       <div 
         onClick={() => fileInputRef.current?.click()}
-        className="w-full aspect-video bg-muted rounded-2xl border-2 border-dashed border-border flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-muted/70 transition group mb-5"
+        className="w-full aspect-video bg-muted rounded-sm border-2 border-dashed border-border flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-muted/70 transition group mb-5"
       >
         <div className="p-4 bg-card rounded-full shadow-sm group-hover:scale-105 transition-transform">
           <ImageIcon className="h-8 w-8 text-primary" />
@@ -28,7 +28,7 @@ export function PostMediaGallery({ files, removeFile, fileInputRef }: PostMediaG
   return (
     <div className="flex gap-2 overflow-x-auto pb-4 mb-4">
       {files.map((file, i) => (
-        <div key={i} className="relative w-32 h-32 shrink-0 rounded-xl overflow-hidden border border-border group">
+        <div key={i} className="relative w-32 h-32 shrink-0 rounded-sm overflow-hidden border border-border group">
           <img src={URL.createObjectURL(file)} alt="preview" className="w-full h-full object-cover" />
           <button 
             type="button"
@@ -43,7 +43,7 @@ export function PostMediaGallery({ files, removeFile, fileInputRef }: PostMediaG
         <button 
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="w-32 h-32 shrink-0 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center hover:bg-muted transition"
+          className="w-32 h-32 shrink-0 rounded-sm border-2 border-dashed border-border flex flex-col items-center justify-center hover:bg-muted transition"
         >
           <ImageIcon className="h-6 w-6 text-muted-foreground mb-1" />
           <span className="text-xs text-muted-foreground font-medium">Tambah</span>

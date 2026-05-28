@@ -170,7 +170,7 @@ export default function RegisterWizard() {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto p-6 bg-card text-foreground rounded-2xl shadow-sm border border-border">
+    <div className="w-full max-w-md mx-auto p-6 bg-card text-foreground rounded-sm shadow-sm border border-border">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-primary font-serif italic mb-2">
           Sotto

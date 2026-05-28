@@ -76,11 +76,11 @@ export default function LandingRoute() {
 
         {/* Feature Highlights */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-32 text-left max-w-5xl">
-          <div className="p-8 rounded-3xl bg-card border border-border shadow-xl relative overflow-hidden group">
+          <div className="p-8 rounded-sm bg-card border border-border shadow-xl relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
               <Layout className="w-32 h-32" />
             </div>
-            <div className="bg-amber-100 dark:bg-amber-500/20 w-12 h-12 rounded-2xl flex items-center justify-center mb-6">
+            <div className="bg-amber-100 dark:bg-amber-500/20 w-12 h-12 rounded-sm flex items-center justify-center mb-6">
               <Layout className="h-6 w-6 text-amber-600 dark:text-amber-400" />
             </div>
             <h3 className="text-xl font-bold mb-3">Linimasa Portofolio</h3>
@@ -89,11 +89,11 @@ export default function LandingRoute() {
             </p>
           </div>
 
-          <div className="p-8 rounded-3xl bg-card border border-border shadow-xl relative overflow-hidden group">
+          <div className="p-8 rounded-sm bg-card border border-border shadow-xl relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
               <ShieldCheck className="w-32 h-32" />
             </div>
-            <div className="bg-emerald-100 dark:bg-emerald-500/20 w-12 h-12 rounded-2xl flex items-center justify-center mb-6">
+            <div className="bg-emerald-100 dark:bg-emerald-500/20 w-12 h-12 rounded-sm flex items-center justify-center mb-6">
               <ShieldCheck className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
             </div>
             <h3 className="text-xl font-bold mb-3">Escrow Jasa Aman</h3>
@@ -102,11 +102,11 @@ export default function LandingRoute() {
             </p>
           </div>
 
-          <div className="p-8 rounded-3xl bg-card border border-border shadow-xl relative overflow-hidden group">
+          <div className="p-8 rounded-sm bg-card border border-border shadow-xl relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
               <Zap className="w-32 h-32" />
             </div>
-            <div className="bg-blue-100 dark:bg-blue-500/20 w-12 h-12 rounded-2xl flex items-center justify-center mb-6">
+            <div className="bg-blue-100 dark:bg-blue-500/20 w-12 h-12 rounded-sm flex items-center justify-center mb-6">
               <Zap className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             </div>
             <h3 className="text-xl font-bold mb-3">Beli Produk Instan</h3>

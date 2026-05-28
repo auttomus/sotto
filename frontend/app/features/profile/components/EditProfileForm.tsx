@@ -110,7 +110,7 @@ export function EditProfileForm({ profile, onCancel, onSuccess }: EditProfileFor
         </div>
       </div>
 
-      <div className="mt-2 space-y-4 bg-muted/30 p-5 rounded-2xl border border-border">
+      <div className="mt-2 space-y-4 bg-muted/30 p-5 rounded-sm border border-border">
         <div>
           <label className="form-label mb-1.5 block">Nama Tampilan</label>
           <input 
@@ -123,7 +123,7 @@ export function EditProfileForm({ profile, onCancel, onSuccess }: EditProfileFor
         </div>
         <div>
           <label className="form-label mb-1.5 block">Jurusan / Keahlian</label>
-          <div className="w-full bg-muted border border-border rounded-xl p-3 text-sm text-muted-foreground cursor-not-allowed">
+          <div className="w-full bg-muted border border-border rounded-sm p-3 text-sm text-muted-foreground cursor-not-allowed">
             {profile.major || "Belum ditentukan"}
           </div>
           <p className="text-xs text-muted-foreground mt-1">Jurusan dikelola oleh administrator sekolah.</p>

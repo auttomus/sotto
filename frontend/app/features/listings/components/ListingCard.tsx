@@ -23,7 +23,7 @@ export function ListingCard({ listing, onRemove, className, isLink = true }: Lis
   const content = (
     <div className="flex gap-4 min-w-0 w-full relative">
       {/* Thumbnail Image / Fallback */}
-      <div className="h-20 w-20 rounded-2xl bg-gray-50 dark:bg-gray-800 overflow-hidden shrink-0 border border-gray-100/50 dark:border-gray-700/30">
+      <div className="h-20 w-20 rounded-sm bg-muted overflow-hidden shrink-0 border border-border">
         {listing.media?.[0] ? (
           <img 
             src={resolveMediaUrl(listing.media[0].objectKey || listing.media[0].url)} 
@@ -31,21 +31,21 @@ export function ListingCard({ listing, onRemove, className, isLink = true }: Lis
             className="w-full h-full object-cover group-hover:scale-105 transition duration-300" 
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-400 text-2xl bg-indigo-50/50 dark:bg-indigo-950/10">📦</div>
+          <div className="w-full h-full flex items-center justify-center text-muted-foreground text-2xl bg-accent">📦</div>
         )}
       </div>
 
       {/* Main Info */}
       <div className="flex flex-col flex-1 min-w-0 pr-16 relative">
-        <h4 className="font-semibold text-gray-900 dark:text-gray-100 text-sm mb-0.5 line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+        <h4 className="font-semibold text-foreground text-sm mb-0.5 line-clamp-1 group-hover:text-primary transition-colors">
           {listing.title}
         </h4>
         {listing.description && (
-          <p className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-1 mb-1 font-medium">
+          <p className="text-[11px] text-muted-foreground line-clamp-1 mb-1 font-medium">
             {listing.description}
           </p>
         )}
-        <p className="font-bold text-indigo-600 dark:text-indigo-400 text-sm mt-auto">
+        <p className="font-bold text-primary text-sm mt-auto">
           Rp {listing.price?.toLocaleString('id-ID')}
         </p>
       </div>
@@ -67,16 +67,16 @@ export function ListingCard({ listing, onRemove, className, isLink = true }: Lis
             e.stopPropagation();
             onRemove();
           }}
-          className="absolute -top-1 -right-1 p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-805 dark:hover:bg-gray-750 transition shrink-0 shadow-sm z-10 border border-gray-200/50 dark:border-gray-700/50"
+          className="absolute -top-1 -right-1 p-1.5 rounded-full bg-muted hover:bg-accent hover:text-accent-foreground transition shrink-0 shadow-sm z-10 border border-border"
           title="Hapus tautan"
         >
-          <X className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
+          <X className="h-3.5 w-3.5 text-muted-foreground" />
         </button>
       )}
     </div>
   );
 
-  const baseClassName = "w-full flex gap-4 bg-white dark:bg-gray-900 rounded-3xl p-3.5 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md hover:border-gray-200 dark:hover:border-gray-750 transition duration-200 group";
+  const baseClassName = "w-full flex gap-4 bg-card rounded-sm p-3.5 border border-border shadow-sm hover:shadow-md hover:border-border/80 transition duration-200 group";
 
   if (isLink && !onRemove) {
     return (

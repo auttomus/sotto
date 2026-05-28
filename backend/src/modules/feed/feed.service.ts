@@ -414,4 +414,18 @@ export class FeedService {
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
     );
   }
+
+  /** Ambil postingan yang disukai oleh user */
+  async getLikedPostsByUser(userId: string) {
+    const userUuid = types.Uuid.fromString(userId);
+    const result = await this.scylla.execute(
+      `SELECT post_id FROM post_likes WHERE user_id = ? ALLOW FILTERING`,
+      [userUuid],
+    );
+    const postIds = result.rows.map((row) => {
+      const r = row as unknown as { post_id: { toString(): string } };
+      return r.post_id.toString();
+    });
+    return this.getPostsByIds(postIds);
+  }
 }

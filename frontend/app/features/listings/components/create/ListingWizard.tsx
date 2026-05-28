@@ -1,12 +1,12 @@
 import * as React from "react";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "~/components/ui/Button";
-import { useCreateStore } from "../../../create/store/useCreateStore";
+import { useCreateStore } from "~/features/create/store/useCreateStore";
 import { useToastStore } from "~/core/store/useToastStore";
 import { ListingBasicStep } from "./ListingBasicStep";
 import { ListingPricingStep } from "./ListingPricingStep";
 import { ListingMediaStep } from "./ListingMediaStep";
-import { useCreateListingLogic } from "../../hooks/useCreateListing";
+import { useCreateListingLogic } from "~/features/listings/hooks/useCreateListing";
 
 export function ListingWizard() {
   const { 
@@ -63,13 +63,13 @@ export function ListingWizard() {
   };
 
   const isStep1Valid = listingData.title.trim().length > 0 && listingData.description.trim().length > 0;
-  const isStep2Valid = listingData.price > 0 && (listingData.type === 'DIGITAL_PRODUCT' || listingData.deliveryTimeDays > 0);
+  const isStep2Valid = listingData.price >= 0 && (listingData.type === 'DIGITAL_PRODUCT' || listingData.deliveryTimeDays > 0);
 
   return (
     <div className="flex flex-col min-h-screen bg-background w-full max-w-lg mx-auto border-x border-border relative">
       {showDraftDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowDraftDialog(false)}>
-          <div className="bg-card rounded-2xl border border-border shadow-xl p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
+          <div className="bg-card rounded-sm border border-border shadow-xl p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
             <h3 className="text-lg font-bold text-foreground mb-2">Simpan sebagai Draft?</h3>
             <p className="text-sm text-muted-foreground mb-6">Kamu memiliki perubahan yang belum disimpan. Ingin menyimpannya untuk dilanjutkan nanti?</p>
             <div className="flex flex-col gap-2">
@@ -112,7 +112,7 @@ export function ListingWizard() {
         {step === 1 && (
           <Button 
             variant="primary" 
-            className="w-full h-12 text-base font-bold rounded-xl shadow-lg shadow-primary/20"
+            className="w-full h-12 text-base font-bold rounded-sm shadow-lg shadow-primary/20"
             onClick={nextStep}
             disabled={!isStep1Valid}
           >
@@ -123,7 +123,7 @@ export function ListingWizard() {
         {step === 2 && (
           <Button 
             variant="primary" 
-            className="w-full h-12 text-base font-bold rounded-xl shadow-lg shadow-primary/20"
+            className="w-full h-12 text-base font-bold rounded-sm shadow-lg shadow-primary/20"
             onClick={nextStep}
             disabled={!isStep2Valid}
           >
@@ -134,7 +134,7 @@ export function ListingWizard() {
         {step === 3 && (
           <Button 
             variant="primary" 
-            className="w-full h-12 text-base font-bold rounded-xl shadow-lg shadow-primary/20"
+            className="w-full h-12 text-base font-bold rounded-sm shadow-lg shadow-primary/20"
             onClick={() => submitListing(listingData, files)}
             disabled={isSubmitting}
           >
