@@ -21,7 +21,7 @@ export function TypeSelector() {
         
         <button 
           onClick={() => setSelectedType("portfolio")}
-          className="w-full bg-card p-4 rounded-md border border-border flex items-center gap-4 hover:border-primary hover:ring-1 hover:ring-primary/50 transition-all text-left shadow-sm group"
+          className="w-full bg-card p-4 rounded-sm border border-border flex items-center gap-4 hover:border-primary hover:ring-1 hover:ring-primary/50 transition-all text-left shadow-sm group"
         >
           <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
             <ImageIcon className="h-6 w-6 text-primary" />
@@ -35,7 +35,7 @@ export function TypeSelector() {
         
         <button 
           onClick={() => setSelectedType("penawaran")}
-          className="w-full bg-card p-4 rounded-md border border-border flex items-center gap-4 hover:border-primary hover:ring-1 hover:ring-primary/50 transition-all text-left shadow-sm group mt-3"
+          className="w-full bg-card p-4 rounded-sm border border-border flex items-center gap-4 hover:border-primary hover:ring-1 hover:ring-primary/50 transition-all text-left shadow-sm group mt-3"
         >
           <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
             <Briefcase className="h-6 w-6 text-primary" />

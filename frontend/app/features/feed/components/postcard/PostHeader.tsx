@@ -91,7 +91,7 @@ export function PostHeader({
             <MoreHorizontal className="h-5 w-5" />
           </button>
           {showMenu && (
-            <div className="absolute right-0 mt-1 z-30 bg-popover text-popover-foreground border border-border rounded-md shadow-lg p-1.5 min-w-[120px] flex flex-col gap-0.5 animate-scale-in">
+            <div className="absolute right-0 mt-1 z-30 bg-popover text-popover-foreground border border-border rounded-sm shadow-lg p-1.5 min-w-[120px] flex flex-col gap-0.5 animate-scale-in">
               <button
                 type="button"
                 onClick={(e) => {

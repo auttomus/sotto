@@ -29,7 +29,7 @@ export function ListingActionBar({
         type="button"
         onClick={handleChat}
         disabled={isOwnListing || isActionLoading}
-        className="h-12 w-12 flex items-center justify-center rounded-md border border-border bg-card hover:bg-accent hover:text-accent-foreground transition text-foreground disabled:opacity-50 cursor-pointer"
+        className="h-12 w-12 flex items-center justify-center rounded-sm border border-border bg-card hover:bg-accent hover:text-accent-foreground transition text-foreground disabled:opacity-50 cursor-pointer"
       >
         {chatLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <MessageCircle className="h-5 w-5" />}
       </button>

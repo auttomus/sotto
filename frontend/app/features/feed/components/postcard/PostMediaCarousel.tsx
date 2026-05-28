@@ -59,11 +59,11 @@ export function PostMediaCarousel({ media }: PostMediaCarouselProps) {
     const url = resolveMediaUrl(item.url || (item as any).objectKey);
     return (
       <>
-        <div className="rounded-md overflow-hidden bg-muted border border-border mt-3 shadow-sm flex items-center justify-center max-h-[512px] w-full cursor-zoom-in group/media">
+        <div className="rounded-sm overflow-hidden bg-muted border border-border mt-3 shadow-sm flex items-center justify-center max-h-[512px] w-full cursor-zoom-in group/media">
           <img
             src={url || ""}
             alt={item.fileName || "Post media"}
-            className="w-full h-auto max-h-[512px] object-contain rounded-md select-none group-hover/media:brightness-95 transition-all duration-200"
+            className="w-full h-auto max-h-[512px] object-contain rounded-sm select-none group-hover/media:brightness-95 transition-all duration-200"
             onClick={() => setLightboxUrl(url ?? null)}
             loading="lazy"
           />
@@ -102,7 +102,7 @@ export function PostMediaCarousel({ media }: PostMediaCarouselProps) {
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar rounded-md border border-border bg-muted aspect-video w-full"
+          className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar rounded-sm border border-border bg-muted aspect-video w-full"
         >
           {media.map((item, i) => {
             const url = resolveMediaUrl(item.url || (item as any).objectKey);

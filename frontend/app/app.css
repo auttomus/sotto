@@ -149,7 +149,7 @@ body {
 }
 
 @utility form-input {
-  @apply w-full px-4 py-2 border border-border rounded-md bg-background text-foreground transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary disabled:opacity-50;
+  @apply w-full px-4 py-2 border border-border rounded-sm bg-background text-foreground transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary disabled:opacity-50;
 }
 
 @utility form-label {

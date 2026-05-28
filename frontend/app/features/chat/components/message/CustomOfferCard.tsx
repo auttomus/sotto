@@ -36,7 +36,7 @@ export function CustomOfferCard({
           className="mt-auto shrink-0 h-6 w-6"
         />
       )}
-      <div className="bg-card border border-border p-4 rounded-md shadow-md w-full relative overflow-hidden">
+      <div className="bg-card border border-border p-4 rounded-sm shadow-md w-full relative overflow-hidden">
         <div className="absolute -top-10 -right-10 w-24 h-24 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
 
         <div className="flex items-center justify-between mb-3 border-b border-border pb-2">
@@ -59,7 +59,7 @@ export function CustomOfferCard({
           {offer.description}
         </p>
 
-        <div className="grid grid-cols-2 gap-3 mb-4 bg-muted p-3 rounded-md border border-border">
+        <div className="grid grid-cols-2 gap-3 mb-4 bg-muted p-3 rounded-sm border border-border">
           <div className="flex flex-col">
             <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider">Harga Kesepakatan</span>
             <span className="text-xs font-extrabold text-primary">Rp {formattedPrice}</span>
@@ -78,7 +78,7 @@ export function CustomOfferCard({
                   type="button"
                   onClick={() => rejectOffer({ variables: { offerId: offer.id } })}
                   disabled={actionLoading}
-                  className="flex-1 py-2 text-center text-[11px] font-bold text-destructive border border-destructive/30 hover:bg-destructive/10 rounded-md transition cursor-pointer disabled:opacity-50"
+                  className="flex-1 py-2 text-center text-[11px] font-bold text-destructive border border-destructive/30 hover:bg-destructive/10 rounded-sm transition cursor-pointer disabled:opacity-50"
                 >
                   Tolak
                 </button>
@@ -86,7 +86,7 @@ export function CustomOfferCard({
                   type="button"
                   onClick={() => acceptOffer({ variables: { offerId: offer.id } })}
                   disabled={actionLoading}
-                  className="flex-[2] py-2 text-center text-[11px] font-bold bg-primary hover:opacity-90 text-primary-foreground rounded-md shadow-md shadow-primary/10 active:scale-[0.99] transition cursor-pointer disabled:opacity-50"
+                  className="flex-[2] py-2 text-center text-[11px] font-bold bg-primary hover:opacity-90 text-primary-foreground rounded-sm shadow-md shadow-primary/10 active:scale-[0.99] transition cursor-pointer disabled:opacity-50"
                 >
                   Terima & Bayar
                 </button>
@@ -96,7 +96,7 @@ export function CustomOfferCard({
                 type="button"
                 onClick={() => withdrawOffer({ variables: { offerId: offer.id } })}
                 disabled={actionLoading}
-                className="w-full py-2 text-center text-[11px] font-bold text-muted-foreground border border-border hover:bg-muted rounded-md transition cursor-pointer disabled:opacity-50"
+                className="w-full py-2 text-center text-[11px] font-bold text-muted-foreground border border-border hover:bg-muted rounded-sm transition cursor-pointer disabled:opacity-50"
               >
                 Tarik Penawaran
               </button>
@@ -108,7 +108,7 @@ export function CustomOfferCard({
           <button
             type="button"
             onClick={() => navigate(`/workspace/order/${offer.orderId}`)}
-            className="w-full py-2 text-center text-[11px] font-bold text-primary border border-primary/30 hover:bg-primary/5 rounded-md transition cursor-pointer"
+            className="w-full py-2 text-center text-[11px] font-bold text-primary border border-primary/30 hover:bg-primary/5 rounded-sm transition cursor-pointer"
           >
             Lihat Detail Order
           </button>

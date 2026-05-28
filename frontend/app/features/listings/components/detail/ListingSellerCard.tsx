@@ -23,7 +23,7 @@ export function ListingSellerCard({ account }: ListingSellerCardProps) {
       <h3 className="font-bold text-foreground mb-4 text-lg">Tentang Penjual</h3>
       <Link 
         to={account.username ? ROUTES.PROFILE_PUBLIC(account.username) : "#"} 
-        className="flex items-center justify-between p-4 rounded-md border border-border hover:bg-accent hover:text-accent-foreground transition"
+        className="flex items-center justify-between p-4 rounded-sm border border-border hover:bg-accent hover:text-accent-foreground transition"
       >
         <div className="flex items-center gap-3">
           <Avatar 

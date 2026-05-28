@@ -23,7 +23,7 @@ export function ListingCard({ listing, onRemove, className, isLink = true }: Lis
   const content = (
     <div className="flex gap-4 min-w-0 w-full relative">
       {/* Thumbnail Image / Fallback */}
-      <div className="h-20 w-20 rounded-md bg-muted overflow-hidden shrink-0 border border-border">
+      <div className="h-20 w-20 rounded-sm bg-muted overflow-hidden shrink-0 border border-border">
         {listing.media?.[0] ? (
           <img 
             src={resolveMediaUrl(listing.media[0].objectKey || listing.media[0].url)} 
@@ -76,7 +76,7 @@ export function ListingCard({ listing, onRemove, className, isLink = true }: Lis
     </div>
   );
 
-  const baseClassName = "w-full flex gap-4 bg-card rounded-md p-3.5 border border-border shadow-sm hover:shadow-md hover:border-border/80 transition duration-200 group";
+  const baseClassName = "w-full flex gap-4 bg-card rounded-sm p-3.5 border border-border shadow-sm hover:shadow-md hover:border-border/80 transition duration-200 group";
 
   if (isLink && !onRemove) {
     return (

@@ -61,7 +61,7 @@ export function ChatInputArea({
           {selectedImages.map((file, idx) => {
             const previewUrl = URL.createObjectURL(file);
             return (
-              <div key={idx} className="relative h-16 w-16 rounded-md overflow-hidden shrink-0 border border-border bg-muted">
+              <div key={idx} className="relative h-16 w-16 rounded-sm overflow-hidden shrink-0 border border-border bg-muted">
                 <img src={previewUrl} className="h-full w-full object-cover" alt="Preview" />
                 <button
                   type="button"
@@ -78,7 +78,7 @@ export function ChatInputArea({
 
       {/* Selected Listing Preview */}
       {selectedListing && (
-        <div className="mb-3 p-2 bg-primary/5 rounded-md border border-primary/20 flex items-center justify-between gap-3 animate-fade-in">
+        <div className="mb-3 p-2 bg-primary/5 rounded-sm border border-primary/20 flex items-center justify-between gap-3 animate-fade-in">
           <div className="flex items-center gap-2.5 overflow-hidden">
             <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
               <Package className="h-5 w-5" />

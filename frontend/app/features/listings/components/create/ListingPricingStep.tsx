@@ -67,7 +67,7 @@ export function ListingPricingStep() {
         )}
 
         <div className="pt-2">
-          <label className="flex items-center justify-between p-4 border border-border bg-card rounded-md cursor-pointer hover:bg-muted transition">
+          <label className="flex items-center justify-between p-4 border border-border bg-card rounded-sm cursor-pointer hover:bg-muted transition">
             <div>
               <h4 className="font-bold text-foreground">Ketersediaan Tanpa Batas</h4>
               <p className="text-xs text-muted-foreground mt-0.5">Bisa menerima banyak orderan sekaligus</p>

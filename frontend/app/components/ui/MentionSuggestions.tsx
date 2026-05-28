@@ -107,7 +107,7 @@ export function MentionSuggestions({ value, onChange, inputRef }: MentionSuggest
 
   return (
     <div 
-      className="absolute left-0 bottom-full mb-2.5 z-50 w-full max-w-[280px] bg-popover/95 border border-border shadow-xl rounded-md p-1.5 flex flex-col gap-0.5 animate-scale-in"
+      className="absolute left-0 bottom-full mb-2.5 z-50 w-full max-w-[280px] bg-popover/95 border border-border shadow-xl rounded-sm p-1.5 flex flex-col gap-0.5 animate-scale-in"
       onClick={(e) => e.stopPropagation()} // Mencegah bubbling click
     >
       <div className="px-2 py-1 text-[10px] font-bold text-muted-foreground tracking-wide uppercase border-b border-border mb-1">
@@ -119,7 +119,7 @@ export function MentionSuggestions({ value, onChange, inputRef }: MentionSuggest
             key={acc.id}
             type="button"
             onClick={() => handleSelect(acc.username)}
-            className="flex items-center gap-2.5 w-full text-left px-2.5 py-1.5 rounded-md hover:bg-accent hover:text-accent-foreground transition-all duration-150 cursor-pointer group active:scale-[0.98]"
+            className="flex items-center gap-2.5 w-full text-left px-2.5 py-1.5 rounded-sm hover:bg-accent hover:text-accent-foreground transition-all duration-150 cursor-pointer group active:scale-[0.98]"
           >
             <Avatar 
               src={resolveMediaUrl(acc.avatarObjectKey)} 

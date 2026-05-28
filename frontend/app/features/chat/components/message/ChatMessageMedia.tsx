@@ -36,13 +36,13 @@ export function ChatMessageMedia({ media }: ChatMessageMediaProps) {
           return (
             <div 
               key={item.id} 
-              className="rounded-md overflow-hidden max-w-full bg-muted border border-border max-h-[220px] flex items-center justify-center cursor-zoom-in group/media"
+              className="rounded-sm overflow-hidden max-w-full bg-muted border border-border max-h-[220px] flex items-center justify-center cursor-zoom-in group/media"
               onClick={() => setLightboxUrl(url ?? null)}
             >
               <img
                 src={url || ""}
                 alt={item.fileName || "Gambar chat"}
-                className="w-full h-auto max-h-[220px] object-cover rounded-md select-none group-hover/media:brightness-95 transition-all duration-200"
+                className="w-full h-auto max-h-[220px] object-cover rounded-sm select-none group-hover/media:brightness-95 transition-all duration-200"
               />
             </div>
           );

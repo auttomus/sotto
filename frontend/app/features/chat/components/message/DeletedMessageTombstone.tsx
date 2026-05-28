@@ -22,7 +22,7 @@ export function DeletedMessageTombstone({
           className="mt-auto shrink-0 h-6 w-6"
         />
       )}
-      <div className="bg-muted p-3 rounded-md rounded-bl-sm border border-border shadow-sm w-full select-none">
+      <div className="bg-muted p-3 rounded-sm rounded-bl-sm border border-border shadow-sm w-full select-none">
         <p className="text-xs italic text-muted-foreground font-medium">
           Pesan ini telah dihapus
         </p>

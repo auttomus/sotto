@@ -17,7 +17,7 @@ export function ChatMessagePost({ postId }: ChatMessagePostProps) {
 
   if (loading) {
     return (
-      <div className="mt-2 p-3 bg-muted/50 rounded-md border border-border flex items-center justify-center min-h-[80px] w-full">
+      <div className="mt-2 p-3 bg-muted/50 rounded-sm border border-border flex items-center justify-center min-h-[80px] w-full">
         <Loader2 className="h-5 w-5 animate-spin text-primary" />
       </div>
     );
@@ -32,7 +32,7 @@ export function ChatMessagePost({ postId }: ChatMessagePostProps) {
   return (
     <Link
       to={`/post/${post.postId}`}
-      className="mt-2 block w-full bg-muted hover:bg-muted border border-border rounded-md p-3 text-left transition-all duration-200 group max-w-sm shadow-none cursor-pointer"
+      className="mt-2 block w-full bg-muted hover:bg-muted border border-border rounded-sm p-3 text-left transition-all duration-200 group max-w-sm shadow-none cursor-pointer"
     >
       {/* Header */}
       <div className="flex items-center gap-2 mb-2">
@@ -57,7 +57,7 @@ export function ChatMessagePost({ postId }: ChatMessagePostProps) {
           </p>
         </div>
         {mediaUrl && (
-          <div className="h-14 w-14 rounded-md overflow-hidden shrink-0 border border-border/40 bg-muted">
+          <div className="h-14 w-14 rounded-sm overflow-hidden shrink-0 border border-border/40 bg-muted">
             <img
               src={mediaUrl}
               alt="Post preview"

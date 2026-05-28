@@ -332,7 +332,7 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
               <div className="text-center p-8 text-muted-foreground">Belum ada penawaran.</div>
             ) : (
               listings.map((item) => (
-                <div key={item.id} className="flex flex-col gap-3 p-4 bg-card border border-border rounded-md hover:shadow-sm transition">
+                <div key={item.id} className="flex flex-col gap-3 p-4 bg-card border border-border rounded-sm hover:shadow-sm transition">
                   <ListingCard listing={item as any} isLink={true} className="border-0 p-0 shadow-none hover:shadow-none bg-transparent" />
                   {isOwnProfile && (
                     <div className="flex gap-2 pl-2 border-t border-border pt-3">
@@ -342,7 +342,7 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
                           e.stopPropagation();
                           handleEditListing(item);
                         }}
-                        className="px-3 py-1.5 text-[11px] font-bold bg-muted text-foreground rounded-md hover:bg-accent hover:text-accent-foreground flex items-center gap-1 transition cursor-pointer"
+                        className="px-3 py-1.5 text-[11px] font-bold bg-muted text-foreground rounded-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-1 transition cursor-pointer"
                       >
                         <Pencil className="h-3 w-3" />
                         Sunting
@@ -353,7 +353,7 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
                           e.stopPropagation();
                           setDeletingListingId(item.id);
                         }}
-                        className="px-3 py-1.5 text-[11px] font-bold bg-destructive/10 text-destructive rounded-md hover:bg-destructive/20 flex items-center gap-1 transition cursor-pointer"
+                        className="px-3 py-1.5 text-[11px] font-bold bg-destructive/10 text-destructive rounded-sm hover:bg-destructive/20 flex items-center gap-1 transition cursor-pointer"
                       >
                         <Trash2 className="h-3 w-3" />
                         Hapus
@@ -462,7 +462,7 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
           <>
             <button
               onClick={() => setEditingListing(null)}
-              className="flex-1 py-2.5 text-center text-xs font-bold text-muted-foreground border border-border hover:bg-muted rounded-md transition cursor-pointer"
+              className="flex-1 py-2.5 text-center text-xs font-bold text-muted-foreground border border-border hover:bg-muted rounded-sm transition cursor-pointer"
             >
               Batal
             </button>
@@ -485,7 +485,7 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
                 });
               }}
               disabled={isUpdatingListing}
-              className="flex-[2] py-2.5 text-center text-xs font-bold bg-primary hover:opacity-90 text-primary-foreground rounded-md shadow-md shadow-primary/10 active:scale-[0.99] transition cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+              className="flex-[2] py-2.5 text-center text-xs font-bold bg-primary hover:opacity-90 text-primary-foreground rounded-sm shadow-md shadow-primary/10 active:scale-[0.99] transition cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
             >
               {isUpdatingListing ? (
                 <>
@@ -506,7 +506,7 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
               type="text"
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
-              className="w-full text-sm bg-muted text-foreground rounded-md p-3 border border-border focus:outline-none focus:border-primary focus:ring-1 focus:ring-ring font-medium"
+              className="w-full text-sm bg-muted text-foreground rounded-sm p-3 border border-border focus:outline-none focus:border-primary focus:ring-1 focus:ring-ring font-medium"
               placeholder="Contoh: Jasa Pembuatan Website Portfolio"
             />
           </div>
@@ -516,7 +516,7 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
             <textarea
               value={editDescription}
               onChange={(e) => setEditDescription(e.target.value)}
-              className="w-full text-sm bg-muted text-foreground rounded-md p-3 border border-border focus:outline-none focus:border-primary focus:ring-1 focus:ring-ring font-medium resize-none"
+              className="w-full text-sm bg-muted text-foreground rounded-sm p-3 border border-border focus:outline-none focus:border-primary focus:ring-1 focus:ring-ring font-medium resize-none"
               rows={4}
               placeholder="Jelaskan secara detail tentang penawaran Anda..."
             />
@@ -529,7 +529,7 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
                 type="number"
                 value={editPrice}
                 onChange={(e) => setEditPrice(Number(e.target.value))}
-                className="w-full text-sm bg-muted text-foreground rounded-md p-3 border border-border focus:outline-none focus:border-primary focus:ring-1 focus:ring-ring font-bold"
+                className="w-full text-sm bg-muted text-foreground rounded-sm p-3 border border-border focus:outline-none focus:border-primary focus:ring-1 focus:ring-ring font-bold"
               />
             </div>
 
@@ -539,7 +539,7 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
                 type="number"
                 value={editDeliveryTime || ""}
                 onChange={(e) => setEditDeliveryTime(e.target.value ? Number(e.target.value) : null)}
-                className="w-full text-sm bg-muted text-foreground rounded-md p-3 border border-border focus:outline-none focus:border-primary focus:ring-1 focus:ring-ring font-bold"
+                className="w-full text-sm bg-muted text-foreground rounded-sm p-3 border border-border focus:outline-none focus:border-primary focus:ring-1 focus:ring-ring font-bold"
                 placeholder="Instan / N/A"
               />
             </div>
@@ -562,7 +562,7 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
           <>
             <button
               onClick={() => setDeletingListingId(null)}
-              className="flex-1 py-2.5 text-center text-xs font-bold text-muted-foreground border border-border hover:bg-muted rounded-md transition cursor-pointer"
+              className="flex-1 py-2.5 text-center text-xs font-bold text-muted-foreground border border-border hover:bg-muted rounded-sm transition cursor-pointer"
             >
               Batal
             </button>
@@ -574,7 +574,7 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
                 });
               }}
               disabled={isDeletingListing}
-              className="flex-1 py-2.5 text-center text-xs font-bold bg-destructive hover:opacity-90 text-destructive-foreground rounded-md shadow-md transition cursor-pointer flex items-center justify-center gap-1.5"
+              className="flex-1 py-2.5 text-center text-xs font-bold bg-destructive hover:opacity-90 text-destructive-foreground rounded-sm shadow-md transition cursor-pointer flex items-center justify-center gap-1.5"
             >
               {isDeletingListing ? (
                 <>
