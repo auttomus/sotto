@@ -3,6 +3,8 @@ import { Loader2, X, AlertCircle } from "lucide-react";
 import { useCreateOfferMutation } from "~/core/apollo/generated";
 import { useToastStore } from "~/core/store/useToastStore";
 
+import { useClearableNumberInput } from "~/core/hooks/useClearableNumberInput";
+
 interface CreateOfferModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -25,12 +27,19 @@ export function CreateOfferModal({
   const [priceStr, setPriceStr] = React.useState("");
   const [deliveryDays, setDeliveryDays] = React.useState(3);
 
+  const deliveryDaysInput = useClearableNumberInput({
+    value: deliveryDays,
+    onChange: setDeliveryDays,
+    min: 1,
+    defaultValue: 3,
+  });
+
   const [createOffer, { loading }] = useCreateOfferMutation({
     onCompleted: () => {
       addToast("success", "Penawaran harga kustom berhasil dikirim!");
       setDescription("");
       setPriceStr("");
-      setDeliveryDays(3);
+      deliveryDaysInput.setValue(3);
       onSuccess?.();
       onClose();
     },
@@ -41,13 +50,13 @@ export function CreateOfferModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const price = parseFloat(priceStr.replace(/[^0-9]/g, ""));
+    const price = priceStr ? parseFloat(priceStr.replace(/[^0-9]/g, "")) : 0;
     if (!description.trim()) {
       addToast("error", "Deskripsi penawaran tidak boleh kosong");
       return;
     }
-    if (isNaN(price) || price <= 0) {
-      addToast("error", "Harga penawaran harus valid dan lebih dari 0");
+    if (isNaN(price) || price < 0) {
+      addToast("error", "Harga penawaran harus valid dan minimal Rp 0");
       return;
     }
 
@@ -124,7 +133,7 @@ export function CreateOfferModal({
               <div className="flex items-center bg-muted border border-border rounded-md overflow-hidden">
                 <button
                   type="button"
-                  onClick={() => setDeliveryDays((d) => Math.max(1, d - 1))}
+                  onClick={() => deliveryDaysInput.setValue(Math.max(1, deliveryDays - 1))}
                   className="px-3.5 py-2.5 hover:bg-muted-foreground/10 text-muted-foreground font-bold transition cursor-pointer"
                   disabled={loading}
                 >
@@ -132,14 +141,15 @@ export function CreateOfferModal({
                 </button>
                 <input
                   type="number"
-                  value={deliveryDays}
-                  onChange={(e) => setDeliveryDays(Math.max(1, parseInt(e.target.value) || 1))}
+                  value={deliveryDaysInput.value}
+                  onChange={deliveryDaysInput.onChange}
+                  onBlur={deliveryDaysInput.onBlur}
                   className="w-full text-center text-sm font-semibold border-none bg-transparent focus:ring-0 outline-none text-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   disabled={loading}
                 />
                 <button
                   type="button"
-                  onClick={() => setDeliveryDays((d) => d + 1)}
+                  onClick={() => deliveryDaysInput.setValue(deliveryDays + 1)}
                   className="px-3.5 py-2.5 hover:bg-muted-foreground/10 text-muted-foreground font-bold transition cursor-pointer"
                   disabled={loading}
                 >

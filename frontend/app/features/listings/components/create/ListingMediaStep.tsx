@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Image as ImageIcon, X } from "lucide-react";
-import { useCreateStore } from "../../../create/store/useCreateStore";
+import { useCreateStore } from "~/features/create/store/useCreateStore";
 
 interface ListingMediaStepProps {
   handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;

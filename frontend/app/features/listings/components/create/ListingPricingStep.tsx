@@ -1,8 +1,29 @@
-import * as React from "react";
-import { useCreateStore } from "../../../create/store/useCreateStore";
+import { useCreateStore } from "~/features/create/store/useCreateStore";
+import { useClearableNumberInput } from "~/core/hooks/useClearableNumberInput";
 
 export function ListingPricingStep() {
   const { listingData, updateListingData } = useCreateStore();
+
+  const priceInput = useClearableNumberInput({
+    value: listingData.price,
+    onChange: (val: number) => updateListingData({ price: val }),
+    min: 0,
+    defaultValue: 0,
+  });
+
+  const deliveryDaysInput = useClearableNumberInput({
+    value: listingData.deliveryTimeDays,
+    onChange: (val: number) => updateListingData({ deliveryTimeDays: val }),
+    min: 1,
+    defaultValue: 1,
+  });
+
+  const maxOrdersInput = useClearableNumberInput({
+    value: listingData.maxActiveOrders,
+    onChange: (val: number) => updateListingData({ maxActiveOrders: val }),
+    min: 1,
+    defaultValue: 5,
+  });
 
   return (
     <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
@@ -18,8 +39,9 @@ export function ListingPricingStep() {
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">Rp</span>
             <input 
               type="number" 
-              value={listingData.price || ''}
-              onChange={(e) => updateListingData({ price: parseInt(e.target.value) || 0 })}
+              value={priceInput.value}
+              onChange={priceInput.onChange}
+              onBlur={priceInput.onBlur}
               placeholder="0"
               min="0"
               className="form-input w-full p-3.5 pl-12 text-lg font-bold"
@@ -33,8 +55,9 @@ export function ListingPricingStep() {
             <div className="flex items-center gap-3">
               <input 
                 type="number" 
-                value={listingData.deliveryTimeDays || ''}
-                onChange={(e) => updateListingData({ deliveryTimeDays: parseInt(e.target.value) || 1 })}
+                value={deliveryDaysInput.value}
+                onChange={deliveryDaysInput.onChange}
+                onBlur={deliveryDaysInput.onBlur}
                 min="1"
                 className="form-input w-24 p-3.5 text-center font-bold"
               />
@@ -68,8 +91,9 @@ export function ListingPricingStep() {
             <div className="flex items-center gap-3">
               <input 
                 type="number" 
-                value={listingData.maxActiveOrders || ''}
-                onChange={(e) => updateListingData({ maxActiveOrders: parseInt(e.target.value) || 1 })}
+                value={maxOrdersInput.value}
+                onChange={maxOrdersInput.onChange}
+                onBlur={maxOrdersInput.onBlur}
                 min="1"
                 className="form-input w-24 p-3.5 text-center font-bold"
               />

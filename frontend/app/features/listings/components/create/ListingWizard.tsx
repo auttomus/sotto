@@ -1,12 +1,12 @@
 import * as React from "react";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "~/components/ui/Button";
-import { useCreateStore } from "../../../create/store/useCreateStore";
+import { useCreateStore } from "~/features/create/store/useCreateStore";
 import { useToastStore } from "~/core/store/useToastStore";
 import { ListingBasicStep } from "./ListingBasicStep";
 import { ListingPricingStep } from "./ListingPricingStep";
 import { ListingMediaStep } from "./ListingMediaStep";
-import { useCreateListingLogic } from "../../hooks/useCreateListing";
+import { useCreateListingLogic } from "~/features/listings/hooks/useCreateListing";
 
 export function ListingWizard() {
   const { 
@@ -63,7 +63,7 @@ export function ListingWizard() {
   };
 
   const isStep1Valid = listingData.title.trim().length > 0 && listingData.description.trim().length > 0;
-  const isStep2Valid = listingData.price > 0 && (listingData.type === 'DIGITAL_PRODUCT' || listingData.deliveryTimeDays > 0);
+  const isStep2Valid = listingData.price >= 0 && (listingData.type === 'DIGITAL_PRODUCT' || listingData.deliveryTimeDays > 0);
 
   return (
     <div className="flex flex-col min-h-screen bg-background w-full max-w-lg mx-auto border-x border-border relative">
