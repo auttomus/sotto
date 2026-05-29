@@ -52,6 +52,7 @@ export type ConversationModel = {
   lastMessageContent?: Maybe<Scalars['String']['output']>;
   participants?: Maybe<Array<ConversationParticipant>>;
   type: ConversationType;
+  unreadCount: Scalars['Int']['output'];
   updatedAt: Scalars['DateTime']['output'];
 };
 
@@ -60,6 +61,7 @@ export type ConversationParticipant = {
   accountId: Scalars['ID']['output'];
   avatarObjectKey?: Maybe<Scalars['String']['output']>;
   displayName: Scalars['String']['output'];
+  lastReadMessageId?: Maybe<Scalars['String']['output']>;
   username?: Maybe<Scalars['String']['output']>;
 };
 
@@ -218,6 +220,7 @@ export type Mutation = {
   follow: Scalars['Boolean']['output'];
   getMidtransSnapToken: Scalars['String']['output'];
   markAllNotificationsAsRead: Scalars['Boolean']['output'];
+  markConversationAsRead: Scalars['Boolean']['output'];
   markNotificationAsRead: Scalars['Boolean']['output'];
   rejectOffer: CustomOfferModel;
   requestUploadUrl: PresignedUploadResult;
@@ -321,6 +324,11 @@ export type MutationFollowArgs = {
 
 export type MutationGetMidtransSnapTokenArgs = {
   orderId: Scalars['ID']['input'];
+};
+
+
+export type MutationMarkConversationAsReadArgs = {
+  conversationId: Scalars['ID']['input'];
 };
 
 
@@ -501,6 +509,7 @@ export type Query = {
   searchSchools: Array<SchoolModel>;
   searchTags: Array<TagModel>;
   tags: Array<TagModel>;
+  unreadChatCount: Scalars['Int']['output'];
   unreadNotificationCount: Scalars['Int']['output'];
 };
 

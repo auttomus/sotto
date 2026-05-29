@@ -37,6 +37,7 @@ type ConversationModel {
   lastMessageContent: String
   participants: [ConversationParticipant!]
   type: ConversationType!
+  unreadCount: Int!
   updatedAt: DateTime!
 }
 
@@ -44,6 +45,7 @@ type ConversationParticipant {
   accountId: ID!
   avatarObjectKey: String
   displayName: String!
+  lastReadMessageId: String
   username: String
 }
 
@@ -186,7 +188,10 @@ type Mutation {
   acceptOffer(offerId: ID!): CustomOfferModel!
   advanceOrderStatus(orderId: ID!): OrderModel!
   cancelOrder(orderId: ID!): OrderModel!
-  confirmUpload(input: RequestUploadInput!, objectKey: String!): MediaAttachmentModel!
+  confirmUpload(
+    input: RequestUploadInput!
+    objectKey: String!
+  ): MediaAttachmentModel!
   createConversation(input: CreateConversationInput!): ConversationModel!
   createListing(input: CreateListingInput!): ListingModel!
   createOffer(input: CreateOfferInput!): CustomOfferModel!
@@ -201,17 +206,24 @@ type Mutation {
   follow(targetAccountId: ID!): Boolean!
   getMidtransSnapToken(orderId: ID!): String!
   markAllNotificationsAsRead: Boolean!
+  markConversationAsRead(conversationId: ID!): Boolean!
   markNotificationAsRead(id: ID!): Boolean!
   rejectOffer(offerId: ID!): CustomOfferModel!
   requestUploadUrl(input: RequestUploadInput!): PresignedUploadResult!
   toggleLikeListing(id: ID!): Boolean!
   toggleLikePost(postId: String!): Boolean!
 
-  """Catat interaksi user (view, click, like)"""
+  """
+  Catat interaksi user (view, click, like)
+  """
   trackEvent(actionType: String!, targetId: String!): Boolean!
   unfollow(targetAccountId: ID!): Boolean!
   updateListing(id: ID!, input: UpdateListingInput!): ListingModel!
-  updateMessage(conversationId: ID!, input: UpdateMessageInput!, messageId: ID!): MessageModel!
+  updateMessage(
+    conversationId: ID!
+    input: UpdateMessageInput!
+    messageId: ID!
+  ): MessageModel!
   updatePost(input: UpdatePostInput!, postId: String!): PostModel!
   updateProfile(input: UpdateProfileInput!): AccountModel!
   verifyPayment(orderId: ID!): String!
@@ -252,10 +264,10 @@ type OrderModel {
   customOfferId: String
   id: ID!
   listingId: String!
+  review: ReviewModel
   seller: AccountModel
   sellerAccountId: String!
   status: OrderStatus!
-  review: ReviewModel
   updatedAt: DateTime!
 }
 
@@ -301,7 +313,10 @@ type Query {
   listings: [ListingModel!]!
   listingsByAccount(accountId: ID!): [ListingModel!]!
   majorsBySchool(schoolId: ID!): [MajorModel!]!
-  mediaForObject(attachedId: String!, attachedType: String!): [MediaAttachmentModel!]!
+  mediaForObject(
+    attachedId: String!
+    attachedType: String!
+  ): [MediaAttachmentModel!]!
   messages(conversationId: ID!, limit: Int! = 50): [MessageModel!]!
   myOrders(role: String!, status: String): [OrderModel!]!
   myProfile: AccountModel!
@@ -321,6 +336,7 @@ type Query {
   searchSchools(query: String!): [SchoolModel!]!
   searchTags(query: String!): [TagModel!]!
   tags: [TagModel!]!
+  unreadChatCount: Int!
   unreadNotificationCount: Int!
 }
 
@@ -338,8 +354,8 @@ type ReviewModel {
   id: ID!
   orderId: String!
   rating: Int!
-  reviewerAccountId: String!
   reviewer: AccountModel
+  reviewerAccountId: String!
   targetAccountId: String!
   updatedAt: DateTime!
 }

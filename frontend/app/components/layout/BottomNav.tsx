@@ -2,12 +2,18 @@ import * as React from "react";
 import { Home, Search, MessageSquare, ClipboardList, User } from "lucide-react";
 import { NavLink } from "react-router";
 import { cn } from "../../core/utils/cn";
+import { useGetUnreadChatCountQuery } from "~/core/apollo/generated";
 
 export default function BottomNav() {
+  const { data } = useGetUnreadChatCountQuery({
+    fetchPolicy: "cache-and-network",
+  });
+  const unreadChatCount = data?.unreadChatCount ?? 0;
+
   const navItems = [
     { icon: Home, label: "Beranda", to: "/home" },
     { icon: Search, label: "Eksplor", to: "/explore" },
-    { icon: MessageSquare, label: "Pesan", to: "/chats", hasBadge: true },
+    { icon: MessageSquare, label: "Pesan", to: "/chats", hasBadge: unreadChatCount > 0 },
     { icon: ClipboardList, label: "Order", to: "/orders" },
     { icon: User, label: "Profil", to: "/profile" },
   ];

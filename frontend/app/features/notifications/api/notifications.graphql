@@ -1,0 +1,25 @@
+query GetNotifications($cursor: String, $take: Int) {
+  notifications(cursor: $cursor, take: $take) {
+    id
+    accountId
+    type
+    targetType
+    targetId
+    isRead
+    createdAt
+    fromAccountId
+    fromDisplayName
+  }
+}
+
+query GetUnreadNotificationCount {
+  unreadNotificationCount
+}
+
+mutation MarkNotificationAsRead($id: ID!) {
+  markNotificationAsRead(id: $id)
+}
+
+mutation MarkAllNotificationsAsRead {
+  markAllNotificationsAsRead
+}

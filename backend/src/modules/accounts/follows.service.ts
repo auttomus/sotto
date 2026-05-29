@@ -1,9 +1,14 @@
 import { Injectable, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '@prisma/client';
 
 @Injectable()
 export class FollowsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   /** Follow seseorang. Update counter secara atomic. */
   async follow(accountId: string, targetAccountId: string) {
@@ -33,6 +38,16 @@ export class FollowsService {
         data: { followersCount: { increment: 1 } },
       }),
     ]);
+
+    // Trigger notifikasi FOLLOW ke user yang di-follow
+    await this.notificationsService.createNotification({
+      accountId: targetAccountId,
+      fromAccountId: accountId,
+      type: NotificationType.FOLLOW,
+      targetType: 'Account',
+      targetId: accountId,
+    });
+
     return true;
   }
 

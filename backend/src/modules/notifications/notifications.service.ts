@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationType } from '@prisma/client';
+import { NotificationsGateway } from './notifications.gateway';
 
 @Injectable()
 export class NotificationsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly gateway: NotificationsGateway,
+  ) {}
 
   /** Buat notifikasi baru. Dipanggil oleh modul lain (orders, chat, follows). */
   async createNotification(params: {
@@ -14,7 +18,12 @@ export class NotificationsService {
     targetType?: string;
     targetId?: string;
   }) {
-    return this.prisma.notification.create({
+    // Jangan buat notifikasi untuk diri sendiri
+    if (params.fromAccountId && params.fromAccountId === params.accountId) {
+      return null;
+    }
+
+    const notif = await this.prisma.notification.create({
       data: {
         accountId: params.accountId,
         fromAccountId: params.fromAccountId,
@@ -22,7 +31,26 @@ export class NotificationsService {
         targetType: params.targetType,
         targetId: params.targetId,
       },
+      include: {
+        fromAccount: { select: { displayName: true } },
+      },
     });
+
+    // Push real-time ke client via Socket.IO
+    this.gateway.emitNewNotification(params.accountId, {
+      id: notif.id,
+      type: notif.type,
+      targetType: notif.targetType,
+      targetId: notif.targetId,
+      fromAccountId: notif.fromAccountId,
+      fromDisplayName:
+        (notif as { fromAccount?: { displayName?: string | null } | null })
+          .fromAccount?.displayName ?? null,
+      isRead: notif.isRead,
+      createdAt: notif.createdAt,
+    });
+
+    return notif;
   }
 
   /** Ambil notifikasi milik user dengan cursor pagination */

@@ -12,6 +12,7 @@ export default [
     route("orders", "routes/_main.orders.tsx"),
     route("listing/:id", "routes/_main.listing.$id.tsx"),
     route("post/:postId", "routes/_main.post.$postId.tsx"),
+    route("notifications", "routes/_main.notifications.tsx"),
   ]),
   route("login", "routes/login.tsx"),
   route("register", "routes/register.tsx"),

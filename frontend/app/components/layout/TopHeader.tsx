@@ -1,11 +1,16 @@
 import * as React from "react";
-import { Bell, Search, Moon, Sun } from "lucide-react";
+import { Bell } from "lucide-react";
 import { Link } from "react-router";
-import { useThemeStore } from "~/core/store/useThemeStore";
+import { useGetUnreadNotificationCountQuery } from "~/core/apollo/generated";
 
 export default function TopHeader() {
-  const { isDark, toggleTheme } = useThemeStore();
   const [isHidden, setIsHidden] = React.useState(false);
+
+  const { data } = useGetUnreadNotificationCountQuery({
+    fetchPolicy: "cache-and-network",
+    pollInterval: 60000, // Fallback poll setiap 60 detik
+  });
+  const unreadCount = data?.unreadNotificationCount ?? 0;
 
   React.useEffect(() => {
     const handleScrollHeader = (e: Event) => {
@@ -24,13 +29,17 @@ export default function TopHeader() {
           Sotto
         </Link>
         <div className="flex items-center gap-3 ml-4">
-          <button className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors relative">
+          <Link
+            to="/notifications"
+            className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors relative"
+          >
             <Bell className="h-5 w-5" />
-            <span className="absolute top-1.5 right-2 block h-2 w-2 rounded-full bg-destructive ring-2 ring-card" />
-          </button>
+            {unreadCount > 0 && (
+              <span className="absolute top-1.5 right-2 block h-2 w-2 rounded-full bg-destructive ring-2 ring-card" />
+            )}
+          </Link>
         </div>
       </div>
     </header>
   );
 }
-

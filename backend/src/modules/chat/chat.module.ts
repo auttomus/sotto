@@ -5,9 +5,10 @@ import { ChatMessageResolver, ChatConversationResolver } from './chat.resolver';
 import { MediaModule } from '../media/media.module';
 import { IamModule } from '../iam/iam.module';
 import { OrdersModule } from '../orders/orders.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [MediaModule, IamModule, OrdersModule],
+  imports: [MediaModule, IamModule, OrdersModule, NotificationsModule],
   providers: [
     ChatGateway,
     ChatMessageResolver,
