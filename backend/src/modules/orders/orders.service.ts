@@ -6,11 +6,17 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateOrderInput } from './dto/create-order.input';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus, NotificationType } from '@prisma/client';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationsGateway } from '../notifications/notifications.gateway';
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+    private readonly notificationsGateway: NotificationsGateway,
+  ) {}
 
   /** Buat order baru (status: PENDING_PAYMENT) */
   async createOrder(buyerAccountId: string, input: CreateOrderInput) {
@@ -23,7 +29,7 @@ export class OrdersService {
       throw new BadRequestException('Tidak bisa membeli listing sendiri.');
     }
 
-    return this.prisma.order.create({
+    const order = await this.prisma.order.create({
       data: {
         buyerAccountId,
         sellerAccountId: listing.accountId,
@@ -36,6 +42,20 @@ export class OrdersService {
             : OrderStatus.PENDING_PAYMENT,
       },
     });
+
+    // Notifikasi ke seller: ada order baru
+    await this.notificationsService.createNotification({
+      accountId: order.sellerAccountId,
+      fromAccountId: buyerAccountId,
+      type: NotificationType.ORDER_UPDATE,
+      targetType: 'Order',
+      targetId: order.id,
+    });
+
+    // Real-time order update ke kedua pihak
+    this.emitOrderUpdate(order);
+
+    return order;
   }
 
   /** Advance order status: state machine transitions */
@@ -73,7 +93,7 @@ export class OrdersService {
     }
 
     // Optimistic locking
-    return this.prisma.order.update({
+    const updatedOrder = await this.prisma.order.update({
       where: {
         id: orderId,
         lockVersion: order.lockVersion,
@@ -83,6 +103,21 @@ export class OrdersService {
         lockVersion: { increment: 1 },
       },
     });
+
+    // 🔔 Notifikasi ke pihak lawan
+    const recipientId = isBuyer ? order.sellerAccountId : order.buyerAccountId;
+    await this.notificationsService.createNotification({
+      accountId: recipientId,
+      fromAccountId: accountId,
+      type: NotificationType.ORDER_UPDATE,
+      targetType: 'Order',
+      targetId: orderId,
+    });
+
+    // 📡 Real-time order update ke kedua pihak
+    this.emitOrderUpdate(updatedOrder);
+
+    return updatedOrder;
   }
 
   /** Cancel order */
@@ -103,10 +138,28 @@ export class OrdersService {
       );
     }
 
-    return this.prisma.order.update({
+    const updatedOrder = await this.prisma.order.update({
       where: { id: orderId, lockVersion: order.lockVersion },
       data: { status: OrderStatus.CANCELLED, lockVersion: { increment: 1 } },
     });
+
+    // 🔔 Notifikasi ke pihak lawan
+    const recipientId =
+      order.buyerAccountId === accountId
+        ? order.sellerAccountId
+        : order.buyerAccountId;
+    await this.notificationsService.createNotification({
+      accountId: recipientId,
+      fromAccountId: accountId,
+      type: NotificationType.ORDER_UPDATE,
+      targetType: 'Order',
+      targetId: orderId,
+    });
+
+    // 📡 Real-time order update ke kedua pihak
+    this.emitOrderUpdate(updatedOrder);
+
+    return updatedOrder;
   }
 
   /** Ambil order berdasarkan ID */
@@ -133,5 +186,24 @@ export class OrdersService {
       include: { listing: { select: { title: true } } },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  // ── Private helper ─────────────────────────────────────
+
+  /** Emit real-time order update ke buyer + seller */
+  private emitOrderUpdate(order: {
+    id: string;
+    buyerAccountId: string;
+    sellerAccountId: string;
+    status: OrderStatus;
+    updatedAt: Date;
+  }) {
+    const payload = {
+      orderId: order.id,
+      status: order.status,
+      updatedAt: order.updatedAt,
+    };
+    this.notificationsGateway.emitOrderUpdated(order.buyerAccountId, payload);
+    this.notificationsGateway.emitOrderUpdated(order.sellerAccountId, payload);
   }
 }

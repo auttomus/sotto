@@ -1,14 +1,27 @@
-import { Home, Search, MessageSquare, ClipboardList, User, Moon, Sun, PlusSquare, Menu } from "lucide-react";
+import { Home, Search, MessageSquare, ClipboardList, User, Moon, Sun, PlusSquare, Menu, Bell } from "lucide-react";
 import { NavLink, Link } from "react-router";
 import { cn } from "../../core/utils/cn";
 import { useThemeStore } from "~/core/store/useThemeStore";
+import { useGetUnreadNotificationCountQuery, useGetUnreadChatCountQuery } from "~/core/apollo/generated";
 
 export default function DesktopSidebar() {
   const { isDark, toggleTheme } = useThemeStore();
+
+  const { data } = useGetUnreadNotificationCountQuery({
+    fetchPolicy: "cache-and-network",
+  });
+  const unreadCount = data?.unreadNotificationCount ?? 0;
+
+  const { data: chatUnreadData } = useGetUnreadChatCountQuery({
+    fetchPolicy: "cache-and-network",
+  });
+  const unreadChatCount = chatUnreadData?.unreadChatCount ?? 0;
+
   const navItems = [
     { icon: Home, label: "Beranda", to: "/home" },
     { icon: Search, label: "Eksplor", to: "/explore" },
-    { icon: MessageSquare, label: "Pesan", to: "/chats", hasBadge: true },
+    { icon: Bell, label: "Notifikasi", to: "/notifications", hasBadge: unreadCount > 0 },
+    { icon: MessageSquare, label: "Pesan", to: "/chats", hasBadge: unreadChatCount > 0 },
     { icon: ClipboardList, label: "Order", to: "/orders" },
     { icon: User, label: "Profil", to: "/profile" },
   ];

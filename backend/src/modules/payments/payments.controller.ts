@@ -8,7 +8,9 @@ import {
 import { Public } from '../../common/decorators/public.decorator';
 import { PaymentsService } from './payments.service';
 import { PrismaService } from '../../prisma/prisma.service';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus, NotificationType } from '@prisma/client';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationsGateway } from '../notifications/notifications.gateway';
 
 export interface MidtransWebhookBody {
   order_id: string;
@@ -30,6 +32,8 @@ export class PaymentsController {
   constructor(
     private readonly paymentsService: PaymentsService,
     private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+    private readonly notificationsGateway: NotificationsGateway,
   ) {}
 
   @Public()
@@ -77,24 +81,72 @@ export class PaymentsController {
       transaction_status === 'settlement' ||
       transaction_status === 'capture'
     ) {
-      await this.prisma.order.update({
+      const updatedOrder = await this.prisma.order.update({
         where: { id: cleanOrderId },
         data: { status: OrderStatus.IN_PROGRESS },
       });
       this.logger.log(
         `Order ${cleanOrderId} telah DIBAYAR. Status diperbarui ke IN_PROGRESS.`,
       );
+
+      // Notifikasi ke seller: pembayaran diterima
+      await this.notificationsService.createNotification({
+        accountId: order.sellerAccountId,
+        fromAccountId: order.buyerAccountId,
+        type: NotificationType.ORDER_UPDATE,
+        targetType: 'Order',
+        targetId: cleanOrderId,
+      });
+
+      // Real-time order update ke kedua pihak
+      const payload = {
+        orderId: cleanOrderId,
+        status: updatedOrder.status,
+        updatedAt: updatedOrder.updatedAt,
+      };
+      this.notificationsGateway.emitOrderUpdated(order.buyerAccountId, payload);
+      this.notificationsGateway.emitOrderUpdated(
+        order.sellerAccountId,
+        payload,
+      );
     } else if (
       transaction_status === 'deny' ||
       transaction_status === 'cancel' ||
       transaction_status === 'expire'
     ) {
-      await this.prisma.order.update({
+      const updatedOrder = await this.prisma.order.update({
         where: { id: cleanOrderId },
         data: { status: OrderStatus.CANCELLED },
       });
       this.logger.log(
         `Order ${cleanOrderId} BATAL/EXPIRED. Status diperbarui ke CANCELLED.`,
+      );
+
+      // Notifikasi ke kedua pihak: order dibatalkan
+      await this.notificationsService.createNotification({
+        accountId: order.sellerAccountId,
+        fromAccountId: order.buyerAccountId,
+        type: NotificationType.ORDER_UPDATE,
+        targetType: 'Order',
+        targetId: cleanOrderId,
+      });
+      await this.notificationsService.createNotification({
+        accountId: order.buyerAccountId,
+        type: NotificationType.ORDER_UPDATE,
+        targetType: 'Order',
+        targetId: cleanOrderId,
+      });
+
+      // Real-time order update
+      const payload = {
+        orderId: cleanOrderId,
+        status: updatedOrder.status,
+        updatedAt: updatedOrder.updatedAt,
+      };
+      this.notificationsGateway.emitOrderUpdated(order.buyerAccountId, payload);
+      this.notificationsGateway.emitOrderUpdated(
+        order.sellerAccountId,
+        payload,
       );
     } else {
       this.logger.warn(

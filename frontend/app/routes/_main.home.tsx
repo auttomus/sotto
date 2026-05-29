@@ -10,10 +10,16 @@ import { ROUTES } from "~/core/constants/ROUTES";
 import { useScrollDirection } from "~/core/hooks/useScrollDirection";
 import { useInfiniteScroll } from "~/core/hooks/useInfiniteScroll";
 import { PageHeader } from "~/components/layout/PageHeader";
+import { useGetUnreadNotificationCountQuery } from "~/core/apollo/generated";
 
 export default function FeedTimelineRoute() {
   const [activeTab, setActiveTab] = useState<"for-you" | "following">("for-you");
   const { showHeader } = useScrollDirection();
+
+  const { data: unreadData } = useGetUnreadNotificationCountQuery({
+    fetchPolicy: "cache-and-network",
+  });
+  const unreadCount = unreadData?.unreadNotificationCount ?? 0;
 
   const {
     posts,
@@ -62,10 +68,15 @@ export default function FeedTimelineRoute() {
           </>
         }
         rightAction={
-          <button className="p-2 -mr-1 rounded-full hover:bg-muted transition relative md:hidden cursor-pointer">
+          <Link
+            to="/notifications"
+            className="p-2 -mr-1 rounded-full hover:bg-muted transition relative md:hidden cursor-pointer"
+          >
             <Bell className="h-5 w-5" />
-            <span className="absolute top-1.5 right-1.5 block h-2 w-2 rounded-full bg-destructive ring-2 ring-card" />
-          </button>
+            {unreadCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 block h-2 w-2 rounded-full bg-destructive ring-2 ring-card" />
+            )}
+          </Link>
         }
         tabs={
           <div className="flex w-full border-t border-border">

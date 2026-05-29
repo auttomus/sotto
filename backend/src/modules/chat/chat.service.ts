@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ScyllaService } from '../../infrastructure/scylla/scylla.service';
 import { MediaService } from '../media/media.service';
+import { NotificationsGateway } from '../notifications/notifications.gateway';
 import { CreateConversationInput } from './dto/create-conversation.input';
 import { types } from 'cassandra-driver';
 import { ConversationType, Prisma } from '@prisma/client';
@@ -41,6 +42,7 @@ export class ChatService {
     private readonly prisma: PrismaService,
     private readonly scylla: ScyllaService,
     private readonly mediaService: MediaService,
+    private readonly notificationsGateway: NotificationsGateway,
   ) {}
 
   // ── Conversations (PostgreSQL) ─────────────────────────
@@ -195,7 +197,7 @@ export class ChatService {
       );
     }
 
-    return {
+    const serializedMessage: SerializedMessage = {
       messageId: messageId.toString(),
       conversationId: conversationId,
       senderId: senderAccountId,
@@ -205,6 +207,23 @@ export class ChatService {
       deletedAt: null,
       media: mediaList,
     };
+
+    // 📡 Siaran real-time ke semua partisipan (kecuali pengirim)
+    // agar daftar chat mereka terupdate secara instan
+    const participants = await this.prisma.conversationParticipant.findMany({
+      where: { conversationId },
+      select: { accountId: true },
+    });
+    for (const p of participants) {
+      if (p.accountId !== senderAccountId) {
+        this.notificationsGateway.emitConversationUpdated(p.accountId, {
+          conversationId,
+          lastMessage: serializedMessage,
+        });
+      }
+    }
+
+    return serializedMessage;
   }
 
   /** Ambil detail pesan tunggal */
@@ -342,5 +361,84 @@ export class ChatService {
       editedAt: row['edited_at'] ? (row['edited_at'] as Date) : null,
       deletedAt: row['deleted_at'] ? (row['deleted_at'] as Date) : null,
     }));
+  }
+
+  /** Hitung jumlah pesan belum dibaca di conversation untuk user tertentu */
+  async getUnreadCount(
+    conversationId: string,
+    accountId: string,
+  ): Promise<number> {
+    const participant = await this.prisma.conversationParticipant.findUnique({
+      where: {
+        conversationId_accountId: {
+          conversationId,
+          accountId,
+        },
+      },
+      select: { lastReadMessageId: true },
+    });
+
+    if (!participant) return 0;
+
+    const lastReadId = participant.lastReadMessageId;
+    const messages = await this.getMessages(conversationId, 50);
+
+    let count = 0;
+    for (const msg of messages) {
+      if (msg.messageId === lastReadId) {
+        break; // Semua pesan setelah ini (lebih lama) sudah dibaca
+      }
+      if (msg.senderId !== accountId) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  /** Jumlah percakapan dengan pesan belum dibaca */
+  async getTotalUnreadChatCount(accountId: string): Promise<number> {
+    const participants = await this.prisma.conversationParticipant.findMany({
+      where: { accountId },
+      select: { conversationId: true },
+    });
+
+    let totalUnread = 0;
+    for (const p of participants) {
+      const count = await this.getUnreadCount(p.conversationId, accountId);
+      if (count > 0) {
+        totalUnread += count;
+      }
+    }
+    return totalUnread;
+  }
+
+  /** Tandai percakapan sebagai telah dibaca */
+  async markAsRead(
+    conversationId: string,
+    accountId: string,
+  ): Promise<boolean> {
+    const messages = await this.getMessages(conversationId, 1);
+    const latestMessage = messages[0];
+
+    if (!latestMessage) return true;
+
+    await this.prisma.conversationParticipant.update({
+      where: {
+        conversationId_accountId: {
+          conversationId,
+          accountId,
+        },
+      },
+      data: {
+        lastReadMessageId: latestMessage.messageId,
+      },
+    });
+
+    // Kirim event conversationUpdated via WebSocket agar counter/badge ikut terupdate di client
+    this.notificationsGateway.emitConversationUpdated(accountId, {
+      conversationId,
+    });
+
+    return true;
   }
 }

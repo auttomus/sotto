@@ -28,7 +28,7 @@ export type MajorsBySchoolQuery = { majorsBySchool: Array<{ id: string, name: st
 export type GetConversationsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetConversationsQuery = { conversations: Array<{ id: string, type: Types.ConversationType, createdAt: string, updatedAt: string, lastMessageContent: string | null, lastMessageAt: string | null, participants: Array<{ accountId: string, displayName: string, avatarObjectKey: string | null, username: string | null }> | null, activeOrder: { id: string, status: Types.OrderStatus, agreedPrice: number, createdAt: string } | null }> };
+export type GetConversationsQuery = { conversations: Array<{ id: string, type: Types.ConversationType, createdAt: string, updatedAt: string, lastMessageContent: string | null, lastMessageAt: string | null, unreadCount: number, participants: Array<{ accountId: string, displayName: string, avatarObjectKey: string | null, username: string | null, lastReadMessageId: string | null }> | null, activeOrder: { id: string, status: Types.OrderStatus, agreedPrice: number, createdAt: string } | null }> };
 
 export type GetMessagesQueryVariables = Exact<{
   conversationId: string | number;
@@ -37,6 +37,11 @@ export type GetMessagesQueryVariables = Exact<{
 
 
 export type GetMessagesQuery = { messages: Array<{ messageId: string, senderId: string, content: string, createdAt: string, editedAt: string | null, deletedAt: string | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null }> | null }> };
+
+export type GetUnreadChatCountQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetUnreadChatCountQuery = { unreadChatCount: number };
 
 export type CreateConversationMutationVariables = Exact<{
   input: Types.CreateConversationInput;
@@ -61,6 +66,13 @@ export type DeleteMessageMutationVariables = Exact<{
 
 
 export type DeleteMessageMutation = { deleteMessage: boolean };
+
+export type MarkConversationAsReadMutationVariables = Exact<{
+  conversationId: string | number;
+}>;
+
+
+export type MarkConversationAsReadMutation = { markConversationAsRead: boolean };
 
 export type SearchTagsQueryVariables = Exact<{
   query: string;
@@ -195,20 +207,45 @@ export type ToggleLikeListingMutationVariables = Exact<{
 
 export type ToggleLikeListingMutation = { toggleLikeListing: boolean };
 
+export type GetNotificationsQueryVariables = Exact<{
+  cursor?: string | null | undefined;
+  take?: number | null | undefined;
+}>;
+
+
+export type GetNotificationsQuery = { notifications: Array<{ id: string, accountId: string, type: Types.NotificationType, targetType: string | null, targetId: string | null, isRead: boolean, createdAt: string, fromAccountId: string | null, fromDisplayName: string | null }> };
+
+export type GetUnreadNotificationCountQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetUnreadNotificationCountQuery = { unreadNotificationCount: number };
+
+export type MarkNotificationAsReadMutationVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type MarkNotificationAsReadMutation = { markNotificationAsRead: boolean };
+
+export type MarkAllNotificationsAsReadMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MarkAllNotificationsAsReadMutation = { markAllNotificationsAsRead: boolean };
+
 export type GetMyOrdersQueryVariables = Exact<{
   role: string;
   status?: string | null | undefined;
 }>;
 
 
-export type GetMyOrdersQuery = { myOrders: Array<{ id: string, status: Types.OrderStatus, agreedPrice: number, createdAt: string, buyerAccountId: string, sellerAccountId: string, listingId: string }> };
+export type GetMyOrdersQuery = { myOrders: Array<{ id: string, status: Types.OrderStatus, agreedPrice: number, createdAt: string, buyerAccountId: string, sellerAccountId: string, listingId: string, isReviewable: boolean }> };
 
 export type GetOrderDetailQueryVariables = Exact<{
   id: string | number;
 }>;
 
 
-export type GetOrderDetailQuery = { order: { id: string, status: Types.OrderStatus, agreedPrice: number, createdAt: string, buyerAccountId: string, sellerAccountId: string, listingId: string, buyer: { id: string, displayName: string, username: string, avatarObjectKey: string | null } | null, seller: { id: string, displayName: string, username: string, avatarObjectKey: string | null } | null, review: { id: string, rating: number, comment: string | null } | null } | null };
+export type GetOrderDetailQuery = { order: { id: string, status: Types.OrderStatus, agreedPrice: number, createdAt: string, buyerAccountId: string, sellerAccountId: string, listingId: string, isReviewable: boolean, buyer: { id: string, displayName: string, username: string, avatarObjectKey: string | null } | null, seller: { id: string, displayName: string, username: string, avatarObjectKey: string | null } | null, review: { id: string, rating: number, comment: string | null } | null } | null };
 
 export type GetOffersForConversationQueryVariables = Exact<{
   conversationId: string | number;
@@ -454,9 +491,11 @@ export const GetConversationsDocument = gql`
       displayName
       avatarObjectKey
       username
+      lastReadMessageId
     }
     lastMessageContent
     lastMessageAt
+    unreadCount
     activeOrder {
       id
       status
@@ -556,6 +595,46 @@ export type GetMessagesQueryHookResult = ReturnType<typeof useGetMessagesQuery>;
 export type GetMessagesLazyQueryHookResult = ReturnType<typeof useGetMessagesLazyQuery>;
 export type GetMessagesSuspenseQueryHookResult = ReturnType<typeof useGetMessagesSuspenseQuery>;
 export type GetMessagesQueryResult = Apollo.QueryResult<GetMessagesQuery, GetMessagesQueryVariables>;
+export const GetUnreadChatCountDocument = gql`
+    query GetUnreadChatCount {
+  unreadChatCount
+}
+    `;
+
+/**
+ * __useGetUnreadChatCountQuery__
+ *
+ * To run a query within a React component, call `useGetUnreadChatCountQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetUnreadChatCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetUnreadChatCountQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetUnreadChatCountQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetUnreadChatCountQuery, GetUnreadChatCountQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetUnreadChatCountQuery, GetUnreadChatCountQueryVariables>(GetUnreadChatCountDocument, options);
+      }
+export function useGetUnreadChatCountLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetUnreadChatCountQuery, GetUnreadChatCountQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetUnreadChatCountQuery, GetUnreadChatCountQueryVariables>(GetUnreadChatCountDocument, options);
+        }
+// @ts-ignore
+export function useGetUnreadChatCountSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<GetUnreadChatCountQuery, GetUnreadChatCountQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetUnreadChatCountQuery, GetUnreadChatCountQueryVariables>;
+export function useGetUnreadChatCountSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetUnreadChatCountQuery, GetUnreadChatCountQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetUnreadChatCountQuery | undefined, GetUnreadChatCountQueryVariables>;
+export function useGetUnreadChatCountSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetUnreadChatCountQuery, GetUnreadChatCountQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetUnreadChatCountQuery, GetUnreadChatCountQueryVariables>(GetUnreadChatCountDocument, options);
+        }
+export type GetUnreadChatCountQueryHookResult = ReturnType<typeof useGetUnreadChatCountQuery>;
+export type GetUnreadChatCountLazyQueryHookResult = ReturnType<typeof useGetUnreadChatCountLazyQuery>;
+export type GetUnreadChatCountSuspenseQueryHookResult = ReturnType<typeof useGetUnreadChatCountSuspenseQuery>;
+export type GetUnreadChatCountQueryResult = Apollo.QueryResult<GetUnreadChatCountQuery, GetUnreadChatCountQueryVariables>;
 export const CreateConversationDocument = gql`
     mutation CreateConversation($input: CreateConversationInput!) {
   createConversation(input: $input) {
@@ -664,6 +743,37 @@ export function useDeleteMessageMutation(baseOptions?: ApolloReactHooks.Mutation
 export type DeleteMessageMutationHookResult = ReturnType<typeof useDeleteMessageMutation>;
 export type DeleteMessageMutationResult = Apollo.MutationResult<DeleteMessageMutation>;
 export type DeleteMessageMutationOptions = Apollo.BaseMutationOptions<DeleteMessageMutation, DeleteMessageMutationVariables>;
+export const MarkConversationAsReadDocument = gql`
+    mutation MarkConversationAsRead($conversationId: ID!) {
+  markConversationAsRead(conversationId: $conversationId)
+}
+    `;
+export type MarkConversationAsReadMutationFn = Apollo.MutationFunction<MarkConversationAsReadMutation, MarkConversationAsReadMutationVariables>;
+
+/**
+ * __useMarkConversationAsReadMutation__
+ *
+ * To run a mutation, you first call `useMarkConversationAsReadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMarkConversationAsReadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [markConversationAsReadMutation, { data, loading, error }] = useMarkConversationAsReadMutation({
+ *   variables: {
+ *      conversationId: // value for 'conversationId'
+ *   },
+ * });
+ */
+export function useMarkConversationAsReadMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<MarkConversationAsReadMutation, MarkConversationAsReadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<MarkConversationAsReadMutation, MarkConversationAsReadMutationVariables>(MarkConversationAsReadDocument, options);
+      }
+export type MarkConversationAsReadMutationHookResult = ReturnType<typeof useMarkConversationAsReadMutation>;
+export type MarkConversationAsReadMutationResult = Apollo.MutationResult<MarkConversationAsReadMutation>;
+export type MarkConversationAsReadMutationOptions = Apollo.BaseMutationOptions<MarkConversationAsReadMutation, MarkConversationAsReadMutationVariables>;
 export const SearchTagsDocument = gql`
     query SearchTags($query: String!) {
   searchTags(query: $query) {
@@ -1609,6 +1719,159 @@ export function useToggleLikeListingMutation(baseOptions?: ApolloReactHooks.Muta
 export type ToggleLikeListingMutationHookResult = ReturnType<typeof useToggleLikeListingMutation>;
 export type ToggleLikeListingMutationResult = Apollo.MutationResult<ToggleLikeListingMutation>;
 export type ToggleLikeListingMutationOptions = Apollo.BaseMutationOptions<ToggleLikeListingMutation, ToggleLikeListingMutationVariables>;
+export const GetNotificationsDocument = gql`
+    query GetNotifications($cursor: String, $take: Int) {
+  notifications(cursor: $cursor, take: $take) {
+    id
+    accountId
+    type
+    targetType
+    targetId
+    isRead
+    createdAt
+    fromAccountId
+    fromDisplayName
+  }
+}
+    `;
+
+/**
+ * __useGetNotificationsQuery__
+ *
+ * To run a query within a React component, call `useGetNotificationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetNotificationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetNotificationsQuery({
+ *   variables: {
+ *      cursor: // value for 'cursor'
+ *      take: // value for 'take'
+ *   },
+ * });
+ */
+export function useGetNotificationsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetNotificationsQuery, GetNotificationsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetNotificationsQuery, GetNotificationsQueryVariables>(GetNotificationsDocument, options);
+      }
+export function useGetNotificationsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetNotificationsQuery, GetNotificationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetNotificationsQuery, GetNotificationsQueryVariables>(GetNotificationsDocument, options);
+        }
+// @ts-ignore
+export function useGetNotificationsSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<GetNotificationsQuery, GetNotificationsQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetNotificationsQuery, GetNotificationsQueryVariables>;
+export function useGetNotificationsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetNotificationsQuery, GetNotificationsQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetNotificationsQuery | undefined, GetNotificationsQueryVariables>;
+export function useGetNotificationsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetNotificationsQuery, GetNotificationsQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetNotificationsQuery, GetNotificationsQueryVariables>(GetNotificationsDocument, options);
+        }
+export type GetNotificationsQueryHookResult = ReturnType<typeof useGetNotificationsQuery>;
+export type GetNotificationsLazyQueryHookResult = ReturnType<typeof useGetNotificationsLazyQuery>;
+export type GetNotificationsSuspenseQueryHookResult = ReturnType<typeof useGetNotificationsSuspenseQuery>;
+export type GetNotificationsQueryResult = Apollo.QueryResult<GetNotificationsQuery, GetNotificationsQueryVariables>;
+export const GetUnreadNotificationCountDocument = gql`
+    query GetUnreadNotificationCount {
+  unreadNotificationCount
+}
+    `;
+
+/**
+ * __useGetUnreadNotificationCountQuery__
+ *
+ * To run a query within a React component, call `useGetUnreadNotificationCountQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetUnreadNotificationCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetUnreadNotificationCountQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetUnreadNotificationCountQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetUnreadNotificationCountQuery, GetUnreadNotificationCountQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetUnreadNotificationCountQuery, GetUnreadNotificationCountQueryVariables>(GetUnreadNotificationCountDocument, options);
+      }
+export function useGetUnreadNotificationCountLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetUnreadNotificationCountQuery, GetUnreadNotificationCountQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetUnreadNotificationCountQuery, GetUnreadNotificationCountQueryVariables>(GetUnreadNotificationCountDocument, options);
+        }
+// @ts-ignore
+export function useGetUnreadNotificationCountSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<GetUnreadNotificationCountQuery, GetUnreadNotificationCountQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetUnreadNotificationCountQuery, GetUnreadNotificationCountQueryVariables>;
+export function useGetUnreadNotificationCountSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetUnreadNotificationCountQuery, GetUnreadNotificationCountQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetUnreadNotificationCountQuery | undefined, GetUnreadNotificationCountQueryVariables>;
+export function useGetUnreadNotificationCountSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetUnreadNotificationCountQuery, GetUnreadNotificationCountQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetUnreadNotificationCountQuery, GetUnreadNotificationCountQueryVariables>(GetUnreadNotificationCountDocument, options);
+        }
+export type GetUnreadNotificationCountQueryHookResult = ReturnType<typeof useGetUnreadNotificationCountQuery>;
+export type GetUnreadNotificationCountLazyQueryHookResult = ReturnType<typeof useGetUnreadNotificationCountLazyQuery>;
+export type GetUnreadNotificationCountSuspenseQueryHookResult = ReturnType<typeof useGetUnreadNotificationCountSuspenseQuery>;
+export type GetUnreadNotificationCountQueryResult = Apollo.QueryResult<GetUnreadNotificationCountQuery, GetUnreadNotificationCountQueryVariables>;
+export const MarkNotificationAsReadDocument = gql`
+    mutation MarkNotificationAsRead($id: ID!) {
+  markNotificationAsRead(id: $id)
+}
+    `;
+export type MarkNotificationAsReadMutationFn = Apollo.MutationFunction<MarkNotificationAsReadMutation, MarkNotificationAsReadMutationVariables>;
+
+/**
+ * __useMarkNotificationAsReadMutation__
+ *
+ * To run a mutation, you first call `useMarkNotificationAsReadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMarkNotificationAsReadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [markNotificationAsReadMutation, { data, loading, error }] = useMarkNotificationAsReadMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useMarkNotificationAsReadMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<MarkNotificationAsReadMutation, MarkNotificationAsReadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<MarkNotificationAsReadMutation, MarkNotificationAsReadMutationVariables>(MarkNotificationAsReadDocument, options);
+      }
+export type MarkNotificationAsReadMutationHookResult = ReturnType<typeof useMarkNotificationAsReadMutation>;
+export type MarkNotificationAsReadMutationResult = Apollo.MutationResult<MarkNotificationAsReadMutation>;
+export type MarkNotificationAsReadMutationOptions = Apollo.BaseMutationOptions<MarkNotificationAsReadMutation, MarkNotificationAsReadMutationVariables>;
+export const MarkAllNotificationsAsReadDocument = gql`
+    mutation MarkAllNotificationsAsRead {
+  markAllNotificationsAsRead
+}
+    `;
+export type MarkAllNotificationsAsReadMutationFn = Apollo.MutationFunction<MarkAllNotificationsAsReadMutation, MarkAllNotificationsAsReadMutationVariables>;
+
+/**
+ * __useMarkAllNotificationsAsReadMutation__
+ *
+ * To run a mutation, you first call `useMarkAllNotificationsAsReadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMarkAllNotificationsAsReadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [markAllNotificationsAsReadMutation, { data, loading, error }] = useMarkAllNotificationsAsReadMutation({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useMarkAllNotificationsAsReadMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<MarkAllNotificationsAsReadMutation, MarkAllNotificationsAsReadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<MarkAllNotificationsAsReadMutation, MarkAllNotificationsAsReadMutationVariables>(MarkAllNotificationsAsReadDocument, options);
+      }
+export type MarkAllNotificationsAsReadMutationHookResult = ReturnType<typeof useMarkAllNotificationsAsReadMutation>;
+export type MarkAllNotificationsAsReadMutationResult = Apollo.MutationResult<MarkAllNotificationsAsReadMutation>;
+export type MarkAllNotificationsAsReadMutationOptions = Apollo.BaseMutationOptions<MarkAllNotificationsAsReadMutation, MarkAllNotificationsAsReadMutationVariables>;
 export const GetMyOrdersDocument = gql`
     query GetMyOrders($role: String!, $status: String) {
   myOrders(role: $role, status: $status) {
@@ -1619,6 +1882,7 @@ export const GetMyOrdersDocument = gql`
     buyerAccountId
     sellerAccountId
     listingId
+    isReviewable
   }
 }
     `;
@@ -1669,6 +1933,7 @@ export const GetOrderDetailDocument = gql`
     buyerAccountId
     sellerAccountId
     listingId
+    isReviewable
     buyer {
       id
       displayName

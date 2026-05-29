@@ -126,6 +126,17 @@ export class OrdersResolver {
     };
   }
 
+  @ResolveField(() => Boolean)
+  async isReviewable(@Parent() order: OrderModel): Promise<boolean> {
+    if (!order.customOfferId) {
+      return true;
+    }
+    const offer = await this.prisma.customOffer.findUnique({
+      where: { id: order.customOfferId },
+    });
+    return !!(offer && offer.listingId);
+  }
+
   @ResolveField(() => AccountModel, { nullable: true })
   async buyer(@Parent() order: OrderModel) {
     return this.prisma.account.findUnique({

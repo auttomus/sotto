@@ -25,6 +25,7 @@ import { OrderStatus } from '@prisma/client';
 
 // Explicit type for participant from Prisma include shape
 type ParticipantRow = {
+  lastReadMessageId: string | null;
   account: {
     id: string;
     username: string;
@@ -119,6 +120,7 @@ export class ChatConversationResolver {
         displayName: p.account.displayName,
         avatarObjectKey: p.account.avatarObjectKey ?? undefined,
         username: p.account.username,
+        lastReadMessageId: p.lastReadMessageId ?? undefined,
       })),
     };
   }
@@ -138,6 +140,7 @@ export class ChatConversationResolver {
         displayName: p.account.displayName,
         avatarObjectKey: p.account.avatarObjectKey ?? undefined,
         username: p.account.username,
+        lastReadMessageId: p.lastReadMessageId ?? undefined,
       })),
     }));
   }
@@ -205,5 +208,28 @@ export class ChatConversationResolver {
   ): Promise<Date | null> {
     const messages = await this.chatService.getMessages(conversation.id, 1);
     return messages[0]?.createdAt || null;
+  }
+
+  @ResolveField(() => Int)
+  async unreadCount(
+    @Parent() conversation: ConversationModel,
+    @CurrentUser() user: CurrentUserPayload,
+  ): Promise<number> {
+    return this.chatService.getUnreadCount(conversation.id, user.accountId);
+  }
+
+  @Query(() => Int, { name: 'unreadChatCount' })
+  async getUnreadChatCount(
+    @CurrentUser() user: CurrentUserPayload,
+  ): Promise<number> {
+    return this.chatService.getTotalUnreadChatCount(user.accountId);
+  }
+
+  @Mutation(() => Boolean)
+  async markConversationAsRead(
+    @Args('conversationId', { type: () => ID }) conversationId: string,
+    @CurrentUser() user: CurrentUserPayload,
+  ): Promise<boolean> {
+    return this.chatService.markAsRead(conversationId, user.accountId);
   }
 }

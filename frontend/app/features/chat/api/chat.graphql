@@ -9,9 +9,11 @@ query GetConversations {
       displayName
       avatarObjectKey
       username
+      lastReadMessageId
     }
     lastMessageContent
     lastMessageAt
+    unreadCount
     activeOrder {
       id
       status
@@ -38,6 +40,10 @@ query GetMessages($conversationId: ID!, $limit: Int) {
   }
 }
 
+query GetUnreadChatCount {
+  unreadChatCount
+}
+
 mutation CreateConversation($input: CreateConversationInput!) {
   createConversation(input: $input) {
     id
@@ -56,4 +62,8 @@ mutation UpdateMessage($conversationId: ID!, $messageId: ID!, $input: UpdateMess
 
 mutation DeleteMessage($conversationId: ID!, $messageId: ID!) {
   deleteMessage(conversationId: $conversationId, messageId: $messageId)
+}
+
+mutation MarkConversationAsRead($conversationId: ID!) {
+  markConversationAsRead(conversationId: $conversationId)
 }

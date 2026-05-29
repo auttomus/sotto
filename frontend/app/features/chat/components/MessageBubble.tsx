@@ -20,12 +20,13 @@ interface MessageBubbleProps {
   msg: any;
   userAccountId?: string;
   recipientAvatar?: string | null;
+  recipientLastReadTime?: number | null;
   refetchOffers?: () => void;
   onEdit?: (messageId: string, newContent: string) => Promise<void>;
   onDelete?: (messageId: string) => Promise<void>;
 }
 
-export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffers, onEdit, onDelete }: MessageBubbleProps) {
+export function MessageBubble({ msg, userAccountId, recipientAvatar, recipientLastReadTime, refetchOffers, onEdit, onDelete }: MessageBubbleProps) {
   const isMine = msg.senderId === userAccountId;
   const navigate = useNavigate();
   const addToast = useToastStore((s) => s.addToast);
@@ -237,7 +238,30 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, refetchOffe
             <span className={`text-[9px] ${isMine ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
               {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
-            {isMine && <Check className="h-3 w-3 text-primary-foreground" />}
+            {isMine && (() => {
+              const isLocal = msg.messageId.startsWith("local-");
+              const isRead = recipientLastReadTime && new Date(msg.createdAt).getTime() <= recipientLastReadTime;
+              
+              if (isLocal) {
+                return <Check className="h-3 w-3 text-primary-foreground/50 animate-pulse" />;
+              }
+              
+              if (isRead) {
+                return (
+                  <div className="flex -space-x-1.5 items-center">
+                    <Check className="h-3 w-3 text-sky-300 stroke-[2.5]" />
+                    <Check className="h-3 w-3 text-sky-300 stroke-[2.5]" />
+                  </div>
+                );
+              }
+              
+              return (
+                <div className="flex -space-x-1.5 items-center">
+                  <Check className="h-3 w-3 text-primary-foreground/60" />
+                  <Check className="h-3 w-3 text-primary-foreground/60" />
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>

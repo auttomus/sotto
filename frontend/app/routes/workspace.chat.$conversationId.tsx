@@ -33,6 +33,7 @@ export default function ChatRoute() {
     refetchOffers,
     editMessage,
     deleteMessage,
+    recipientLastReadTime,
   } = useChatRoom({ conversationId: conversationId as string });
 
   const [isListingModalOpen, setIsListingModalOpen] = React.useState(false);
@@ -86,6 +87,7 @@ export default function ChatRoute() {
             msg={msg} 
             userAccountId={user?.accountId} 
             recipientAvatar={recipient?.avatarObjectKey} 
+            recipientLastReadTime={recipientLastReadTime}
             refetchOffers={refetchOffers}
             onEdit={editMessage}
             onDelete={deleteMessage}
@@ -125,7 +127,7 @@ export default function ChatRoute() {
         onClose={() => setIsOfferModalOpen(false)}
         conversationId={conversationId as string}
         buyerAccountId={recipient?.accountId || ""}
-        listingId={selectedListing?.id}
+        sellerAccountId={user?.accountId}
         onSuccess={refetchOffers}
       />
     </div>

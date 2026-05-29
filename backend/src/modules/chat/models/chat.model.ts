@@ -1,4 +1,4 @@
-import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
+import { ObjectType, Field, ID, registerEnumType, Int } from '@nestjs/graphql';
 import { MediaAttachmentModel } from '../../media/models/media-attachment.model';
 import { ConversationType } from '@prisma/client';
 import { OrderModel } from '../../orders/models/order.model';
@@ -33,6 +33,9 @@ export class ConversationModel {
   // Virtual Field: Pesanan aktif dalam percakapan ini
   @Field(() => OrderModel, { nullable: true })
   activeOrder?: OrderModel;
+
+  @Field(() => Int, { defaultValue: 0 })
+  unreadCount?: number;
 }
 
 @ObjectType()
@@ -48,6 +51,9 @@ export class ConversationParticipant {
 
   @Field(() => String, { nullable: true })
   username?: string;
+
+  @Field(() => String, { nullable: true })
+  lastReadMessageId?: string;
 }
 
 @ObjectType()

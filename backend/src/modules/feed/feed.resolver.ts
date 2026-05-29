@@ -18,9 +18,11 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { TagsService } from '../tags/tags.service';
 import { MediaService } from '../media/media.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { MediaAttachmentModel } from '../media/models/media-attachment.model';
 import { TagModel } from '../tags/models/tag.model';
 import { Public } from '../../common/decorators/public.decorator';
+import { NotificationType } from '@prisma/client';
 
 @Resolver(() => PostModel)
 export class FeedResolver {
@@ -29,6 +31,7 @@ export class FeedResolver {
     private readonly prisma: PrismaService,
     private readonly tagsService: TagsService,
     private readonly mediaService: MediaService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   @Mutation(() => PostModel)
@@ -79,6 +82,20 @@ export class FeedResolver {
       post.postId.toString(),
       followers.map((f) => f.accountId),
     );
+
+    // Jika ini adalah komentar/reply, beri tahu pemilik postingan asli
+    if (input.inReplyToPostId) {
+      const parentPost = await this.feedService.getPost(input.inReplyToPostId);
+      if (parentPost && parentPost.authorId !== accountId) {
+        await this.notificationsService.createNotification({
+          accountId: parentPost.authorId,
+          fromAccountId: accountId,
+          type: NotificationType.MENTION,
+          targetType: 'ScyllaPost',
+          targetId: post.postId.toString(),
+        });
+      }
+    }
 
     return post;
   }

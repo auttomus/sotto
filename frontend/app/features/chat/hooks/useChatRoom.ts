@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useLocation } from "react-router";
-import { useGetMessagesQuery, useGetConversationsQuery, useGetOffersForConversationQuery, useUpdateMessageMutation, useDeleteMessageMutation } from "~/core/apollo/generated";
+import { useGetMessagesQuery, useGetConversationsQuery, useGetOffersForConversationQuery, useUpdateMessageMutation, useDeleteMessageMutation, useMarkConversationAsReadMutation } from "~/core/apollo/generated";
 import { useAuthStore } from "~/core/store/useAuthStore";
 import { useChatSocket } from "~/core/hooks/useChatSocket";
 import { useUpload } from "~/core/hooks/useUpload";
@@ -56,6 +56,10 @@ export function useChatRoom({ conversationId }: UseChatRoomOptions) {
 
   const [deleteMessageMutation] = useDeleteMessageMutation({
     refetchQueries: ["GetMessages", "GetConversations"]
+  });
+
+  const [markConversationAsRead] = useMarkConversationAsReadMutation({
+    refetchQueries: ["GetConversations", "GetUnreadChatCount"]
   });
 
   const editMessage = async (messageId: string, newContent: string) => {
@@ -121,6 +125,15 @@ export function useChatRoom({ conversationId }: UseChatRoomOptions) {
   React.useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [allMessages.length]);
+
+  // Tandai percakapan sebagai telah dibaca
+  React.useEffect(() => {
+    if (conversationId) {
+      markConversationAsRead({ variables: { conversationId } }).catch((err) => {
+        console.error("Gagal menandai pesan sebagai terbaca:", err);
+      });
+    }
+  }, [conversationId, allMessages.length, markConversationAsRead]);
 
   const handleSend = async () => {
     if (!inputText.trim() && selectedImages.length === 0 && !selectedListing) return;
@@ -193,6 +206,12 @@ export function useChatRoom({ conversationId }: UseChatRoomOptions) {
     setSelectedListing(null);
   };
 
+  const recipientLastReadTime = React.useMemo(() => {
+    if (!recipient?.lastReadMessageId) return null;
+    const match = allMessages.find((m: any) => m.messageId === recipient.lastReadMessageId);
+    return match ? new Date(match.createdAt).getTime() : null;
+  }, [recipient?.lastReadMessageId, allMessages]);
+
   return {
     inputText,
     setInputText,
@@ -217,5 +236,6 @@ export function useChatRoom({ conversationId }: UseChatRoomOptions) {
     refetchOffers,
     editMessage,
     deleteMessage,
+    recipientLastReadTime,
   };
 }

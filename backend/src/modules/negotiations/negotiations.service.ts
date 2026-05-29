@@ -5,15 +5,21 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateOfferInput } from './dto/create-offer.input';
-import { OfferStatus } from '@prisma/client';
+import { OfferStatus, NotificationType } from '@prisma/client';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationsGateway } from '../notifications/notifications.gateway';
 
 @Injectable()
 export class NegotiationsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+    private readonly notificationsGateway: NotificationsGateway,
+  ) {}
 
   /** Buat penawaran khusus (oleh seller di dalam chat) */
   async createOffer(sellerAccountId: string, input: CreateOfferInput) {
-    return this.prisma.customOffer.create({
+    const offer = await this.prisma.customOffer.create({
       data: {
         conversationId: input.conversationId,
         sellerAccountId,
@@ -26,6 +32,22 @@ export class NegotiationsService {
         expiresAt: new Date(Date.now() + 7 * 24 * 3600 * 1000), // 7 hari
       },
     });
+
+    // Notifikasi ke buyer: ada penawaran baru
+    await this.notificationsService.createNotification({
+      accountId: input.buyerAccountId,
+      fromAccountId: sellerAccountId,
+      type: NotificationType.ORDER_UPDATE,
+      targetType: 'CustomOffer_Created',
+      targetId: input.conversationId,
+    });
+
+    // Emit real-time ke buyer
+    this.notificationsGateway.emitConversationUpdated(input.buyerAccountId, {
+      conversationId: input.conversationId,
+    });
+
+    return offer;
   }
 
   /** Terima penawaran → nanti trigger order creation */
@@ -51,28 +73,23 @@ export class NegotiationsService {
       // 2. Resolve listingId
       let listingId = offer.listingId;
       if (!listingId) {
-        // Cari listing aktif pertama milik penjual
-        const activeListing = await tx.listing.findFirst({
-          where: { accountId: offer.sellerAccountId, status: 'ACTIVE' },
+        // SELALU buat listing fallback/private khusus untuk standalone custom offer agar judul/deskripsi tetap akurat
+        const cleanTitle =
+          offer.description.split('\n')[0].trim().slice(0, 80) ||
+          `Jasa Kustom (${offer.deliveryTimeDays} Hari)`;
+        const fallbackListing = await tx.listing.create({
+          data: {
+            accountId: offer.sellerAccountId,
+            title: cleanTitle,
+            description:
+              offer.description ||
+              'Pengerjaan kustom disepakati melalui obrolan chat',
+            price: offer.proposedPrice,
+            status: 'ARCHIVED',
+            isUnlimited: true,
+          },
         });
-        if (activeListing) {
-          listingId = activeListing.id;
-        } else {
-          // Buat listing dummy/fallback jika penjual belum punya listing aktif sama sekali
-          const fallbackListing = await tx.listing.create({
-            data: {
-              accountId: offer.sellerAccountId,
-              title: `Jasa Kustom (${offer.deliveryTimeDays} Hari)`,
-              description:
-                offer.description ||
-                'Pengerjaan kustom disepakati melalui obrolan chat',
-              price: offer.proposedPrice,
-              status: 'ARCHIVED',
-              isUnlimited: true,
-            },
-          });
-          listingId = fallbackListing.id;
-        }
+        listingId = fallbackListing.id;
       }
 
       // 3. Create the Order
@@ -90,6 +107,20 @@ export class NegotiationsService {
         },
       });
 
+      // Notifikasi ke seller: penawaran diterima
+      await this.notificationsService.createNotification({
+        accountId: offer.sellerAccountId,
+        fromAccountId: buyerAccountId,
+        type: NotificationType.ORDER_UPDATE,
+        targetType: 'CustomOffer_Accepted',
+        targetId: offer.conversationId,
+      });
+
+      // Emit real-time ke seller
+      this.notificationsGateway.emitConversationUpdated(offer.sellerAccountId, {
+        conversationId: offer.conversationId,
+      });
+
       return updatedOffer;
     });
   }
@@ -104,10 +135,26 @@ export class NegotiationsService {
       throw new BadRequestException('Hanya pembeli yang bisa menolak.');
     }
 
-    return this.prisma.customOffer.update({
+    const updatedOffer = await this.prisma.customOffer.update({
       where: { id: offerId },
       data: { status: OfferStatus.REJECTED },
     });
+
+    // Notifikasi ke seller: penawaran ditolak
+    await this.notificationsService.createNotification({
+      accountId: offer.sellerAccountId,
+      fromAccountId: buyerAccountId,
+      type: NotificationType.ORDER_UPDATE,
+      targetType: 'CustomOffer_Rejected',
+      targetId: offer.conversationId,
+    });
+
+    // Emit real-time ke seller
+    this.notificationsGateway.emitConversationUpdated(offer.sellerAccountId, {
+      conversationId: offer.conversationId,
+    });
+
+    return updatedOffer;
   }
 
   /** Tarik kembali penawaran (oleh seller) */
@@ -120,10 +167,26 @@ export class NegotiationsService {
       throw new BadRequestException('Hanya penjual yang bisa menarik.');
     }
 
-    return this.prisma.customOffer.update({
+    const updatedOffer = await this.prisma.customOffer.update({
       where: { id: offerId },
       data: { status: OfferStatus.WITHDRAWN },
     });
+
+    // Notifikasi ke buyer: penawaran ditarik
+    await this.notificationsService.createNotification({
+      accountId: offer.buyerAccountId,
+      fromAccountId: sellerAccountId,
+      type: NotificationType.ORDER_UPDATE,
+      targetType: 'CustomOffer_Withdrawn',
+      targetId: offer.conversationId,
+    });
+
+    // Emit real-time ke buyer
+    this.notificationsGateway.emitConversationUpdated(offer.buyerAccountId, {
+      conversationId: offer.conversationId,
+    });
+
+    return updatedOffer;
   }
 
   /** Ambil semua penawaran di sebuah conversation */
