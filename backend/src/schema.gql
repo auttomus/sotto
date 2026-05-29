@@ -117,6 +117,7 @@ scalar DateTime
 type ListingModel {
   account: AccountPartial
   accountId: ID!
+  averageRating: Float!
   createdAt: DateTime!
   deliveryTimeDays: Int
   description: String!
@@ -127,6 +128,8 @@ type ListingModel {
   maxActiveOrders: Int
   media: [MediaAttachmentModel!]
   price: Float!
+  reviews: [ReviewModel!]
+  reviewsCount: Int!
   status: ListingStatus!
   title: String!
   type: ListingType!
@@ -211,6 +214,7 @@ type Mutation {
   updateMessage(conversationId: ID!, input: UpdateMessageInput!, messageId: ID!): MessageModel!
   updatePost(input: UpdatePostInput!, postId: String!): PostModel!
   updateProfile(input: UpdateProfileInput!): AccountModel!
+  verifyPayment(orderId: ID!): String!
   withdrawOffer(offerId: ID!): CustomOfferModel!
 }
 
@@ -242,13 +246,16 @@ enum OfferStatus {
 
 type OrderModel {
   agreedPrice: Float!
+  buyer: AccountModel
   buyerAccountId: String!
   createdAt: DateTime!
   customOfferId: String
   id: ID!
   listingId: String!
+  seller: AccountModel
   sellerAccountId: String!
   status: OrderStatus!
+  review: ReviewModel
   updatedAt: DateTime!
 }
 
@@ -332,6 +339,7 @@ type ReviewModel {
   orderId: String!
   rating: Int!
   reviewerAccountId: String!
+  reviewer: AccountModel
   targetAccountId: String!
   updatedAt: DateTime!
 }

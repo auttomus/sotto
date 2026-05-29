@@ -30,7 +30,10 @@ export class OrdersService {
         listingId: listing.id,
         customOfferId: input.customOfferId ? input.customOfferId : undefined,
         agreedPrice: input.agreedPrice,
-        status: OrderStatus.PENDING_PAYMENT,
+        status:
+          input.agreedPrice <= 0
+            ? OrderStatus.IN_PROGRESS
+            : OrderStatus.PENDING_PAYMENT,
       },
     });
   }

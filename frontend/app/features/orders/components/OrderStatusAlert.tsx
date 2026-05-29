@@ -5,9 +5,10 @@ import { OrderStatus } from "~/core/apollo/base-types";
 interface OrderStatusAlertProps {
   status: OrderStatus;
   isBuyer: boolean;
+  agreedPrice?: number;
 }
 
-export function OrderStatusAlert({ status, isBuyer }: OrderStatusAlertProps) {
+export function OrderStatusAlert({ status, isBuyer, agreedPrice }: OrderStatusAlertProps) {
   switch (status) {
     case OrderStatus.PendingPayment:
       return (
@@ -35,7 +36,9 @@ export function OrderStatusAlert({ status, isBuyer }: OrderStatusAlertProps) {
             <p className="text-xs text-muted-foreground leading-relaxed font-medium">
               {isBuyer
                 ? "Penjual sedang mengerjakan pesanan Anda. Anda dapat berkoordinasi melalui ruang obrolan."
-                : "Order telah dibayar. Silakan kerjakan pesanan ini dan hubungi pembeli untuk deliverables produk/jasa."}
+                : agreedPrice === 0
+                  ? "Pesanan aktif. Silakan kerjakan pesanan ini dan hubungi pembeli untuk deliverables produk/jasa."
+                  : "Order telah dibayar. Silakan kerjakan pesanan ini dan hubungi pembeli untuk deliverables produk/jasa."}
             </p>
           </div>
         </div>

@@ -50,6 +50,19 @@ query GetListingDetail($id: ID!) {
       url
       isPrivate
     }
+    averageRating
+    reviewsCount
+    reviews {
+      id
+      rating
+      comment
+      createdAt
+      reviewer {
+        displayName
+        username
+        avatarObjectKey
+      }
+    }
   }
 }
 

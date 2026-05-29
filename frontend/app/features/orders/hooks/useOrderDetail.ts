@@ -4,7 +4,9 @@ import {
   useAdvanceOrderStatusMutation, 
   useCancelOrderMutation,
   useGetMidtransSnapTokenMutation,
-  useGetListingDetailQuery
+  useVerifyPaymentMutation,
+  useGetListingDetailQuery,
+  useCreateReviewMutation
 } from "~/core/apollo/generated";
 import { useAuthStore } from "~/core/store/useAuthStore";
 import { useToastStore } from "~/core/store/useToastStore";
@@ -42,7 +44,10 @@ export function useOrderDetail({ orderId }: UseOrderDetailOptions) {
 
     const script = document.createElement("script");
     script.src = "https://app.sandbox.midtrans.com/snap/snap.js";
-    const clientKey = import.meta.env.VITE_MIDTRANS_CLIENT_KEY || "";
+    const clientKey = 
+      (typeof window !== "undefined" && (window as any).ENV?.VITE_MIDTRANS_CLIENT_KEY) || 
+      import.meta.env.VITE_MIDTRANS_CLIENT_KEY || 
+      "";
     script.setAttribute("data-client-key", clientKey);
     document.body.appendChild(script);
 
@@ -53,21 +58,34 @@ export function useOrderDetail({ orderId }: UseOrderDetailOptions) {
     };
   }, [order?.status, isBuyer]);
 
-  // 4. Mutasi untuk mendapatkan Midtrans Snap Token secara dinamis
+  // 4. Mutasi verifikasi pembayaran langsung ke Midtrans Status API (fallback webhook)
+  const [verifyPayment] = useVerifyPaymentMutation();
+
+  // 5. Mutasi untuk mendapatkan Midtrans Snap Token secara dinamis
   const [getSnapToken, { loading: isPaying }] = useGetMidtransSnapTokenMutation({
     onCompleted: (res) => {
       const token = res.getMidtransSnapToken;
       if (token && (window as any).snap) {
         (window as any).snap.pay(token, {
-          onSuccess: (result: any) => {
+          onSuccess: async (result: any) => {
             console.log("Midtrans Success:", result);
-            addToast("success", "Pembayaran terverifikasi! Pesanan aktif.");
-            window.location.reload();
+            addToast("success", "Pembayaran berhasil! Memverifikasi...");
+            try {
+              await verifyPayment({ variables: { orderId } });
+            } catch (e) {
+              console.error("Verify payment failed:", e);
+            }
+            refetch();
           },
-          onPending: (result: any) => {
+          onPending: async (result: any) => {
             console.log("Midtrans Pending:", result);
-            addToast("info", "Menunggu penyelesaian pembayaran.");
-            window.location.reload();
+            addToast("info", "Menunggu penyelesaian pembayaran...");
+            try {
+              await verifyPayment({ variables: { orderId } });
+            } catch (e) {
+              console.error("Verify payment failed:", e);
+            }
+            refetch();
           },
           onError: (result: any) => {
             console.error("Midtrans Error:", result);
@@ -104,7 +122,15 @@ export function useOrderDetail({ orderId }: UseOrderDetailOptions) {
     onError: (e: any) => addToast("error", e.message),
   });
 
-  const isActionLoading = advanceLoading || cancelLoading;
+  const [createReview, { loading: reviewLoading }] = useCreateReviewMutation({
+    onCompleted: () => {
+      addToast("success", "Ulasan berhasil dikirim!");
+      refetch();
+    },
+    onError: (e: any) => addToast("error", e.message),
+  });
+
+  const isActionLoading = advanceLoading || cancelLoading || reviewLoading;
 
   const getStatusLabel = (status: string) => {
     switch (status) {
@@ -139,6 +165,16 @@ export function useOrderDetail({ orderId }: UseOrderDetailOptions) {
     }
   };
 
+  const handleReview = async (rating: number, comment?: string) => {
+    await createReview({
+      variables: {
+        orderId,
+        rating,
+        comment: comment || undefined,
+      },
+    });
+  };
+
   // Gabungkan info listing ke objek order
   const orderWithListing = order
     ? {
@@ -154,11 +190,13 @@ export function useOrderDetail({ orderId }: UseOrderDetailOptions) {
     isBuyer,
     partnerLabel,
     isActionLoading,
+    reviewLoading,
     isPaying,
     getStatusLabel,
     handleAdvance,
     handleCancel,
     handlePay,
+    handleReview,
     refetch,
   };
 }

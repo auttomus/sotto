@@ -37,11 +37,18 @@ export class PaymentsService {
       throw new NotFoundException('Order tidak ditemukan.');
     }
 
+    if (Math.round(Number(order.agreedPrice)) <= 0) {
+      throw new BadRequestException(
+        'Transaksi gratis (Rp 0) tidak memerlukan proses pembayaran Midtrans.',
+      );
+    }
+
     const email = order.buyer.user?.email || 'pembeli@sotto.com';
 
+    const midtransOrderId = `${order.id}-${Date.now()}`;
     const payload = {
       transaction_details: {
-        order_id: `${order.id}-${Date.now()}`,
+        order_id: midtransOrderId,
         gross_amount: Math.round(Number(order.agreedPrice)),
       },
       credit_card: {
@@ -86,11 +93,163 @@ export class PaymentsService {
       this.logger.log(
         `Midtrans Snap Token generated successfully: ${data.token}`,
       );
+
+      // Simpan mapping orderId → midtransOrderId untuk verifikasi nanti
+      this.recordMidtransOrderId(orderId, midtransOrderId);
+
       return data.token;
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
       this.logger.error(`Midtrans Snap request failed: ${errorMsg}`);
       throw new BadRequestException('Koneksi pembayaran Midtrans terputus.');
+    }
+  }
+
+  /**
+   * Verifikasi status pembayaran langsung ke Midtrans Status API.
+   * Dipanggil oleh frontend setelah Snap popup onSuccess sebagai
+   * fallback jika webhook tidak sampai (e.g. Cloudflare blocking).
+   */
+  async verifyAndUpdatePayment(orderId: string): Promise<string> {
+    if (!this.serverKey) {
+      throw new BadRequestException('Midtrans Server Key belum dikonfigurasi.');
+    }
+
+    // 1. Cari order di database
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+    });
+    if (!order) {
+      throw new NotFoundException(`Order ${orderId} tidak ditemukan.`);
+    }
+
+    // Jika sudah bukan PENDING_PAYMENT, tidak perlu cek lagi
+    if (order.status !== 'PENDING_PAYMENT') {
+      this.logger.log(
+        `Order ${orderId} sudah berstatus ${order.status}, skip verifikasi.`,
+      );
+      return order.status;
+    }
+
+    // 2. Cari transaksi Midtrans terkait (order_id di Midtrans = orderId-timestamp)
+    //    Kita perlu cek semua kemungkinan. Gunakan Midtrans Status API.
+    //    Karena order_id di Midtrans mengandung timestamp, kita list transactions
+    //    yang match dengan prefix orderId.
+    //    Alternatif: simpan midtrans order_id di DB. Untuk sekarang, kita gunakan
+    //    Midtrans API dengan order_id yang paling baru.
+
+    // Coba query Midtrans status API menggunakan pattern order_id
+    // Midtrans menyimpan order_id persis seperti yang kita kirim
+    // Kita perlu mencoba beberapa order_id yang mungkin
+    const possibleTransactions =
+      await this.findRecentMidtransTransaction(orderId);
+
+    if (!possibleTransactions) {
+      this.logger.warn(
+        `Tidak ada transaksi Midtrans yang ditemukan untuk order ${orderId}.`,
+      );
+      return order.status;
+    }
+
+    const { transaction_status } = possibleTransactions;
+
+    this.logger.log(
+      `Midtrans status untuk order ${orderId}: ${transaction_status}`,
+    );
+
+    // 3. Update order berdasarkan status Midtrans
+    if (
+      transaction_status === 'settlement' ||
+      transaction_status === 'capture'
+    ) {
+      await this.prisma.order.update({
+        where: { id: orderId },
+        data: { status: 'IN_PROGRESS' },
+      });
+      this.logger.log(
+        `Order ${orderId} diverifikasi DIBAYAR via Status API. Status → IN_PROGRESS.`,
+      );
+      return 'IN_PROGRESS';
+    } else if (
+      transaction_status === 'deny' ||
+      transaction_status === 'cancel' ||
+      transaction_status === 'expire'
+    ) {
+      await this.prisma.order.update({
+        where: { id: orderId },
+        data: { status: 'CANCELLED' },
+      });
+      this.logger.log(
+        `Order ${orderId} BATAL/EXPIRED via Status API. Status → CANCELLED.`,
+      );
+      return 'CANCELLED';
+    } else if (transaction_status === 'pending') {
+      this.logger.log(`Order ${orderId} masih PENDING di Midtrans.`);
+      return 'PENDING_PAYMENT';
+    }
+
+    return order.status;
+  }
+
+  /**
+   * Cari transaksi Midtrans terbaru untuk orderId yang diberikan.
+   * Karena order_id di Midtrans format: `{uuid}-{timestamp}`,
+   * kita simpan mapping-nya. Untuk saat ini, gunakan approach
+   * yang query langsung ke Midtrans Order Status API.
+   */
+  private lastMidtransOrderIds = new Map<string, string>();
+
+  /** Simpan mapping orderId → midtransOrderId saat membuat snap token */
+  recordMidtransOrderId(orderId: string, midtransOrderId: string) {
+    this.lastMidtransOrderIds.set(orderId, midtransOrderId);
+    this.logger.log(
+      `Recorded Midtrans order mapping: ${orderId} → ${midtransOrderId}`,
+    );
+  }
+
+  private async findRecentMidtransTransaction(
+    orderId: string,
+  ): Promise<{ transaction_status: string } | null> {
+    const midtransOrderId = this.lastMidtransOrderIds.get(orderId);
+    if (!midtransOrderId) {
+      this.logger.warn(
+        `No Midtrans order ID mapping found for ${orderId}. Cannot verify.`,
+      );
+      return null;
+    }
+
+    try {
+      const response = await fetch(
+        `https://api.sandbox.midtrans.com/v2/${midtransOrderId}/status`,
+        {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: `Basic ${Buffer.from(this.serverKey + ':').toString('base64')}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        this.logger.error(
+          `Midtrans Status API error for ${midtransOrderId}: ${response.statusText}`,
+        );
+        return null;
+      }
+
+      const data = (await response.json()) as {
+        transaction_status: string;
+        order_id: string;
+      };
+      this.logger.log(
+        `Midtrans Status API response for ${midtransOrderId}: ${JSON.stringify(data)}`,
+      );
+      return data;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.logger.error(`Midtrans Status API request failed: ${msg}`);
+      return null;
     }
   }
 

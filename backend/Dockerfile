@@ -6,23 +6,22 @@ RUN corepack enable
 FROM base AS dependencies
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
-# Koreksi di sini
 RUN pnpm install --ignore-scripts
 
 FROM base AS build
 WORKDIR /app
 COPY . .
 COPY --from=dependencies /app/node_modules ./node_modules
-RUN pnpm prisma generate
-RUN pnpm run build
+COPY node_modules/@prisma ./node_modules/@prisma
+COPY node_modules/.pnpm ./node_modules/.pnpm
+RUN ./node_modules/.bin/nest build
 
 FROM base AS prod-dependencies
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
-# Koreksi di sini
 RUN pnpm install --prod --ignore-scripts
-COPY prisma ./prisma
-RUN pnpm dlx prisma@6 generate
+COPY node_modules/@prisma ./node_modules/@prisma
+COPY node_modules/.pnpm ./node_modules/.pnpm
 
 FROM base AS deploy
 WORKDIR /app

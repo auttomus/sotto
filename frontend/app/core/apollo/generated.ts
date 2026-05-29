@@ -164,7 +164,7 @@ export type GetListingDetailQueryVariables = Exact<{
 }>;
 
 
-export type GetListingDetailQuery = { listing: { id: string, title: string, description: string, price: number, status: Types.ListingStatus, type: Types.ListingType, isUnlimited: boolean, deliveryTimeDays: number | null, createdAt: string, updatedAt: string, accountId: string, isLikedByMe: boolean, likesCount: number, account: { displayName: string, major: string | null, trustScore: number, username: string | null, avatarObjectKey: string | null } | null, media: Array<{ id: string, fileName: string, contentType: string, objectKey: string, url: string | null, isPrivate: boolean }> | null } | null };
+export type GetListingDetailQuery = { listing: { id: string, title: string, description: string, price: number, status: Types.ListingStatus, type: Types.ListingType, isUnlimited: boolean, deliveryTimeDays: number | null, createdAt: string, updatedAt: string, accountId: string, isLikedByMe: boolean, likesCount: number, averageRating: number, reviewsCount: number, account: { displayName: string, major: string | null, trustScore: number, username: string | null, avatarObjectKey: string | null } | null, media: Array<{ id: string, fileName: string, contentType: string, objectKey: string, url: string | null, isPrivate: boolean }> | null, reviews: Array<{ id: string, rating: number, comment: string | null, createdAt: string, reviewer: { displayName: string, username: string, avatarObjectKey: string | null } | null }> | null } | null };
 
 export type CreateListingMutationVariables = Exact<{
   input: Types.CreateListingInput;
@@ -208,7 +208,7 @@ export type GetOrderDetailQueryVariables = Exact<{
 }>;
 
 
-export type GetOrderDetailQuery = { order: { id: string, status: Types.OrderStatus, agreedPrice: number, createdAt: string, buyerAccountId: string, sellerAccountId: string, listingId: string } | null };
+export type GetOrderDetailQuery = { order: { id: string, status: Types.OrderStatus, agreedPrice: number, createdAt: string, buyerAccountId: string, sellerAccountId: string, listingId: string, buyer: { id: string, displayName: string, username: string, avatarObjectKey: string | null } | null, seller: { id: string, displayName: string, username: string, avatarObjectKey: string | null } | null, review: { id: string, rating: number, comment: string | null } | null } | null };
 
 export type GetOffersForConversationQueryVariables = Exact<{
   conversationId: string | number;
@@ -258,6 +258,13 @@ export type GetMidtransSnapTokenMutationVariables = Exact<{
 
 
 export type GetMidtransSnapTokenMutation = { getMidtransSnapToken: string };
+
+export type VerifyPaymentMutationVariables = Exact<{
+  orderId: string | number;
+}>;
+
+
+export type VerifyPaymentMutation = { verifyPayment: string };
 
 export type AdvanceOrderStatusMutationVariables = Exact<{
   orderId: string | number;
@@ -1412,6 +1419,19 @@ export const GetListingDetailDocument = gql`
       url
       isPrivate
     }
+    averageRating
+    reviewsCount
+    reviews {
+      id
+      rating
+      comment
+      createdAt
+      reviewer {
+        displayName
+        username
+        avatarObjectKey
+      }
+    }
   }
 }
     `;
@@ -1649,6 +1669,23 @@ export const GetOrderDetailDocument = gql`
     buyerAccountId
     sellerAccountId
     listingId
+    buyer {
+      id
+      displayName
+      username
+      avatarObjectKey
+    }
+    seller {
+      id
+      displayName
+      username
+      avatarObjectKey
+    }
+    review {
+      id
+      rating
+      comment
+    }
   }
 }
     `;
@@ -1945,6 +1982,37 @@ export function useGetMidtransSnapTokenMutation(baseOptions?: ApolloReactHooks.M
 export type GetMidtransSnapTokenMutationHookResult = ReturnType<typeof useGetMidtransSnapTokenMutation>;
 export type GetMidtransSnapTokenMutationResult = Apollo.MutationResult<GetMidtransSnapTokenMutation>;
 export type GetMidtransSnapTokenMutationOptions = Apollo.BaseMutationOptions<GetMidtransSnapTokenMutation, GetMidtransSnapTokenMutationVariables>;
+export const VerifyPaymentDocument = gql`
+    mutation VerifyPayment($orderId: ID!) {
+  verifyPayment(orderId: $orderId)
+}
+    `;
+export type VerifyPaymentMutationFn = Apollo.MutationFunction<VerifyPaymentMutation, VerifyPaymentMutationVariables>;
+
+/**
+ * __useVerifyPaymentMutation__
+ *
+ * To run a mutation, you first call `useVerifyPaymentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useVerifyPaymentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [verifyPaymentMutation, { data, loading, error }] = useVerifyPaymentMutation({
+ *   variables: {
+ *      orderId: // value for 'orderId'
+ *   },
+ * });
+ */
+export function useVerifyPaymentMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<VerifyPaymentMutation, VerifyPaymentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<VerifyPaymentMutation, VerifyPaymentMutationVariables>(VerifyPaymentDocument, options);
+      }
+export type VerifyPaymentMutationHookResult = ReturnType<typeof useVerifyPaymentMutation>;
+export type VerifyPaymentMutationResult = Apollo.MutationResult<VerifyPaymentMutation>;
+export type VerifyPaymentMutationOptions = Apollo.BaseMutationOptions<VerifyPaymentMutation, VerifyPaymentMutationVariables>;
 export const AdvanceOrderStatusDocument = gql`
     mutation AdvanceOrderStatus($orderId: ID!) {
   advanceOrderStatus(orderId: $orderId) {

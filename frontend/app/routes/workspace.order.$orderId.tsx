@@ -5,6 +5,7 @@ import { OrderProgressTracker } from "~/features/orders/components/OrderProgress
 import { OrderDetailCard } from "~/features/orders/components/OrderDetailCard";
 import { OrderStatusAlert } from "~/features/orders/components/OrderStatusAlert";
 import { OrderActionPanel } from "~/features/orders/components/OrderActionPanel";
+import { OrderReviewSection } from "~/features/orders/components/OrderReviewSection";
 
 export default function OrderRoute() {
   const { orderId } = useParams();
@@ -16,11 +17,13 @@ export default function OrderRoute() {
     error,
     isBuyer,
     isActionLoading,
+    reviewLoading,
     isPaying,
     getStatusLabel,
     handleAdvance,
     handleCancel,
     handlePay,
+    handleReview,
   } = useOrderDetail({ orderId: orderId as string });
 
   if (loading && !order) {
@@ -67,13 +70,22 @@ export default function OrderRoute() {
       {/* Konten Utama */}
       <div className="flex-1 overflow-y-auto p-4 space-y-5">
         {/* Banner Alert Status */}
-        <OrderStatusAlert status={order.status} isBuyer={isBuyer} />
+        <OrderStatusAlert status={order.status} isBuyer={isBuyer} agreedPrice={order.agreedPrice} />
 
         {/* Detail Pembayaran & Produk */}
         <OrderDetailCard
           order={order}
           isBuyer={isBuyer}
           getStatusLabel={getStatusLabel}
+        />
+
+        {/* Ulasan & Komentar Transaksi Selesai */}
+        <OrderReviewSection
+          status={order.status}
+          review={order.review}
+          isBuyer={isBuyer}
+          onSubmitReview={handleReview}
+          reviewLoading={reviewLoading}
         />
       </div>
 

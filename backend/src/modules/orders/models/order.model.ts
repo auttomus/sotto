@@ -8,6 +8,8 @@ import {
 } from '@nestjs/graphql';
 import { OrderStatus } from '@prisma/client';
 
+import { AccountModel } from '../../accounts/models/account.model';
+
 registerEnumType(OrderStatus, { name: 'OrderStatus' });
 
 @ObjectType()
@@ -32,6 +34,15 @@ export class OrderModel {
 
   @Field(() => OrderStatus)
   status: OrderStatus;
+
+  @Field(() => AccountModel, { nullable: true })
+  buyer?: AccountModel;
+
+  @Field(() => AccountModel, { nullable: true })
+  seller?: AccountModel;
+
+  @Field(() => ReviewModel, { nullable: true })
+  review?: ReviewModel | null;
 
   @Field()
   createdAt: Date;
@@ -59,6 +70,9 @@ export class ReviewModel {
 
   @Field(() => String, { nullable: true })
   comment?: string | null;
+
+  @Field(() => AccountModel, { nullable: true })
+  reviewer?: AccountModel | null;
 
   @Field()
   createdAt: Date;
