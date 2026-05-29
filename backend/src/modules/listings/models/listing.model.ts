@@ -8,6 +8,7 @@ import {
 } from '@nestjs/graphql';
 import { ListingType, ListingStatus } from '@prisma/client';
 import { MediaAttachmentModel } from '../../media/models/media-attachment.model';
+import { ReviewModel } from '../../orders/models/order.model';
 
 registerEnumType(ListingType, { name: 'ListingType' });
 registerEnumType(ListingStatus, { name: 'ListingStatus' });
@@ -75,6 +76,15 @@ export class ListingModel {
 
   @Field(() => Int, { defaultValue: 0 })
   likesCount?: number;
+
+  @Field(() => Float, { defaultValue: 0.0 })
+  averageRating?: number;
+
+  @Field(() => Int, { defaultValue: 0 })
+  reviewsCount?: number;
+
+  @Field(() => [ReviewModel], { nullable: true })
+  reviews?: ReviewModel[];
 
   @Field()
   createdAt: Date;

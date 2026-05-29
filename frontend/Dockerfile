@@ -19,7 +19,11 @@ FROM base AS build
 WORKDIR /app
 COPY . .
 COPY --from=dev-deps /app/node_modules ./node_modules
-RUN pnpm run build
+ARG VITE_MINIO_PUBLIC_URL=https://cdn.sotto.auttomus.xyz
+ARG VITE_MIDTRANS_CLIENT_KEY=Mid-client-aKAogCe7B_Nui3nc
+ENV VITE_MINIO_PUBLIC_URL=$VITE_MINIO_PUBLIC_URL
+ENV VITE_MIDTRANS_CLIENT_KEY=$VITE_MIDTRANS_CLIENT_KEY
+RUN ./node_modules/.bin/react-router build
 
 FROM base AS deploy
 WORKDIR /app

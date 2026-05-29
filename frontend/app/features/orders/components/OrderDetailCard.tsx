@@ -1,5 +1,8 @@
 import * as React from "react";
+import { Link } from "react-router";
 import { OrderStatus } from "~/core/apollo/base-types";
+import { Avatar } from "~/components/ui/Avatar";
+import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
 
 interface OrderDetailCardProps {
   order: {
@@ -10,6 +13,18 @@ interface OrderDetailCardProps {
     listingId: string;
     listing?: {
       title: string;
+    } | null;
+    buyer?: {
+      id: string;
+      displayName: string;
+      username: string;
+      avatarObjectKey?: string | null;
+    } | null;
+    seller?: {
+      id: string;
+      displayName: string;
+      username: string;
+      avatarObjectKey?: string | null;
     } | null;
   };
   isBuyer: boolean;
@@ -23,6 +38,9 @@ export function OrderDetailCard({ order, isBuyer, getStatusLabel }: OrderDetailC
     month: "long",
     year: "numeric",
   });
+
+  const partner = isBuyer ? order.seller : order.buyer;
+  const partnerRoleLabel = isBuyer ? "Penjual" : "Pembeli";
 
   return (
     <div className="bg-card p-4 rounded-sm border border-border shadow-sm space-y-4">
@@ -73,6 +91,36 @@ export function OrderDetailCard({ order, isBuyer, getStatusLabel }: OrderDetailC
           </span>
         </div>
       </div>
+
+      {partner && (
+        <div className="border-t border-border pt-4 mt-2">
+          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-2">
+            Informasi {partnerRoleLabel}
+          </span>
+          <Link
+            to={`/profile/${partner.username}`}
+            className="flex items-center gap-3 p-3 rounded-sm bg-background border border-border/50 hover:bg-muted/70 hover:border-primary/30 transition cursor-pointer group"
+          >
+            <Avatar
+              src={resolveMediaUrl(partner.avatarObjectKey)}
+              alt={partner.displayName}
+              size="md"
+              className="border border-border group-hover:border-primary/20 transition"
+            />
+            <div className="flex-1 min-w-0">
+              <h5 className="font-extrabold text-foreground text-xs leading-none mb-1 group-hover:text-primary transition truncate">
+                {partner.displayName}
+              </h5>
+              <span className="text-[10px] text-muted-foreground leading-none font-bold">
+                @{partner.username}
+              </span>
+            </div>
+            <span className="text-[10px] font-bold text-primary bg-primary/5 px-2.5 py-1 rounded-full group-hover:bg-primary/10 transition shrink-0">
+              Lihat Profil
+            </span>
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

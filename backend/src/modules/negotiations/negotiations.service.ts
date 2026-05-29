@@ -83,7 +83,10 @@ export class NegotiationsService {
           listingId,
           customOfferId: offer.id,
           agreedPrice: offer.proposedPrice,
-          status: 'PENDING_PAYMENT',
+          status:
+            Number(offer.proposedPrice) <= 0
+              ? 'IN_PROGRESS'
+              : 'PENDING_PAYMENT',
         },
       });
 

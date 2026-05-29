@@ -49,12 +49,26 @@ export class PaymentsController {
     const order_id = body.order_id;
     const transaction_status = body.transaction_status;
 
+    this.logger.log(
+      `Webhook received — order_id: ${order_id}, status: ${transaction_status}`,
+    );
+
+    // Extract the clean 36-character UUID from the appended transaction ID (UUID-timestamp)
+    const cleanOrderId =
+      order_id.length >= 36 ? order_id.slice(0, 36) : order_id;
+
+    this.logger.log(
+      `Extracted cleanOrderId: ${cleanOrderId} from original: ${order_id}`,
+    );
+
     // 2. Cari order terkait di database
     const order = await this.prisma.order.findUnique({
-      where: { id: order_id },
+      where: { id: cleanOrderId },
     });
     if (!order) {
-      this.logger.error(`Order ${order_id} tidak ditemukan untuk webhook ini.`);
+      this.logger.error(
+        `Order ${cleanOrderId} (original: ${order_id}) tidak ditemukan untuk webhook ini.`,
+      );
       return { received: true, error: 'Order not found' };
     }
 
@@ -64,11 +78,11 @@ export class PaymentsController {
       transaction_status === 'capture'
     ) {
       await this.prisma.order.update({
-        where: { id: order_id },
+        where: { id: cleanOrderId },
         data: { status: OrderStatus.IN_PROGRESS },
       });
       this.logger.log(
-        `Order ${order_id} telah DIBAYAR. Status diperbarui ke IN_PROGRESS.`,
+        `Order ${cleanOrderId} telah DIBAYAR. Status diperbarui ke IN_PROGRESS.`,
       );
     } else if (
       transaction_status === 'deny' ||
@@ -76,11 +90,15 @@ export class PaymentsController {
       transaction_status === 'expire'
     ) {
       await this.prisma.order.update({
-        where: { id: order_id },
+        where: { id: cleanOrderId },
         data: { status: OrderStatus.CANCELLED },
       });
       this.logger.log(
-        `Order ${order_id} BATAL/EXPIRED. Status diperbarui ke CANCELLED.`,
+        `Order ${cleanOrderId} BATAL/EXPIRED. Status diperbarui ke CANCELLED.`,
+      );
+    } else {
+      this.logger.warn(
+        `Order ${cleanOrderId} — status tidak dikenali: ${transaction_status}`,
       );
     }
 

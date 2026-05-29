@@ -19,6 +19,23 @@ query GetOrderDetail($id: ID!) {
     buyerAccountId
     sellerAccountId
     listingId
+    buyer {
+      id
+      displayName
+      username
+      avatarObjectKey
+    }
+    seller {
+      id
+      displayName
+      username
+      avatarObjectKey
+    }
+    review {
+      id
+      rating
+      comment
+    }
   }
 }
 
@@ -78,6 +95,10 @@ mutation RejectOffer($offerId: ID!) {
 
 mutation GetMidtransSnapToken($orderId: ID!) {
   getMidtransSnapToken(orderId: $orderId)
+}
+
+mutation VerifyPayment($orderId: ID!) {
+  verifyPayment(orderId: $orderId)
 }
 
 mutation AdvanceOrderStatus($orderId: ID!) {

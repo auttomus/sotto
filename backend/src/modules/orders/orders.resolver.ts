@@ -1,4 +1,13 @@
-import { Resolver, Query, Mutation, Args, ID, Context } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  ID,
+  Context,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql';
 import { OrdersService } from './orders.service';
 import { ReviewsService } from './reviews.service';
 import { OrderModel, ReviewModel } from './models/order.model';
@@ -9,6 +18,8 @@ import {
 } from '../../common/decorators/current-user.decorator';
 import { OrderStatus } from '@prisma/client';
 import { PaymentsService } from '../payments/payments.service';
+import { AccountModel } from '../accounts/models/account.model';
+import { PrismaService } from '../../prisma/prisma.service';
 
 interface NgrokTunnel {
   proto: string;
@@ -25,6 +36,7 @@ export class OrdersResolver {
     private readonly ordersService: OrdersService,
     private readonly reviewsService: ReviewsService,
     private readonly paymentsService: PaymentsService,
+    private readonly prisma: PrismaService,
   ) {}
 
   private serializeOrder(order: import('@prisma/client').Order): OrderModel {
@@ -114,13 +126,27 @@ export class OrdersResolver {
     };
   }
 
+  @ResolveField(() => AccountModel, { nullable: true })
+  async buyer(@Parent() order: OrderModel) {
+    return this.prisma.account.findUnique({
+      where: { id: order.buyerAccountId },
+    });
+  }
+
+  @ResolveField(() => AccountModel, { nullable: true })
+  async seller(@Parent() order: OrderModel) {
+    return this.prisma.account.findUnique({
+      where: { id: order.sellerAccountId },
+    });
+  }
+
   @Mutation(() => String)
   async getMidtransSnapToken(
     @Args('orderId', { type: () => ID }) orderId: string,
     @Context() context: { req: import('express').Request },
   ): Promise<string> {
     const req = context.req;
-    let publicUrl = process.env.PUBLIC_URL;
+    let publicUrl = process.env.PUBLIC_URL || process.env.FRONTEND_URL;
 
     // Auto-discovery URL Ngrok dinamis jika tidak ada yang diset di .env
     if (!publicUrl) {
@@ -155,5 +181,35 @@ export class OrdersResolver {
     }
 
     return this.paymentsService.getSnapToken(orderId, publicUrl);
+  }
+
+  /**
+   * Verifikasi status pembayaran langsung ke Midtrans Status API.
+   * Dipanggil oleh frontend setelah Snap popup onSuccess/onPending.
+   */
+  @Mutation(() => String)
+  async verifyPayment(
+    @Args('orderId', { type: () => ID }) orderId: string,
+  ): Promise<string> {
+    return this.paymentsService.verifyAndUpdatePayment(orderId);
+  }
+
+  @ResolveField(() => ReviewModel, { nullable: true })
+  async review(@Parent() order: OrderModel) {
+    return this.prisma.review.findUnique({
+      where: { orderId: order.id },
+    });
+  }
+}
+
+@Resolver(() => ReviewModel)
+export class ReviewsResolver {
+  constructor(private readonly prisma: PrismaService) {}
+
+  @ResolveField(() => AccountModel, { nullable: true })
+  async reviewer(@Parent() review: ReviewModel) {
+    return this.prisma.account.findUnique({
+      where: { id: review.reviewerAccountId },
+    });
   }
 }

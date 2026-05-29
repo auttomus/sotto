@@ -130,6 +130,7 @@ export type ListingModel = {
   __typename?: 'ListingModel';
   account?: Maybe<AccountPartial>;
   accountId: Scalars['ID']['output'];
+  averageRating: Scalars['Float']['output'];
   createdAt: Scalars['DateTime']['output'];
   deliveryTimeDays?: Maybe<Scalars['Int']['output']>;
   description: Scalars['String']['output'];
@@ -140,6 +141,8 @@ export type ListingModel = {
   maxActiveOrders?: Maybe<Scalars['Int']['output']>;
   media?: Maybe<Array<MediaAttachmentModel>>;
   price: Scalars['Float']['output'];
+  reviews?: Maybe<Array<ReviewModel>>;
+  reviewsCount: Scalars['Int']['output'];
   status: ListingStatus;
   title: Scalars['String']['output'];
   type: ListingType;
@@ -227,6 +230,7 @@ export type Mutation = {
   updateMessage: MessageModel;
   updatePost: PostModel;
   updateProfile: AccountModel;
+  verifyPayment: Scalars['String']['output'];
   withdrawOffer: CustomOfferModel;
 };
 
@@ -380,6 +384,11 @@ export type MutationUpdateProfileArgs = {
 };
 
 
+export type MutationVerifyPaymentArgs = {
+  orderId: Scalars['ID']['input'];
+};
+
+
 export type MutationWithdrawOfferArgs = {
   offerId: Scalars['ID']['input'];
 };
@@ -414,11 +423,14 @@ export enum OfferStatus {
 export type OrderModel = {
   __typename?: 'OrderModel';
   agreedPrice: Scalars['Float']['output'];
+  buyer?: Maybe<AccountModel>;
   buyerAccountId: Scalars['String']['output'];
   createdAt: Scalars['DateTime']['output'];
   customOfferId?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   listingId: Scalars['String']['output'];
+  review?: Maybe<ReviewModel>;
+  seller?: Maybe<AccountModel>;
   sellerAccountId: Scalars['String']['output'];
   status: OrderStatus;
   updatedAt: Scalars['DateTime']['output'];
@@ -623,6 +635,7 @@ export type ReviewModel = {
   id: Scalars['ID']['output'];
   orderId: Scalars['String']['output'];
   rating: Scalars['Int']['output'];
+  reviewer?: Maybe<AccountModel>;
   reviewerAccountId: Scalars['String']['output'];
   targetAccountId: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];

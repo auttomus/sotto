@@ -5,6 +5,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from "react-router";
 import { ApolloProvider } from "@apollo/client/react";
 import { apolloClient } from "~/core/apollo/client";
@@ -57,9 +58,26 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+export async function loader() {
+  return {
+    ENV: {
+      VITE_MIDTRANS_CLIENT_KEY: process.env.MIDTRANS_CLIENT_KEY || process.env.VITE_MIDTRANS_CLIENT_KEY || "",
+    }
+  };
+}
+
 export default function App() {
+  const data = useLoaderData<any>();
+
   return (
     <ApolloProvider client={apolloClient}>
+      {data?.ENV && (
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.ENV = ${JSON.stringify(data.ENV)};`,
+          }}
+        />
+      )}
       <Outlet />
       <ToastProvider />
     </ApolloProvider>
