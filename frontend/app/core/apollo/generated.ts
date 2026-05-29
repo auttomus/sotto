@@ -238,14 +238,14 @@ export type GetMyOrdersQueryVariables = Exact<{
 }>;
 
 
-export type GetMyOrdersQuery = { myOrders: Array<{ id: string, status: Types.OrderStatus, agreedPrice: number, createdAt: string, buyerAccountId: string, sellerAccountId: string, listingId: string }> };
+export type GetMyOrdersQuery = { myOrders: Array<{ id: string, status: Types.OrderStatus, agreedPrice: number, createdAt: string, buyerAccountId: string, sellerAccountId: string, listingId: string, isReviewable: boolean }> };
 
 export type GetOrderDetailQueryVariables = Exact<{
   id: string | number;
 }>;
 
 
-export type GetOrderDetailQuery = { order: { id: string, status: Types.OrderStatus, agreedPrice: number, createdAt: string, buyerAccountId: string, sellerAccountId: string, listingId: string, buyer: { id: string, displayName: string, username: string, avatarObjectKey: string | null } | null, seller: { id: string, displayName: string, username: string, avatarObjectKey: string | null } | null, review: { id: string, rating: number, comment: string | null } | null } | null };
+export type GetOrderDetailQuery = { order: { id: string, status: Types.OrderStatus, agreedPrice: number, createdAt: string, buyerAccountId: string, sellerAccountId: string, listingId: string, isReviewable: boolean, buyer: { id: string, displayName: string, username: string, avatarObjectKey: string | null } | null, seller: { id: string, displayName: string, username: string, avatarObjectKey: string | null } | null, review: { id: string, rating: number, comment: string | null } | null } | null };
 
 export type GetOffersForConversationQueryVariables = Exact<{
   conversationId: string | number;
@@ -1882,6 +1882,7 @@ export const GetMyOrdersDocument = gql`
     buyerAccountId
     sellerAccountId
     listingId
+    isReviewable
   }
 }
     `;
@@ -1932,6 +1933,7 @@ export const GetOrderDetailDocument = gql`
     buyerAccountId
     sellerAccountId
     listingId
+    isReviewable
     buyer {
       id
       displayName

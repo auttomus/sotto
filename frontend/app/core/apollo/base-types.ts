@@ -436,6 +436,7 @@ export type OrderModel = {
   createdAt: Scalars['DateTime']['output'];
   customOfferId?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
+  isReviewable: Scalars['Boolean']['output'];
   listingId: Scalars['String']['output'];
   review?: Maybe<ReviewModel>;
   seller?: Maybe<AccountModel>;

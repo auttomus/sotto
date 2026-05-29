@@ -7,6 +7,7 @@ query GetMyOrders($role: String!, $status: String) {
     buyerAccountId
     sellerAccountId
     listingId
+    isReviewable
   }
 }
 
@@ -19,6 +20,7 @@ query GetOrderDetail($id: ID!) {
     buyerAccountId
     sellerAccountId
     listingId
+    isReviewable
     buyer {
       id
       displayName

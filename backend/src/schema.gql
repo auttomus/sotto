@@ -188,10 +188,7 @@ type Mutation {
   acceptOffer(offerId: ID!): CustomOfferModel!
   advanceOrderStatus(orderId: ID!): OrderModel!
   cancelOrder(orderId: ID!): OrderModel!
-  confirmUpload(
-    input: RequestUploadInput!
-    objectKey: String!
-  ): MediaAttachmentModel!
+  confirmUpload(input: RequestUploadInput!, objectKey: String!): MediaAttachmentModel!
   createConversation(input: CreateConversationInput!): ConversationModel!
   createListing(input: CreateListingInput!): ListingModel!
   createOffer(input: CreateOfferInput!): CustomOfferModel!
@@ -213,17 +210,11 @@ type Mutation {
   toggleLikeListing(id: ID!): Boolean!
   toggleLikePost(postId: String!): Boolean!
 
-  """
-  Catat interaksi user (view, click, like)
-  """
+  """Catat interaksi user (view, click, like)"""
   trackEvent(actionType: String!, targetId: String!): Boolean!
   unfollow(targetAccountId: ID!): Boolean!
   updateListing(id: ID!, input: UpdateListingInput!): ListingModel!
-  updateMessage(
-    conversationId: ID!
-    input: UpdateMessageInput!
-    messageId: ID!
-  ): MessageModel!
+  updateMessage(conversationId: ID!, input: UpdateMessageInput!, messageId: ID!): MessageModel!
   updatePost(input: UpdatePostInput!, postId: String!): PostModel!
   updateProfile(input: UpdateProfileInput!): AccountModel!
   verifyPayment(orderId: ID!): String!
@@ -263,6 +254,7 @@ type OrderModel {
   createdAt: DateTime!
   customOfferId: String
   id: ID!
+  isReviewable: Boolean!
   listingId: String!
   review: ReviewModel
   seller: AccountModel
@@ -313,10 +305,7 @@ type Query {
   listings: [ListingModel!]!
   listingsByAccount(accountId: ID!): [ListingModel!]!
   majorsBySchool(schoolId: ID!): [MajorModel!]!
-  mediaForObject(
-    attachedId: String!
-    attachedType: String!
-  ): [MediaAttachmentModel!]!
+  mediaForObject(attachedId: String!, attachedType: String!): [MediaAttachmentModel!]!
   messages(conversationId: ID!, limit: Int! = 50): [MessageModel!]!
   myOrders(role: String!, status: String): [OrderModel!]!
   myProfile: AccountModel!

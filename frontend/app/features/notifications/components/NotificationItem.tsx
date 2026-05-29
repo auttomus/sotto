@@ -1,5 +1,5 @@
 import * as React from "react";
-import { UserPlus, ShoppingBag, MessageCircle, AtSign } from "lucide-react";
+import { UserPlus, ShoppingBag, MessageCircle, AtSign, Star } from "lucide-react";
 import { Link } from "react-router";
 import type { NotificationType } from "~/core/apollo/base-types";
 
@@ -20,6 +20,9 @@ function NotifIcon({ type, targetType }: { type: NotificationType; targetType?: 
   const base = "h-5 w-5";
   if (targetType && targetType.startsWith("CustomOffer")) {
     return <MessageCircle className={`${base} text-violet-500`} />;
+  }
+  if (targetType === "Review") {
+    return <Star className={`${base} text-amber-500`} />;
   }
   switch (type) {
     case "FOLLOW":
@@ -49,6 +52,9 @@ function getNotifMessage(type: NotificationType, fromName: string, targetType?: 
   if (targetType === "CustomOffer_Withdrawn") {
     return `${fromName} menarik penawaran khusus`;
   }
+  if (targetType === "Review") {
+    return `${fromName} memberikan ulasan untuk pesanan Anda`;
+  }
   switch (type) {
     case "FOLLOW":
       return `${fromName} mulai mengikuti Anda`;
@@ -76,6 +82,8 @@ function getTargetLink(
   }
   switch (targetType) {
     case "Order":
+      return `/workspace/order/${targetId}`;
+    case "Review":
       return `/workspace/order/${targetId}`;
     case "CustomOffer":
       return `/workspace/chat/${targetId}`;

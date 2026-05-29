@@ -1,9 +1,14 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { NotificationType } from '@prisma/client';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class ReviewsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   /** Buat review untuk order yang sudah COMPLETED */
   async createReview(
@@ -14,6 +19,7 @@ export class ReviewsService {
   ) {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
+      include: { customOffer: true },
     });
     if (!order) throw new BadRequestException('Order tidak ditemukan.');
     if (order.status !== 'COMPLETED') {
@@ -21,6 +27,11 @@ export class ReviewsService {
     }
     if (order.buyerAccountId !== reviewerAccountId) {
       throw new BadRequestException('Hanya pembeli yang bisa memberi review.');
+    }
+    if (order.customOfferId && !order.customOffer?.listingId) {
+      throw new BadRequestException(
+        'Penawaran khusus mandiri tidak dapat diberi ulasan karena bersifat privat.',
+      );
     }
 
     // Cek duplikat
@@ -53,6 +64,15 @@ export class ReviewsService {
       });
 
       return newReview;
+    });
+
+    // Notifikasi ke seller: ada review/rating baru
+    await this.notificationsService.createNotification({
+      accountId: order.sellerAccountId,
+      fromAccountId: reviewerAccountId,
+      type: NotificationType.ORDER_UPDATE,
+      targetType: 'Review',
+      targetId: orderId,
     });
 
     return review;

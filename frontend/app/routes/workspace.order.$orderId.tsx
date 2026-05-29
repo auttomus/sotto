@@ -80,13 +80,15 @@ export default function OrderRoute() {
         />
 
         {/* Ulasan & Komentar Transaksi Selesai */}
-        <OrderReviewSection
-          status={order.status}
-          review={order.review}
-          isBuyer={isBuyer}
-          onSubmitReview={handleReview}
-          reviewLoading={reviewLoading}
-        />
+        {order.isReviewable && (
+          <OrderReviewSection
+            status={order.status}
+            review={order.review}
+            isBuyer={isBuyer}
+            onSubmitReview={handleReview}
+            reviewLoading={reviewLoading}
+          />
+        )}
       </div>
 
       {/* Control Action Panel (Sticky Bottom) */}

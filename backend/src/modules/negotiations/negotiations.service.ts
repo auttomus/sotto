@@ -73,28 +73,23 @@ export class NegotiationsService {
       // 2. Resolve listingId
       let listingId = offer.listingId;
       if (!listingId) {
-        // Cari listing aktif pertama milik penjual
-        const activeListing = await tx.listing.findFirst({
-          where: { accountId: offer.sellerAccountId, status: 'ACTIVE' },
+        // SELALU buat listing fallback/private khusus untuk standalone custom offer agar judul/deskripsi tetap akurat
+        const cleanTitle =
+          offer.description.split('\n')[0].trim().slice(0, 80) ||
+          `Jasa Kustom (${offer.deliveryTimeDays} Hari)`;
+        const fallbackListing = await tx.listing.create({
+          data: {
+            accountId: offer.sellerAccountId,
+            title: cleanTitle,
+            description:
+              offer.description ||
+              'Pengerjaan kustom disepakati melalui obrolan chat',
+            price: offer.proposedPrice,
+            status: 'ARCHIVED',
+            isUnlimited: true,
+          },
         });
-        if (activeListing) {
-          listingId = activeListing.id;
-        } else {
-          // Buat listing dummy/fallback jika penjual belum punya listing aktif sama sekali
-          const fallbackListing = await tx.listing.create({
-            data: {
-              accountId: offer.sellerAccountId,
-              title: `Jasa Kustom (${offer.deliveryTimeDays} Hari)`,
-              description:
-                offer.description ||
-                'Pengerjaan kustom disepakati melalui obrolan chat',
-              price: offer.proposedPrice,
-              status: 'ARCHIVED',
-              isUnlimited: true,
-            },
-          });
-          listingId = fallbackListing.id;
-        }
+        listingId = fallbackListing.id;
       }
 
       // 3. Create the Order

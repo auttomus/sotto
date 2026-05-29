@@ -35,6 +35,9 @@ export class OrderModel {
   @Field(() => OrderStatus)
   status: OrderStatus;
 
+  @Field(() => Boolean)
+  isReviewable?: boolean;
+
   @Field(() => AccountModel, { nullable: true })
   buyer?: AccountModel;
 
