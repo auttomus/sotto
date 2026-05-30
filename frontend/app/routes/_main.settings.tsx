@@ -1,64 +1,100 @@
 import * as React from "react";
 import { useNavigate } from "react-router";
-import { User, ChevronRight } from "lucide-react";
+import { User } from "lucide-react";
 import { useThemeStore } from "~/core/store/useThemeStore";
 import { useAuthStore } from "~/core/store/useAuthStore";
 import { ThemeSelector } from "~/features/settings/components/ThemeSelector";
 import { LogoutButton } from "~/features/settings/components/LogoutButton";
+import { AboutCard } from "~/features/settings/components/AboutCard";
+import { SupportCard } from "~/features/settings/components/SupportCard";
 import { PageHeader } from "~/components/layout/PageHeader";
+import { Avatar } from "~/components/ui/Avatar";
+import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
 
 export default function SettingsRoute() {
   const navigate = useNavigate();
   const { isDark, toggleTheme } = useThemeStore();
   const { user } = useAuthStore();
+  const [activeTab, setActiveTab] = React.useState<"umum" | "info">("umum");
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      <PageHeader title="Pengaturan & Lainnya" showBackButton />
+    <div className="flex flex-col min-h-screen bg-background pb-20">
+      <PageHeader 
+        title="Pengaturan & Lainnya" 
+        showBackButton 
+        tabs={
+          <div className="flex w-full border-t border-border bg-card">
+            <button
+              onClick={() => setActiveTab("umum")}
+              className={`flex-1 py-3 text-center text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                activeTab === "umum"
+                  ? "text-primary border-b-2 border-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Umum
+            </button>
+            <button
+              onClick={() => setActiveTab("info")}
+              className={`flex-1 py-3 text-center text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                activeTab === "info"
+                  ? "text-primary border-b-2 border-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Tentang & Bantuan
+            </button>
+          </div>
+        }
+      />
 
       {/* Content */}
       <div className="p-4 space-y-6 max-w-lg mx-auto w-full">
-        {/* Profile Card Summary */}
-        {user && (
-          <div className="flex items-center gap-3 p-4 bg-card rounded-sm border border-border">
-            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg uppercase">
-              {user.displayName[0]}
-            </div>
-            <div>
-              <h2 className="font-bold text-foreground text-sm leading-tight">{user.displayName}</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">@{user.username}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Theme Settings */}
-        <ThemeSelector isDark={isDark} toggleTheme={toggleTheme} />
-
-        {/* Menu Tautan */}
-        <section className="space-y-3">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Menu & Akun</h2>
-          <div className="space-y-2">
-            <button 
-              onClick={() => navigate("/profile")} 
-              className="w-full flex items-center justify-between p-4 bg-card hover:bg-accent/5 rounded-sm border border-border transition group cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-sm bg-muted text-foreground">
-                  <User className="h-5 w-5" />
+        {activeTab === "umum" ? (
+          <>
+            {/* Profile Card Summary */}
+            {user && (
+              <div className="flex items-center justify-between p-4 bg-card rounded-sm border border-border">
+                <div className="flex items-center gap-3 min-w-0">
+                  <Avatar 
+                    src={resolveMediaUrl(user.avatarObjectKey)} 
+                    alt={user.displayName} 
+                    size="md" 
+                    className="h-12 w-12 text-lg uppercase font-bold shrink-0" 
+                  />
+                  <div className="min-w-0">
+                    <h2 className="font-bold text-foreground text-sm leading-tight truncate">{user.displayName}</h2>
+                    <p className="text-xs text-muted-foreground mt-0.5 truncate">@{user.username}</p>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <h3 className="font-bold text-xs text-foreground">Edit Profil</h3>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">Ganti avatar, bio, atau nama tampilan</p>
-                </div>
+                
+                <button 
+                  onClick={() => navigate("/profile?edit=true", { state: { edit: true } })} 
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border border-border hover:bg-accent rounded-sm text-foreground transition cursor-pointer active:scale-95 shrink-0"
+                >
+                  <User className="h-3.5 w-3.5" />
+                  Edit Profil
+                </button>
               </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
-            </button>
-          </div>
-        </section>
+            )}
 
-        {/* Logout Button */}
-        <LogoutButton />
+            {/* Theme Settings */}
+            <ThemeSelector isDark={isDark} toggleTheme={toggleTheme} />
+
+            {/* Logout Button */}
+            <LogoutButton />
+          </>
+        ) : (
+          <>
+            {/* Tentang Aplikasi */}
+            <AboutCard />
+
+            {/* Hubungi Dukungan & Saran */}
+            <SupportCard />
+          </>
+        )}
       </div>
     </div>
   );
 }
+

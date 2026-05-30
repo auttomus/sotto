@@ -78,7 +78,7 @@ export function SearchResults({
               <Link 
                 to={`/profile/${account.username}`} 
                 key={account.id} 
-                className="bg-card rounded-sm p-5 border border-border shadow-sm flex flex-col items-center text-center hover:shadow-md hover:bg-accent/5 transition-all hover:-translate-y-0.5 cursor-pointer group"
+                className="bg-card rounded-sm p-5 border border-border shadow-sm flex flex-col items-center text-center hover:shadow-md hover:border-primary/50 transition-all cursor-pointer group"
               >
                 <div className="h-16 w-16 rounded-full bg-muted mb-3 overflow-hidden border-2 border-border shadow-inner shrink-0 group-hover:scale-105 transition duration-200">
                   {account.avatarObjectKey ? (
