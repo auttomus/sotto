@@ -5,6 +5,7 @@
 type AccountModel {
   avatarObjectKey: String
   avatarUrl: String
+  bannerObjectKey: String
   createdAt: DateTime!
   displayName: String!
   followersCount: String!
@@ -390,6 +391,7 @@ input UpdatePostInput {
 
 input UpdateProfileInput {
   avatarObjectKey: String
+  bannerObjectKey: String
   displayName: String
   note: String
 }

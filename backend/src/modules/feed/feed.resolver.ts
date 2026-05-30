@@ -45,6 +45,7 @@ export class FeedResolver {
           accountId,
           input.inReplyToPostId,
           input.content,
+          input.linkedServiceId ? input.linkedServiceId : undefined,
         )
       : await this.feedService.createPost(
           accountId,

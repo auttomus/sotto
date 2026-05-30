@@ -10,11 +10,17 @@ export default function PostDetailRoute() {
 
   const {
     post,
+    parentPost,
+    parentLoading,
     replies,
     postLoading,
     repliesLoading,
     replyText,
     setReplyText,
+    replyFiles,
+    setReplyFiles,
+    replyListingId,
+    setReplyListingId,
     submitting,
     handleReplySubmit,
     currentUser
@@ -42,10 +48,16 @@ export default function PostDetailRoute() {
   return (
     <ThreadDetail
       post={post}
+      parentPost={parentPost}
+      parentLoading={parentLoading}
       replies={replies}
       repliesLoading={repliesLoading}
       replyText={replyText}
       setReplyText={setReplyText}
+      replyFiles={replyFiles}
+      setReplyFiles={setReplyFiles}
+      replyListingId={replyListingId}
+      setReplyListingId={setReplyListingId}
       submitting={submitting}
       handleReplySubmit={handleReplySubmit}
       currentUser={currentUser}

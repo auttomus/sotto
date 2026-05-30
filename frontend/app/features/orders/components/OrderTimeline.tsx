@@ -111,9 +111,6 @@ export function OrderTimeline({
                         value={order.status}
                         icon={getStatusIcon(order.status) || undefined}
                       />
-                      <span className="text-xs text-muted-foreground font-medium">
-                        {isBuyer ? "Pembelian" : "Penjualan"} 
-                      </span>
                     </div>
                     <span className="text-xs text-muted-foreground font-medium">{formatDate(order.createdAt)}</span>
                   </div>
@@ -121,7 +118,7 @@ export function OrderTimeline({
                   <div className="flex gap-4">
                     <div className="flex flex-col flex-1">
                       <h4 className="font-semibold text-foreground text-sm mb-1 group-hover:text-primary transition">
-                        Order #{order.id.slice(0, 8)}
+                        {isBuyer ? "Pembelian" : "Penjualan"} #{order.id.slice(0, 8)}
                       </h4>
                       <div className="mt-auto flex justify-between items-end">
                         <span className="text-xs text-muted-foreground">Listing: {order.listingId?.slice(0, 8)}...</span>

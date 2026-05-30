@@ -18,6 +18,7 @@ export type AccountModel = {
   __typename?: 'AccountModel';
   avatarObjectKey?: Maybe<Scalars['String']['output']>;
   avatarUrl?: Maybe<Scalars['String']['output']>;
+  bannerObjectKey?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   displayName: Scalars['String']['output'];
   followersCount: Scalars['String']['output'];
@@ -694,6 +695,7 @@ export type UpdatePostInput = {
 
 export type UpdateProfileInput = {
   avatarObjectKey?: InputMaybe<Scalars['String']['input']>;
+  bannerObjectKey?: InputMaybe<Scalars['String']['input']>;
   displayName?: InputMaybe<Scalars['String']['input']>;
   note?: InputMaybe<Scalars['String']['input']>;
 };

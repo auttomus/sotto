@@ -1,19 +1,24 @@
 import * as React from "react";
-import { useNavigate } from "react-router";
-import { Loader2, Send } from "lucide-react";
-import { Avatar } from "~/components/ui/Avatar";
+import { Loader2 } from "lucide-react";
 import { PostCard } from "~/features/feed/components/PostCard";
-import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
 import { PageHeader } from "~/components/layout/PageHeader";
-import { MentionSuggestions } from "~/components/ui/MentionSuggestions";
 import { useToastStore } from "~/core/store/useToastStore";
+import { useGetMyProfileQuery, useGetListingsByAccountQuery } from "~/core/apollo/generated";
+import { ReplyInputForm } from "./threaddetail/ReplyInputForm";
+import { ListingSelectorDrawer } from "./threaddetail/ListingSelectorDrawer";
 
 interface ThreadDetailProps {
   post: any;
+  parentPost?: any;
+  parentLoading?: boolean;
   replies: any[];
   repliesLoading: boolean;
   replyText: string;
   setReplyText: (text: string) => void;
+  replyFiles: File[];
+  setReplyFiles: (files: File[]) => void;
+  replyListingId: string | null;
+  setReplyListingId: (id: string | null) => void;
   submitting: boolean;
   handleReplySubmit: (e: React.FormEvent) => void;
   currentUser: any;
@@ -25,13 +30,28 @@ export function ThreadDetail({
   repliesLoading,
   replyText,
   setReplyText,
+  replyFiles,
+  setReplyFiles,
+  replyListingId,
+  setReplyListingId,
   submitting,
   handleReplySubmit,
   currentUser,
 }: ThreadDetailProps) {
-  const navigate = useNavigate();
   const addToast = useToastStore((s) => s.addToast);
-  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+  const [showListingSelector, setShowListingSelector] = React.useState(false);
+
+  // Fetch current user listings for the offer selector drawer
+  const { data: profileData } = useGetMyProfileQuery({ skip: !currentUser });
+  const accountId = profileData?.myProfile?.id;
+
+  const { data: listingsData, loading: listingsLoading } = useGetListingsByAccountQuery({
+    variables: { accountId: accountId || "" },
+    skip: !accountId || !showListingSelector,
+  });
+
+  const activeListings = listingsData?.listingsByAccount?.filter((l: any) => l.status === "ACTIVE") || [];
+  const selectedListing = activeListings.find((l: any) => l.id === replyListingId);
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,51 +68,29 @@ export function ThreadDetail({
       <PageHeader title="Utasan" showBackButton />
 
       {/* Main Post Card */}
-      <div className="border-b border-border">
+      <div className="border-b border-border bg-card relative z-10">
         <PostCard post={post} />
       </div>
 
-      {/* Input reply (X-style) */}
+      {/* Input reply form editor */}
       {currentUser && (
-        <div className="p-4 border-b border-border bg-muted/30">
-          <form onSubmit={onSubmit} className="flex gap-3 items-start">
-            <Avatar src={resolveMediaUrl(currentUser.avatarObjectKey)} size="sm" />
-            <div className="flex-1 relative">
-              <textarea
-                ref={textareaRef}
-                value={replyText}
-                onChange={(e) => setReplyText(e.target.value)}
-                placeholder="Balas postingan ini..."
-                rows={2}
-                className="w-full bg-transparent border-0 resize-none text-foreground placeholder-muted-foreground focus:ring-0 text-sm focus:outline-none font-medium leading-relaxed mb-1"
-              />
-              <MentionSuggestions
-                value={replyText}
-                onChange={setReplyText}
-                inputRef={textareaRef}
-              />
-              <div className="flex justify-end border-t border-border pt-2.5 mt-1">
-                <button
-                   type="submit"
-                   disabled={!replyText.trim() || submitting}
-                   className="px-4 py-1.5 rounded-full bg-primary hover:opacity-90 disabled:opacity-50 text-primary-foreground font-semibold text-xs transition flex items-center gap-1.5 cursor-pointer active:scale-[0.97]"
-                >
-                  {submitting ? (
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                  ) : (
-                    <Send className="h-3 w-3" />
-                  )}
-                  Balas
-                </button>
-              </div>
-            </div>
-          </form>
-        </div>
+        <ReplyInputForm
+          currentUser={currentUser}
+          replyText={replyText}
+          setReplyText={setReplyText}
+          replyFiles={replyFiles}
+          setReplyFiles={setReplyFiles}
+          selectedListing={selectedListing}
+          setReplyListingId={setReplyListingId}
+          submitting={submitting}
+          onSubmit={onSubmit}
+          setShowListingSelector={setShowListingSelector}
+        />
       )}
 
       {/* Replies Header */}
       {replies.length > 0 && (
-        <div className="px-4 py-3 bg-muted/50 border-b border-border text-xs font-semibold text-muted-foreground tracking-wider">
+        <div className="px-4 py-3 bg-background border-b border-border text-xs font-semibold text-muted-foreground tracking-wider">
           BALASAN ({replies.length})
         </div>
       )}
@@ -110,11 +108,21 @@ export function ThreadDetail({
         ) : (
           replies.map((reply) => (
             <div key={reply.postId} className="hover:bg-gray-50/10 transition duration-150">
-              <PostCard post={reply} />
+              <PostCard post={reply} hideAncestors={true} />
             </div>
           ))
         )}
       </div>
+
+      {/* Offer/Listing Selector Popover Drawer */}
+      <ListingSelectorDrawer
+        isOpen={showListingSelector}
+        onClose={() => setShowListingSelector(false)}
+        listingsLoading={listingsLoading}
+        activeListings={activeListings}
+        replyListingId={replyListingId}
+        setReplyListingId={setReplyListingId}
+      />
     </div>
   );
 }

@@ -7,7 +7,8 @@ export type LabelBadgeVariant =
   | "listing-service"
   | "school"
   | "order-status"
-  | "offer-status";
+  | "offer-status"
+  | "reply";
 
 export interface LabelBadgeProps {
   variant: LabelBadgeVariant;
@@ -25,6 +26,11 @@ export function LabelBadge({ variant, value, className, icon }: LabelBadgeProps)
   const baseClasses = "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider border transition-all duration-200";
 
   switch (variant) {
+    case "reply":
+      displayValue = value;
+      colorClasses = "bg-primary/10 text-primary border-primary/20 normal-case";
+      break;
+
     case "tag":
       // Tags are prefix `#`
       displayValue = value.startsWith("#") ? value : `#${value}`;

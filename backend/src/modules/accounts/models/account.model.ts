@@ -29,6 +29,9 @@ export class AccountModel {
   @Field(() => String, { nullable: true })
   avatarUrl?: string | null; // Resolved: presigned/public URL
 
+  @Field(() => String, { nullable: true })
+  bannerObjectKey?: string | null;
+
   /** BigInt serialized to string */
   @Field()
   followersCount: string;

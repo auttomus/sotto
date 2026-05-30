@@ -70,6 +70,7 @@ model Account {
 
   note            String? @db.Text
   avatarObjectKey String? @map("avatar_object_key")
+  bannerObjectKey String? @map("banner_object_key")
 
   followersCount BigInt  @default(0) @map("followers_count")
   followingCount BigInt  @default(0) @map("following_count")
