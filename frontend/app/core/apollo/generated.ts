@@ -176,14 +176,14 @@ export type GetListingDetailQueryVariables = Exact<{
 }>;
 
 
-export type GetListingDetailQuery = { listing: { id: string, title: string, description: string, price: number, status: Types.ListingStatus, type: Types.ListingType, isUnlimited: boolean, deliveryTimeDays: number | null, createdAt: string, updatedAt: string, accountId: string, isLikedByMe: boolean, likesCount: number, averageRating: number, reviewsCount: number, account: { displayName: string, major: string | null, trustScore: number, username: string | null, avatarObjectKey: string | null } | null, media: Array<{ id: string, fileName: string, contentType: string, objectKey: string, url: string | null, isPrivate: boolean }> | null, reviews: Array<{ id: string, rating: number, comment: string | null, createdAt: string, reviewer: { displayName: string, username: string, avatarObjectKey: string | null } | null }> | null } | null };
+export type GetListingDetailQuery = { listing: { id: string, title: string, description: string, price: number, status: Types.ListingStatus, type: Types.ListingType, isUnlimited: boolean, deliveryTimeDays: number | null, digitalFileObjectKey: string | null, digitalLink: string | null, createdAt: string, updatedAt: string, accountId: string, isLikedByMe: boolean, likesCount: number, averageRating: number, reviewsCount: number, account: { displayName: string, major: string | null, trustScore: number, username: string | null, avatarObjectKey: string | null } | null, media: Array<{ id: string, fileName: string, contentType: string, objectKey: string, url: string | null, isPrivate: boolean }> | null, reviews: Array<{ id: string, rating: number, comment: string | null, createdAt: string, reviewer: { displayName: string, username: string, avatarObjectKey: string | null } | null }> | null } | null };
 
 export type CreateListingMutationVariables = Exact<{
   input: Types.CreateListingInput;
 }>;
 
 
-export type CreateListingMutation = { createListing: { id: string, title: string, description: string, price: number, status: Types.ListingStatus } };
+export type CreateListingMutation = { createListing: { id: string, title: string, description: string, price: number, status: Types.ListingStatus, digitalFileObjectKey: string | null, digitalLink: string | null } };
 
 export type UpdateListingMutationVariables = Exact<{
   id: string | number;
@@ -191,7 +191,7 @@ export type UpdateListingMutationVariables = Exact<{
 }>;
 
 
-export type UpdateListingMutation = { updateListing: { id: string, title: string, description: string, price: number, status: Types.ListingStatus, updatedAt: string } };
+export type UpdateListingMutation = { updateListing: { id: string, title: string, description: string, price: number, status: Types.ListingStatus, digitalFileObjectKey: string | null, digitalLink: string | null, updatedAt: string } };
 
 export type DeleteListingMutationVariables = Exact<{
   id: string | number;
@@ -1509,6 +1509,8 @@ export const GetListingDetailDocument = gql`
     type
     isUnlimited
     deliveryTimeDays
+    digitalFileObjectKey
+    digitalLink
     createdAt
     updatedAt
     accountId
@@ -1589,6 +1591,8 @@ export const CreateListingDocument = gql`
     description
     price
     status
+    digitalFileObjectKey
+    digitalLink
   }
 }
     `;
@@ -1626,6 +1630,8 @@ export const UpdateListingDocument = gql`
     description
     price
     status
+    digitalFileObjectKey
+    digitalLink
     updatedAt
   }
 }

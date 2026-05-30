@@ -62,6 +62,12 @@ export class ListingModel {
   @Field()
   isUnlimited: boolean;
 
+  @Field(() => String, { nullable: true })
+  digitalFileObjectKey?: string | null;
+
+  @Field(() => String, { nullable: true })
+  digitalLink?: string | null;
+
   @Field(() => ID)
   accountId: string;
 

@@ -89,8 +89,18 @@ export function useChatRoom({ conversationId }: UseChatRoomOptions) {
     }
   };
 
+  const [recipientLastReadId, setRecipientLastReadId] = React.useState<string | null>(null);
+  const [isRecipientTyping, setIsRecipientTyping] = React.useState(false);
+
+  // Sync recipient last read ID from Apollo Cache
+  React.useEffect(() => {
+    if (recipient?.lastReadMessageId) {
+      setRecipientLastReadId(recipient.lastReadMessageId);
+    }
+  }, [recipient?.lastReadMessageId, recipient]);
+
   // Real-time messaging via Socket.io
-  const { sendMessage: socketSendMessage, sendTyping } = useChatSocket({
+  const { sendMessage: socketSendMessage, sendTyping, sendRead } = useChatSocket({
     conversationId,
     onNewMessage: (message) => {
       // Only add if not from us (our own messages are added optimistically)
@@ -98,6 +108,16 @@ export function useChatRoom({ conversationId }: UseChatRoomOptions) {
         setLocalMessages((prev) => [...prev, message]);
       }
     },
+    onUserTyping: (data) => {
+      if (data.accountId === recipient?.accountId) {
+        setIsRecipientTyping(data.isTyping);
+      }
+    },
+    onConversationRead: (data) => {
+      if (data.accountId === recipient?.accountId) {
+        setRecipientLastReadId(data.lastReadMessageId);
+      }
+    }
   });
 
   const allMessages = React.useMemo(() => {
@@ -141,8 +161,9 @@ export function useChatRoom({ conversationId }: UseChatRoomOptions) {
       markConversationAsRead({ variables: { conversationId } }).catch((err) => {
         console.error("Gagal menandai pesan sebagai terbaca:", err);
       });
+      sendRead();
     }
-  }, [conversationId, allMessages.length, markConversationAsRead]);
+  }, [conversationId, allMessages.length, markConversationAsRead, sendRead]);
 
   const handleSend = async () => {
     if (!inputText.trim() && selectedImages.length === 0 && !selectedListing) return;
@@ -172,8 +193,9 @@ export function useChatRoom({ conversationId }: UseChatRoomOptions) {
       }
 
       // Optimistic UI update
+      const localId = `local-${Date.now()}`;
       const newMsg = {
-        messageId: `local-${Date.now()}`,
+        messageId: localId,
         senderId: user?.accountId,
         content,
         createdAt: new Date().toISOString(),
@@ -186,7 +208,11 @@ export function useChatRoom({ conversationId }: UseChatRoomOptions) {
       setSelectedListing(null);
 
       // Send via WebSocket
-      socketSendMessage(content, mediaIds);
+      socketSendMessage(content, mediaIds, (serverMsg) => {
+        setLocalMessages((prev) =>
+          prev.map((msg) => (msg.messageId === localId ? serverMsg : msg))
+        );
+      });
       sendTyping(false);
     } catch (err) {
       console.error("Gagal mengirim pesan / gambar", err);
@@ -216,10 +242,10 @@ export function useChatRoom({ conversationId }: UseChatRoomOptions) {
   };
 
   const recipientLastReadTime = React.useMemo(() => {
-    if (!recipient?.lastReadMessageId) return null;
-    const match = allMessages.find((m: any) => m.messageId === recipient.lastReadMessageId);
+    if (!recipientLastReadId) return null;
+    const match = allMessages.find((m: any) => m.messageId === recipientLastReadId);
     return match ? new Date(match.createdAt).getTime() : null;
-  }, [recipient?.lastReadMessageId, allMessages]);
+  }, [recipientLastReadId, allMessages]);
 
   return {
     inputText,
@@ -246,5 +272,6 @@ export function useChatRoom({ conversationId }: UseChatRoomOptions) {
     editMessage,
     deleteMessage,
     recipientLastReadTime,
+    isRecipientTyping,
   };
 }

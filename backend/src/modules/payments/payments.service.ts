@@ -169,12 +169,18 @@ export class PaymentsService {
       transaction_status === 'settlement' ||
       transaction_status === 'capture'
     ) {
+      const listing = await this.prisma.listing.findUnique({
+        where: { id: order.listingId },
+      });
+      const isDigital = listing?.type === 'DIGITAL_PRODUCT';
+      const nextStatus = isDigital ? 'COMPLETED' : 'IN_PROGRESS';
+
       const updatedOrder = await this.prisma.order.update({
         where: { id: orderId },
-        data: { status: 'IN_PROGRESS' },
+        data: { status: nextStatus },
       });
       this.logger.log(
-        `Order ${orderId} diverifikasi DIBAYAR via Status API. Status → IN_PROGRESS.`,
+        `Order ${orderId} diverifikasi DIBAYAR via Status API. Status → ${nextStatus}.`,
       );
 
       // Notifikasi ke seller: pembayaran diterima
@@ -198,7 +204,7 @@ export class PaymentsService {
         payload,
       );
 
-      return 'IN_PROGRESS';
+      return nextStatus;
     } else if (
       transaction_status === 'deny' ||
       transaction_status === 'cancel' ||

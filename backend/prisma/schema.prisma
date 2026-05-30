@@ -121,6 +121,9 @@ model Listing {
   status      ListingStatus @default(ACTIVE)
   lockVersion Int           @default(0) @map("lock_version")
 
+  digitalFileObjectKey String? @map("digital_file_object_key")
+  digitalLink          String? @map("digital_link")
+
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")

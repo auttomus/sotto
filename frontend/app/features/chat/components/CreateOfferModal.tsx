@@ -175,7 +175,6 @@ export function CreateOfferModal({
                       )}
                     </div>
                     <div className="flex flex-col min-w-0 flex-1">
-                      <span className="text-[9px] text-primary font-bold uppercase tracking-wider leading-none mb-0.5">Penawaran Diskon Listing</span>
                       <h4 className="text-xs font-bold text-foreground truncate leading-tight mb-0.5">{linkedListing.title}</h4>
                       <span className="text-[10px] text-muted-foreground font-semibold leading-tight">
                         Harga Asli: Rp {Number(linkedListing.price).toLocaleString("id-ID")}

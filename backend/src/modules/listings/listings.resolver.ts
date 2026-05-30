@@ -22,6 +22,7 @@ import { MediaService } from '../media/media.service';
 import { MediaAttachmentModel } from '../media/models/media-attachment.model';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ReviewModel } from '../orders/models/order.model';
+import { MinioService } from '../../infrastructure/minio/minio.service';
 
 @Resolver(() => ListingModel)
 export class ListingsResolver {
@@ -29,6 +30,7 @@ export class ListingsResolver {
     private readonly listingsService: ListingsService,
     private readonly mediaService: MediaService,
     private readonly prisma: PrismaService,
+    private readonly minio: MinioService,
   ) {}
 
   @Mutation(() => ListingModel)
@@ -81,6 +83,34 @@ export class ListingsResolver {
   @ResolveField(() => [MediaAttachmentModel])
   async media(@Parent() listing: ListingModel) {
     return this.mediaService.getMediaForObject('Listing', listing.id);
+  }
+
+  @ResolveField(() => String, { nullable: true })
+  async digitalFileObjectKey(
+    @Parent() listing: ListingModel,
+  ): Promise<string | null> {
+    if (!listing.digitalFileObjectKey) return null;
+    try {
+      if (
+        listing.digitalFileObjectKey.startsWith('http://') ||
+        listing.digitalFileObjectKey.startsWith('https://')
+      ) {
+        return listing.digitalFileObjectKey;
+      }
+      const downloadUrl = await this.minio.getPresignedDownloadUrl(
+        listing.digitalFileObjectKey,
+        true,
+      );
+      if (downloadUrl.includes('http://minio:9000')) {
+        return downloadUrl.replace(
+          'http://minio:9000',
+          'http://localhost:9000',
+        );
+      }
+      return downloadUrl;
+    } catch {
+      return null;
+    }
   }
 
   @ResolveField(() => Boolean)

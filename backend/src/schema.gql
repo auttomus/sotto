@@ -65,6 +65,8 @@ input CreateListingInput {
   basePrice: Float!
   deliveryTimeDays: Int
   description: String!
+  digitalFileObjectKey: String
+  digitalLink: String
   isUnlimited: Boolean = false
   maxActiveOrders: Int
   mediaIds: [ID!]
@@ -124,6 +126,8 @@ type ListingModel {
   createdAt: DateTime!
   deliveryTimeDays: Int
   description: String!
+  digitalFileObjectKey: String
+  digitalLink: String
   id: ID!
   isLikedByMe: Boolean!
   isUnlimited: Boolean!
@@ -371,6 +375,8 @@ input UpdateListingInput {
   basePrice: Float
   deliveryTimeDays: Int
   description: String
+  digitalFileObjectKey: String
+  digitalLink: String
   isUnlimited: Boolean
   maxActiveOrders: Int
   mediaIds: [ID!]

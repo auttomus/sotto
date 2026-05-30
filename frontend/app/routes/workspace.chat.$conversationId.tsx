@@ -35,6 +35,7 @@ export default function ChatRoute() {
     editMessage,
     deleteMessage,
     recipientLastReadTime,
+    isRecipientTyping,
   } = useChatRoom({ conversationId: conversationId as string });
 
   const [isListingModalOpen, setIsListingModalOpen] = React.useState(false);
@@ -104,6 +105,23 @@ export default function ChatRoute() {
               onDelete={deleteMessage}
             />
           ))}
+
+          {/* Typing Indicator */}
+          {isRecipientTyping && (
+            <div className="flex gap-2 max-w-[85%] animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <Avatar 
+                src={recipient?.avatarObjectKey ? resolveMediaUrl(recipient.avatarObjectKey) : ""} 
+                size="sm" 
+                className="mt-auto shrink-0 h-6 w-6" 
+              />
+              <div className="p-3 bg-card border border-border text-foreground rounded-sm rounded-bl-none shadow-sm flex items-center gap-1.5 min-h-[36px]">
+                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+            </div>
+          )}
+
           <div ref={messagesEndRef} />
         </div>
 

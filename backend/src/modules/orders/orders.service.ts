@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateOrderInput } from './dto/create-order.input';
-import { OrderStatus, NotificationType } from '@prisma/client';
+import { OrderStatus, NotificationType, ListingType } from '@prisma/client';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationsGateway } from '../notifications/notifications.gateway';
 
@@ -38,7 +38,7 @@ export class OrdersService {
         agreedPrice: input.agreedPrice,
         status:
           input.agreedPrice <= 0
-            ? OrderStatus.IN_PROGRESS
+            ? (listing.type === ListingType.DIGITAL_PRODUCT ? OrderStatus.COMPLETED : OrderStatus.IN_PROGRESS)
             : OrderStatus.PENDING_PAYMENT,
       },
     });

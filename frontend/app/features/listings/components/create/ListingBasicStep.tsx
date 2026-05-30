@@ -1,4 +1,5 @@
 import { useCreateStore } from "~/features/create/store/useCreateStore";
+import { Wrench, Package } from "lucide-react";
 
 export function ListingBasicStep() {
   const { listingData, updateListingData } = useCreateStore();
@@ -21,7 +22,9 @@ export function ListingBasicStep() {
         >
           <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-3 ${
             listingData.type === 'SERVICE' ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'
-          }`}>🛠️</div>
+          }`}>
+            <Wrench className="h-4 w-4" />
+          </div>
           <h3 className={`font-bold ${listingData.type === 'SERVICE' ? 'text-primary' : 'text-foreground'}`}>Jasa</h3>
           <p className="text-xs text-muted-foreground mt-1">Pengerjaan project, desain, tugas, dll.</p>
         </button>
@@ -36,7 +39,9 @@ export function ListingBasicStep() {
         >
           <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-3 ${
             listingData.type === 'DIGITAL_PRODUCT' ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'
-          }`}>📦</div>
+          }`}>
+            <Package className="h-4 w-4" />
+          </div>
           <h3 className={`font-bold ${listingData.type === 'DIGITAL_PRODUCT' ? 'text-primary' : 'text-foreground'}`}>Produk Digital</h3>
           <p className="text-xs text-muted-foreground mt-1">E-book, template, source code, dll.</p>
         </button>

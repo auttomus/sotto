@@ -27,6 +27,12 @@ export function useCreateListingLogic(resetStore: () => void) {
         mediaIds.push(result.id);
       }
 
+      let digitalFileObjectKey: string | undefined = undefined;
+      if (listingData.digitalFile) {
+        const uploadRes = await uploadFile(listingData.digitalFile, 'Listing', undefined, true);
+        digitalFileObjectKey = uploadRes.objectKey;
+      }
+
       await createListing({
         variables: {
           input: {
@@ -37,7 +43,9 @@ export function useCreateListingLogic(resetStore: () => void) {
             isUnlimited: listingData.isUnlimited,
             deliveryTimeDays: listingData.type === 'SERVICE' ? listingData.deliveryTimeDays : null,
             maxActiveOrders: listingData.isUnlimited ? null : listingData.maxActiveOrders,
-            mediaIds: mediaIds.length > 0 ? mediaIds : undefined
+            mediaIds: mediaIds.length > 0 ? mediaIds : undefined,
+            digitalFileObjectKey,
+            digitalLink: listingData.digitalLink ? listingData.digitalLink : undefined,
           }
         },
         refetchQueries: ['GetListings', 'GetListingsByAccount']

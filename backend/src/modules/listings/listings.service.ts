@@ -25,6 +25,8 @@ type SerializedListing = {
   deliveryTimeDays: number | null;
   maxActiveOrders: number | null;
   isUnlimited: boolean;
+  digitalFileObjectKey?: string | null;
+  digitalLink?: string | null;
   category?: string | null;
   accountId: string;
   createdAt: Date;
@@ -70,6 +72,8 @@ export class ListingsService {
       deliveryTimeDays: listing.deliveryTimeDays,
       maxActiveOrders: listing.maxActiveOrders,
       isUnlimited: listing.isUnlimited,
+      digitalFileObjectKey: listing.digitalFileObjectKey,
+      digitalLink: listing.digitalLink,
       accountId: listing.accountId,
       createdAt: listing.createdAt,
       updatedAt: listing.updatedAt,
@@ -100,6 +104,8 @@ export class ListingsService {
         deliveryTimeDays: input.deliveryTimeDays,
         maxActiveOrders: input.maxActiveOrders,
         isUnlimited: input.isUnlimited ?? false,
+        digitalFileObjectKey: input.digitalFileObjectKey,
+        digitalLink: input.digitalLink,
         accountId: accountId,
       },
       include: {
@@ -184,6 +190,12 @@ export class ListingsService {
         }),
         ...(input.isUnlimited !== undefined && {
           isUnlimited: input.isUnlimited,
+        }),
+        ...(input.digitalFileObjectKey !== undefined && {
+          digitalFileObjectKey: input.digitalFileObjectKey,
+        }),
+        ...(input.digitalLink !== undefined && {
+          digitalLink: input.digitalLink,
         }),
         lockVersion: { increment: 1 },
       },

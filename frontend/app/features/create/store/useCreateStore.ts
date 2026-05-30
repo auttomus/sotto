@@ -26,6 +26,8 @@ export interface CreateState {
     isUnlimited: boolean;
     deliveryTimeDays: number;
     maxActiveOrders: number | null;
+    digitalFile: File | null;
+    digitalLink: string;
   };
   listingFiles: File[];
 
@@ -54,6 +56,8 @@ const initialListingData = {
   isUnlimited: false,
   deliveryTimeDays: 1,
   maxActiveOrders: 5,
+  digitalFile: null as File | null,
+  digitalLink: "",
 };
 
 export const useCreateStore = create<CreateState>((set) => ({
