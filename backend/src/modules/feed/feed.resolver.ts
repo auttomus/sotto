@@ -314,6 +314,45 @@ export class FeedResolver {
     return this.feedService.isLikedByMe(user.accountId, post.postId);
   }
 
+  @ResolveField(() => [PostModel])
+  async ancestors(@Parent() post: PostModel): Promise<PostModel[]> {
+    const list: PostModel[] = [];
+    let currentInReplyTo = post.inReplyToPostId;
+
+    const visited = new Set<string>();
+    visited.add(post.postId);
+
+    while (currentInReplyTo) {
+      if (visited.has(currentInReplyTo)) break;
+      visited.add(currentInReplyTo);
+
+      const parentPost = await this.feedService.getPost(currentInReplyTo);
+      if (!parentPost || parentPost.deletedAt) break;
+
+      const author = await this.prisma.account.findUnique({
+        where: { id: parentPost.authorId },
+        select: {
+          displayName: true,
+          username: true,
+          avatarObjectKey: true,
+          school: { select: { name: true } },
+        },
+      });
+
+      list.unshift({
+        ...parentPost,
+        authorDisplayName: author?.displayName,
+        authorUsername: author?.username,
+        authorAvatarObjectKey: author?.avatarObjectKey,
+        authorSchoolName: author?.school?.name,
+      });
+
+      currentInReplyTo = parentPost.inReplyToPostId;
+    }
+
+    return list;
+  }
+
   @Mutation(() => Boolean)
   async toggleLikePost(
     @CurrentUser() user: CurrentUserPayload,

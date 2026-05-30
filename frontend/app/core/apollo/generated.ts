@@ -135,7 +135,7 @@ export type GetPostQueryVariables = Exact<{
 }>;
 
 
-export type GetPostQuery = { post: { postId: string, content: string, createdAt: string, editedAt: string | null, deletedAt: string | null, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, repliesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null } | null };
+export type GetPostQuery = { post: { postId: string, content: string, createdAt: string, editedAt: string | null, deletedAt: string | null, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, repliesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null, ancestors: Array<{ postId: string, content: string, createdAt: string, editedAt: string | null, deletedAt: string | null, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, repliesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null }> | null } | null };
 
 export type GetRepliesQueryVariables = Exact<{
   postId: string;
@@ -1195,6 +1195,34 @@ export const GetPostDocument = gql`
       contentType
       url
       objectKey
+    }
+    ancestors {
+      postId
+      content
+      createdAt
+      editedAt
+      deletedAt
+      authorId
+      authorDisplayName
+      authorUsername
+      authorAvatarObjectKey
+      authorSchoolName
+      linkedServiceId
+      inReplyToPostId
+      likesCount
+      repliesCount
+      likedByMe
+      tags {
+        id
+        name
+      }
+      media {
+        id
+        fileName
+        contentType
+        url
+        objectKey
+      }
     }
   }
 }

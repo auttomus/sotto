@@ -33,6 +33,25 @@ export function ChatMessageMedia({ media }: ChatMessageMediaProps) {
       <div className="mt-2 space-y-2">
         {media.map((item: any) => {
           const url = resolveMediaUrl(item.url || item.objectKey);
+          const isVideo = item.contentType?.startsWith("video/") || /\.(mp4|webm|ogg|mov)$/i.test(item.fileName || "");
+
+          if (isVideo) {
+            return (
+              <div 
+                key={item.id} 
+                className="rounded-sm overflow-hidden max-w-full bg-black border border-border max-h-[280px] flex items-center justify-center relative group/media"
+              >
+                <video
+                  src={url || ""}
+                  controls
+                  className="w-full h-auto max-h-[280px] rounded-sm select-none object-contain"
+                  preload="metadata"
+                  playsInline
+                />
+              </div>
+            );
+          }
+
           return (
             <div 
               key={item.id} 

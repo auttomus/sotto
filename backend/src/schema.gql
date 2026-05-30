@@ -276,6 +276,7 @@ enum OrderStatus {
 }
 
 type PostModel {
+  ancestors: [PostModel!]
   authorAvatarObjectKey: String
   authorDisplayName: String
   authorId: String!

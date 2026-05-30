@@ -55,4 +55,7 @@ export class PostModel {
 
   @Field(() => Boolean)
   likedByMe?: boolean;
+
+  @Field(() => [PostModel], { nullable: true })
+  ancestors?: PostModel[];
 }

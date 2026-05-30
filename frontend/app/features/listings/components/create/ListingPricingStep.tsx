@@ -69,8 +69,14 @@ export function ListingPricingStep() {
         <div className="pt-2">
           <label className="flex items-center justify-between p-4 border border-border bg-card rounded-sm cursor-pointer hover:bg-muted transition">
             <div>
-              <h4 className="font-bold text-foreground">Ketersediaan Tanpa Batas</h4>
-              <p className="text-xs text-muted-foreground mt-0.5">Bisa menerima banyak orderan sekaligus</p>
+              <h4 className="font-bold text-foreground">
+                {listingData.type === 'DIGITAL_PRODUCT' ? 'Stok Tidak Terbatas' : 'Ketersediaan Tanpa Batas'}
+              </h4>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {listingData.type === 'DIGITAL_PRODUCT' 
+                  ? 'Produk dapat dibeli berkali-kali tanpa batasan stok' 
+                  : 'Bisa menerima banyak orderan sekaligus'}
+              </p>
             </div>
             <div className="relative">
               <input 
@@ -87,7 +93,9 @@ export function ListingPricingStep() {
 
         {!listingData.isUnlimited && (
           <div className="pt-2 animate-in fade-in slide-in-from-top-2 duration-200">
-            <label className="form-label mb-1.5 block">Batas Order Aktif</label>
+            <label className="form-label mb-1.5 block">
+              {listingData.type === 'DIGITAL_PRODUCT' ? 'Jumlah Stok Tersedia' : 'Batas Order Aktif'}
+            </label>
             <div className="flex items-center gap-3">
               <input 
                 type="number" 
@@ -97,7 +105,11 @@ export function ListingPricingStep() {
                 min="1"
                 className="form-input w-24 p-3.5 text-center font-bold"
               />
-              <span className="text-xs text-muted-foreground font-medium">Batas maksimal pesanan aktif yang dapat dikerjakan secara bersamaan.</span>
+              <span className="text-xs text-muted-foreground font-medium">
+                {listingData.type === 'DIGITAL_PRODUCT'
+                  ? 'Batas maksimal produk digital ini dapat dibeli sebelum otomatis habis.'
+                  : 'Batas maksimal pesanan aktif yang dapat dikerjakan secara bersamaan.'}
+              </span>
             </div>
           </div>
         )}

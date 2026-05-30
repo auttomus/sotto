@@ -459,6 +459,7 @@ export enum OrderStatus {
 
 export type PostModel = {
   __typename?: 'PostModel';
+  ancestors?: Maybe<Array<PostModel>>;
   authorAvatarObjectKey?: Maybe<Scalars['String']['output']>;
   authorDisplayName?: Maybe<Scalars['String']['output']>;
   authorId: Scalars['String']['output'];
