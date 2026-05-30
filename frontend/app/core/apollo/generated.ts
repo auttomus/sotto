@@ -245,7 +245,7 @@ export type GetOrderDetailQueryVariables = Exact<{
 }>;
 
 
-export type GetOrderDetailQuery = { order: { id: string, status: Types.OrderStatus, agreedPrice: number, createdAt: string, buyerAccountId: string, sellerAccountId: string, listingId: string, isReviewable: boolean, buyer: { id: string, displayName: string, username: string, avatarObjectKey: string | null } | null, seller: { id: string, displayName: string, username: string, avatarObjectKey: string | null } | null, review: { id: string, rating: number, comment: string | null } | null } | null };
+export type GetOrderDetailQuery = { order: { id: string, status: Types.OrderStatus, agreedPrice: number, createdAt: string, buyerAccountId: string, sellerAccountId: string, listingId: string, isReviewable: boolean, deliveredAt: string | null, disputedAt: string | null, disputedById: string | null, complaintReason: string | null, complaintNotes: string | null, lockVersion: number, buyer: { id: string, displayName: string, username: string, avatarObjectKey: string | null } | null, seller: { id: string, displayName: string, username: string, avatarObjectKey: string | null } | null, review: { id: string, rating: number, comment: string | null } | null } | null };
 
 export type GetOffersForConversationQueryVariables = Exact<{
   conversationId: string | number;
@@ -325,6 +325,22 @@ export type CreateReviewMutationVariables = Exact<{
 
 
 export type CreateReviewMutation = { createReview: { id: string, rating: number, comment: string | null } };
+
+export type FileComplaintMutationVariables = Exact<{
+  orderId: string | number;
+  reason: string;
+  notes?: string | null | undefined;
+}>;
+
+
+export type FileComplaintMutation = { fileComplaint: { id: string, status: Types.OrderStatus } };
+
+export type RefundDisputedOrderMutationVariables = Exact<{
+  orderId: string | number;
+}>;
+
+
+export type RefundDisputedOrderMutation = { refundDisputedOrder: { id: string, status: Types.OrderStatus } };
 
 export type GetMyProfileQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1968,6 +1984,12 @@ export const GetOrderDetailDocument = gql`
     sellerAccountId
     listingId
     isReviewable
+    deliveredAt
+    disputedAt
+    disputedById
+    complaintReason
+    complaintNotes
+    lockVersion
     buyer {
       id
       displayName
@@ -2417,6 +2439,76 @@ export function useCreateReviewMutation(baseOptions?: ApolloReactHooks.MutationH
 export type CreateReviewMutationHookResult = ReturnType<typeof useCreateReviewMutation>;
 export type CreateReviewMutationResult = Apollo.MutationResult<CreateReviewMutation>;
 export type CreateReviewMutationOptions = Apollo.BaseMutationOptions<CreateReviewMutation, CreateReviewMutationVariables>;
+export const FileComplaintDocument = gql`
+    mutation FileComplaint($orderId: ID!, $reason: String!, $notes: String) {
+  fileComplaint(orderId: $orderId, reason: $reason, notes: $notes) {
+    id
+    status
+  }
+}
+    `;
+export type FileComplaintMutationFn = Apollo.MutationFunction<FileComplaintMutation, FileComplaintMutationVariables>;
+
+/**
+ * __useFileComplaintMutation__
+ *
+ * To run a mutation, you first call `useFileComplaintMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useFileComplaintMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [fileComplaintMutation, { data, loading, error }] = useFileComplaintMutation({
+ *   variables: {
+ *      orderId: // value for 'orderId'
+ *      reason: // value for 'reason'
+ *      notes: // value for 'notes'
+ *   },
+ * });
+ */
+export function useFileComplaintMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<FileComplaintMutation, FileComplaintMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<FileComplaintMutation, FileComplaintMutationVariables>(FileComplaintDocument, options);
+      }
+export type FileComplaintMutationHookResult = ReturnType<typeof useFileComplaintMutation>;
+export type FileComplaintMutationResult = Apollo.MutationResult<FileComplaintMutation>;
+export type FileComplaintMutationOptions = Apollo.BaseMutationOptions<FileComplaintMutation, FileComplaintMutationVariables>;
+export const RefundDisputedOrderDocument = gql`
+    mutation RefundDisputedOrder($orderId: ID!) {
+  refundDisputedOrder(orderId: $orderId) {
+    id
+    status
+  }
+}
+    `;
+export type RefundDisputedOrderMutationFn = Apollo.MutationFunction<RefundDisputedOrderMutation, RefundDisputedOrderMutationVariables>;
+
+/**
+ * __useRefundDisputedOrderMutation__
+ *
+ * To run a mutation, you first call `useRefundDisputedOrderMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRefundDisputedOrderMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [refundDisputedOrderMutation, { data, loading, error }] = useRefundDisputedOrderMutation({
+ *   variables: {
+ *      orderId: // value for 'orderId'
+ *   },
+ * });
+ */
+export function useRefundDisputedOrderMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<RefundDisputedOrderMutation, RefundDisputedOrderMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<RefundDisputedOrderMutation, RefundDisputedOrderMutationVariables>(RefundDisputedOrderDocument, options);
+      }
+export type RefundDisputedOrderMutationHookResult = ReturnType<typeof useRefundDisputedOrderMutation>;
+export type RefundDisputedOrderMutationResult = Apollo.MutationResult<RefundDisputedOrderMutation>;
+export type RefundDisputedOrderMutationOptions = Apollo.BaseMutationOptions<RefundDisputedOrderMutation, RefundDisputedOrderMutationVariables>;
 export const GetMyProfileDocument = gql`
     query GetMyProfile {
   myProfile {

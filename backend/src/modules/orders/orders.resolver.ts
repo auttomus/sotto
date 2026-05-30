@@ -16,7 +16,7 @@ import {
   CurrentUser,
   type CurrentUserPayload,
 } from '../../common/decorators/current-user.decorator';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus, Order } from '@prisma/client';
 import { PaymentsService } from '../payments/payments.service';
 import { AccountModel } from '../accounts/models/account.model';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -39,7 +39,7 @@ export class OrdersResolver {
     private readonly prisma: PrismaService,
   ) {}
 
-  private serializeOrder(order: import('@prisma/client').Order): OrderModel {
+  private serializeOrder(order: Order): OrderModel {
     return {
       id: order.id,
       buyerAccountId: order.buyerAccountId,
@@ -48,6 +48,12 @@ export class OrdersResolver {
       customOfferId: order.customOfferId,
       agreedPrice: Number(order.agreedPrice),
       status: order.status,
+      deliveredAt: order.deliveredAt,
+      disputedAt: order.disputedAt,
+      disputedById: order.disputedById,
+      complaintReason: order.complaintReason,
+      complaintNotes: order.complaintNotes,
+      lockVersion: order.lockVersion,
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
     };
@@ -80,6 +86,34 @@ export class OrdersResolver {
     @Args('orderId', { type: () => ID }) orderId: string,
   ) {
     const order = await this.ordersService.cancelOrder(orderId, user.accountId);
+    return this.serializeOrder(order);
+  }
+
+  @Mutation(() => OrderModel)
+  async fileComplaint(
+    @CurrentUser() user: CurrentUserPayload,
+    @Args('orderId', { type: () => ID }) orderId: string,
+    @Args('reason') reason: string,
+    @Args('notes', { nullable: true }) notes?: string,
+  ) {
+    const order = await this.ordersService.fileComplaint(
+      orderId,
+      user.accountId,
+      reason,
+      notes,
+    );
+    return this.serializeOrder(order);
+  }
+
+  @Mutation(() => OrderModel)
+  async refundDisputedOrder(
+    @CurrentUser() user: CurrentUserPayload,
+    @Args('orderId', { type: () => ID }) orderId: string,
+  ) {
+    const order = await this.ordersService.refundDisputedOrder(
+      orderId,
+      user.accountId,
+    );
     return this.serializeOrder(order);
   }
 

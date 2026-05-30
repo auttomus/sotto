@@ -16,6 +16,7 @@ import { PostMediaCarousel } from "./postcard/PostMediaCarousel";
 import { PostActions } from "./postcard/PostActions";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { Avatar } from "~/components/ui/Avatar";
+import { Dialog } from "~/components/ui/Dialog";
 import { cn } from "~/core/utils/cn";
 import { ThreadAncestors } from "./ThreadAncestors";
 
@@ -177,6 +178,7 @@ export function PostCard({ post: rawPost, isThreadParent, hideAncestors }: PostC
   const [showMenu, setShowMenu] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(post.content || "");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const { user } = useAuthStore();
   const addToast = useToastStore((s) => s.addToast);
@@ -269,72 +271,107 @@ export function PostCard({ post: rawPost, isThreadParent, hideAncestors }: PostC
     navigate(ROUTES.POST_DETAIL(post.postId));
   };
 
-  const handleDelete = async () => {
-    if (confirm("Apakah Anda yakin ingin menghapus postingan ini?")) {
-      await deletePost({ variables: { postId: post.postId } });
-    }
+  const handleDelete = () => {
+    setShowDeleteConfirm(true);
   };
+
+  const confirmDelete = async () => {
+    await deletePost({ variables: { postId: post.postId } });
+    setShowDeleteConfirm(false);
+  };
+
+  const deleteConfirmDialog = showDeleteConfirm && (
+    <Dialog
+      isOpen={true}
+      onClose={() => setShowDeleteConfirm(false)}
+      title="Hapus Postingan"
+      maxWidth="sm"
+      footer={
+        <div className="flex gap-3 w-full">
+          <button
+            type="button"
+            onClick={() => setShowDeleteConfirm(false)}
+            className="flex-1 font-bold text-xs py-2.5 rounded-sm border border-border text-foreground hover:bg-muted transition cursor-pointer"
+          >
+            Batal
+          </button>
+          <button
+            type="button"
+            onClick={confirmDelete}
+            className="flex-1 font-bold text-xs py-2.5 rounded-sm bg-destructive hover:bg-destructive/90 text-destructive-foreground border-0 shadow-md shadow-destructive/25 active:scale-[0.99] transition cursor-pointer"
+          >
+            Hapus
+          </button>
+        </div>
+      }
+    >
+      <p className="text-xs font-semibold text-muted-foreground">Apakah Anda yakin ingin menghapus postingan ini? Tindakan ini tidak dapat dibatalkan.</p>
+    </Dialog>
+  );
 
   // CONDITIONAL RENDER: Thread Parent Layout
   if (isThreadParent) {
     return (
-      <article
-        onClick={handleCardClick}
-        className="bg-card px-5 pt-4 pb-0 border-b-0 hover:bg-accent/5 transition-all duration-200 cursor-pointer flex gap-3 relative"
-      >
-        {/* Left Column: Avatar + Thread Connector Line */}
-        <div className="flex flex-col items-center shrink-0 w-10 relative">
-          <Link
-            to={post.authorUsername ? ROUTES.PROFILE_PUBLIC(post.authorUsername) : "#"}
-            className="group z-10"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Avatar src={avatarUrl || ""} alt={post.authorDisplayName || ""} size="md" />
-          </Link>
-          {/* Vertical line stretching downwards from avatar bottom to article bottom */}
-          <div className="absolute left-1/2 -translate-x-1/2 top-[52px] bottom-0 w-[2px] bg-border z-0" />
-        </div>
+      <>
+        <article
+          onClick={handleCardClick}
+          className="bg-card px-5 pt-4 pb-0 border-b-0 hover:bg-accent/5 transition-all duration-200 cursor-pointer flex gap-3 relative"
+        >
+          {/* Left Column: Avatar + Thread Connector Line */}
+          <div className="flex flex-col items-center shrink-0 w-10 relative">
+            <Link
+              to={post.authorUsername ? ROUTES.PROFILE_PUBLIC(post.authorUsername) : "#"}
+              className="group z-10"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Avatar src={avatarUrl || ""} alt={post.authorDisplayName || ""} size="md" />
+            </Link>
+            {/* Vertical line stretching downwards from avatar bottom to article bottom */}
+            <div className="absolute left-1/2 -translate-x-1/2 top-[52px] bottom-0 w-[2px] bg-border z-0" />
+          </div>
 
-        {/* Right Column: Content */}
-        <div className="flex-1 min-w-0">
-          <PostHeader
-            post={post}
-            avatarUrl={avatarUrl || ""}
-            isMine={isMine}
-            showMenu={showMenu}
-            setShowMenu={setShowMenu}
-            setIsEditing={setIsEditing}
-            onDelete={handleDelete}
-            hideAvatar={true}
-          />
+          {/* Right Column: Content */}
+          <div className="flex-1 min-w-0">
+            <PostHeader
+              post={post}
+              avatarUrl={avatarUrl || ""}
+              isMine={isMine}
+              showMenu={showMenu}
+              setShowMenu={setShowMenu}
+              setIsEditing={setIsEditing}
+              onDelete={handleDelete}
+              hideAvatar={true}
+            />
 
-          {/* Content Block */}
-          <PostCardContent
-            post={post}
-            isEditing={isEditing}
-            editContent={editContent}
-            setEditContent={setEditContent}
-            setIsEditing={setIsEditing}
-            updatePost={updatePost}
-            listing={listing}
-            textSizeClass="text-[14px]"
-          />
+            {/* Content Block */}
+            <PostCardContent
+              post={post}
+              isEditing={isEditing}
+              editContent={editContent}
+              setEditContent={setEditContent}
+              setIsEditing={setIsEditing}
+              updatePost={updatePost}
+              listing={listing}
+              textSizeClass="text-[14px]"
+            />
 
-          {/* Actions */}
-          <PostActions
-            postId={post.postId}
-            isLiked={liked}
-            likesCount={count}
-            repliesCount={post.repliesCount ?? 0}
-            onLike={handleLike}
-            onShare={() => shareObject({
-              title: `Karya dari ${post.authorDisplayName || post.authorUsername}`,
-              text: post.content,
-              url: ROUTES.POST_DETAIL(post.postId)
-            })}
-          />
-        </div>
-      </article>
+            {/* Actions */}
+            <PostActions
+              postId={post.postId}
+              isLiked={liked}
+              likesCount={count}
+              repliesCount={post.repliesCount ?? 0}
+              onLike={handleLike}
+              onShare={() => shareObject({
+                title: `Karya dari ${post.authorDisplayName || post.authorUsername}`,
+                text: post.content,
+                url: ROUTES.POST_DETAIL(post.postId)
+              })}
+            />
+          </div>
+        </article>
+        {deleteConfirmDialog}
+      </>
     );
   }
 
@@ -389,9 +426,15 @@ export function PostCard({ post: rawPost, isThreadParent, hideAncestors }: PostC
       <div className="flex flex-col">
         <ThreadAncestors parentId={post.inReplyToPostId} />
         {card}
+        {deleteConfirmDialog}
       </div>
     );
   }
 
-  return card;
+  return (
+    <>
+      {card}
+      {deleteConfirmDialog}
+    </>
+  );
 }

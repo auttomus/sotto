@@ -21,6 +21,8 @@ enum ListingStatus {
 enum OrderStatus {
   PENDING_PAYMENT
   IN_PROGRESS
+  DELIVERED
+  DISPUTED
   COMPLETED
   CANCELLED
 }
@@ -97,6 +99,7 @@ model Account {
   customOffersReceived   CustomOffer[]             @relation("OfferReceiver")
   mediaAttachments       MediaAttachment[]
   listingLikes           ListingLike[]
+  wallet                 Wallet?
 
   @@map("accounts")
 }
@@ -148,14 +151,21 @@ model Order {
 
   lockVersion Int @default(0) @map("lock_version")
 
+  deliveredAt      DateTime?   @map("delivered_at")
+  disputedAt       DateTime?   @map("disputed_at")
+  disputedById     String?     @map("disputed_by_id") @db.Uuid
+  complaintReason  String?     @map("complaint_reason")
+  complaintNotes   String?     @map("complaint_notes")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  buyer        Account       @relation("BuyerOrders", fields: [buyerAccountId], references: [id], onDelete: Restrict)
-  seller       Account       @relation("SellerOrders", fields: [sellerAccountId], references: [id], onDelete: Restrict)
-  listing      Listing       @relation(fields: [listingId], references: [id], onDelete: Restrict)
-  customOffer  CustomOffer?  @relation(fields: [customOfferId], references: [id], onDelete: Restrict)
-  review       Review?
+  buyer              Account             @relation("BuyerOrders", fields: [buyerAccountId], references: [id], onDelete: Restrict)
+  seller             Account             @relation("SellerOrders", fields: [sellerAccountId], references: [id], onDelete: Restrict)
+  listing            Listing             @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  customOffer        CustomOffer?        @relation(fields: [customOfferId], references: [id], onDelete: Restrict)
+  review             Review?
+  walletTransactions WalletTransaction[]
 
   @@map("orders")
 }
@@ -381,4 +391,39 @@ model ListingLike {
 
   @@unique([accountId, listingId])
   @@map("listing_likes")
+}
+
+model Wallet {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  accountId String   @unique @map("account_id") @db.Uuid
+  balance   Decimal  @default(0.00) @db.Decimal(12, 2)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  account      Account             @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  transactions WalletTransaction[]
+
+  @@map("wallets")
+}
+
+model WalletTransaction {
+  id          String          @id @default(uuid(7)) @db.Uuid
+  walletId    String          @map("wallet_id") @db.Uuid
+  amount      Decimal         @db.Decimal(12, 2)
+  type        TransactionType
+  description String?
+  orderId     String?         @map("order_id") @db.Uuid
+  createdAt   DateTime        @default(now()) @map("created_at")
+
+  wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  order  Order? @relation(fields: [orderId], references: [id])
+
+  @@map("wallet_transactions")
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAW
+  ESCROW_RELEASE
+  REFUND
 }

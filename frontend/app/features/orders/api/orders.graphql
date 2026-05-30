@@ -21,6 +21,12 @@ query GetOrderDetail($id: ID!) {
     sellerAccountId
     listingId
     isReviewable
+    deliveredAt
+    disputedAt
+    disputedById
+    complaintReason
+    complaintNotes
+    lockVersion
     buyer {
       id
       displayName
@@ -122,5 +128,19 @@ mutation CreateReview($orderId: ID!, $rating: Float!, $comment: String) {
     id
     rating
     comment
+  }
+}
+
+mutation FileComplaint($orderId: ID!, $reason: String!, $notes: String) {
+  fileComplaint(orderId: $orderId, reason: $reason, notes: $notes) {
+    id
+    status
+  }
+}
+
+mutation RefundDisputedOrder($orderId: ID!) {
+  refundDisputedOrder(orderId: $orderId) {
+    id
+    status
   }
 }

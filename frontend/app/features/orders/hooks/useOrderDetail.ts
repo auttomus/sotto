@@ -6,7 +6,9 @@ import {
   useGetMidtransSnapTokenMutation,
   useVerifyPaymentMutation,
   useGetListingDetailQuery,
-  useCreateReviewMutation
+  useCreateReviewMutation,
+  useFileComplaintMutation,
+  useRefundDisputedOrderMutation
 } from "~/core/apollo/generated";
 import { useAuthStore } from "~/core/store/useAuthStore";
 import { useToastStore } from "~/core/store/useToastStore";
@@ -130,7 +132,25 @@ export function useOrderDetail({ orderId }: UseOrderDetailOptions) {
     onError: (e: any) => addToast("error", e.message),
   });
 
-  const isActionLoading = advanceLoading || cancelLoading || reviewLoading;
+  // 7. Mutasi pengajuan komplain (File Complaint)
+  const [fileComplaint, { loading: complaintLoading }] = useFileComplaintMutation({
+    onCompleted: () => {
+      addToast("success", "Komplain berhasil diajukan");
+      refetch();
+    },
+    onError: (e: any) => addToast("error", e.message),
+  });
+
+  // 8. Mutasi setuju refund sengketa (Refund Disputed Order)
+  const [refundDisputedOrder, { loading: refundDisputedLoading }] = useRefundDisputedOrderMutation({
+    onCompleted: () => {
+      addToast("success", "Refund berhasil disetujui. Dana dikembalikan.");
+      refetch();
+    },
+    onError: (e: any) => addToast("error", e.message),
+  });
+
+  const isActionLoading = advanceLoading || cancelLoading || reviewLoading || complaintLoading || refundDisputedLoading;
 
   const getStatusLabel = (status: string) => {
     switch (status) {
@@ -140,6 +160,10 @@ export function useOrderDetail({ orderId }: UseOrderDetailOptions) {
         return "Dikerjakan";
       case "PENDING_PAYMENT":
         return "Menunggu Pembayaran";
+      case "DELIVERED":
+        return "Pekerjaan Dikirim";
+      case "DISPUTED":
+        return "Sengketa/Komplain";
       case "CANCELLED":
         return "Dibatalkan";
       default:
@@ -154,7 +178,7 @@ export function useOrderDetail({ orderId }: UseOrderDetailOptions) {
   };
 
   const handleCancel = () => {
-    if (order && confirm("Apakah Anda yakin ingin membatalkan order ini?")) {
+    if (order) {
       cancelOrder({ variables: { orderId: order.id } });
     }
   };
@@ -190,6 +214,18 @@ export function useOrderDetail({ orderId }: UseOrderDetailOptions) {
       }
     : null;
 
+  const handleFileComplaint = (reason: string, notes?: string) => {
+    if (order) {
+      fileComplaint({ variables: { orderId: order.id, reason, notes } });
+    }
+  };
+
+  const handleRefundDisputedOrder = () => {
+    if (order) {
+      refundDisputedOrder({ variables: { orderId: order.id } });
+    }
+  };
+
   return {
     order: orderWithListing,
     loading,
@@ -204,6 +240,8 @@ export function useOrderDetail({ orderId }: UseOrderDetailOptions) {
     handleCancel,
     handlePay,
     handleReview,
+    handleFileComplaint,
+    handleRefundDisputedOrder,
     refetch,
   };
 }

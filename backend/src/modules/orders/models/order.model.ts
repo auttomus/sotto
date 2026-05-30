@@ -47,6 +47,24 @@ export class OrderModel {
   @Field(() => ReviewModel, { nullable: true })
   review?: ReviewModel | null;
 
+  @Field(() => Date, { nullable: true })
+  deliveredAt?: Date | null;
+
+  @Field(() => Date, { nullable: true })
+  disputedAt?: Date | null;
+
+  @Field(() => String, { nullable: true })
+  disputedById?: string | null;
+
+  @Field(() => String, { nullable: true })
+  complaintReason?: string | null;
+
+  @Field(() => String, { nullable: true })
+  complaintNotes?: string | null;
+
+  @Field(() => Int)
+  lockVersion: number;
+
   @Field()
   createdAt: Date;
 

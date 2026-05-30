@@ -15,6 +15,7 @@ import { formatMentions } from "~/core/utils/formatMentions";
 import { DeletedMessageTombstone } from "./message/DeletedMessageTombstone";
 import { CustomOfferCard } from "./message/CustomOfferCard";
 import { ChatMessageMedia } from "./message/ChatMessageMedia";
+import { Dialog } from "~/components/ui/Dialog";
 
 interface MessageBubbleProps {
   msg: any;
@@ -33,6 +34,7 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, recipientLa
 
   const [showMenu, setShowMenu] = React.useState(false);
   const [isEditing, setIsEditing] = React.useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
 
   // Regex untuk memilah UUID Listing atau Postingan yang disebut di dalam pesan
   const listingRegex = /\s*(?:https?:\/\/[^\/\s]+)?\/listing\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\s*/g;
@@ -98,6 +100,36 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, recipientLa
     );
   }
 
+  // Render System Order Transaction Event
+  if (msg.content?.startsWith("[SYSTEM_ORDER_")) {
+    const matchType = msg.content.match(/^\[SYSTEM_ORDER_([A-Z_]+)\]/);
+    const statusType = matchType ? matchType[1] : null;
+    const textContent = msg.content.replace(/^\[SYSTEM_ORDER_[A-Z_]+\]\s*/, "");
+    
+    // Default style (Sotto rounded-sm border aesthetic)
+    let bgColor = "bg-muted/30 border-border text-muted-foreground";
+    
+    if (statusType === "IN_PROGRESS" || statusType === "CREATED") {
+      bgColor = "bg-primary/5 border-primary/20 text-primary";
+    } else if (statusType === "DELIVERED") {
+      bgColor = "bg-amber-500/5 border-amber-500/20 text-amber-600 dark:text-amber-500";
+    } else if (statusType === "DISPUTED") {
+      bgColor = "bg-destructive/5 border-destructive/20 text-destructive";
+    } else if (statusType === "COMPLETED") {
+      bgColor = "bg-emerald-500/5 border-emerald-500/20 text-emerald-600 dark:text-emerald-500";
+    } else if (statusType === "CANCELLED") {
+      bgColor = "bg-destructive/5 border-destructive/20 text-destructive";
+    }
+
+    return (
+      <div className="flex justify-center w-full my-3 animate-fade-in relative z-10 select-none">
+        <div className={`px-4 py-2 rounded-sm text-[10px] font-extrabold border tracking-wide uppercase text-center max-w-[85%] shadow-sm ${bgColor}`}>
+          <span className="normal-case font-semibold">{textContent}</span>
+        </div>
+      </div>
+    );
+  }
+
   // Render Custom Offer Card
   if (msg.isCustomOffer) {
     return (
@@ -156,10 +188,8 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, recipientLa
                 </button>
                 <button
                   type="button"
-                  onClick={async () => {
-                    if (confirm("Apakah Anda yakin ingin menghapus pesan ini?")) {
-                      await onDelete?.(msg.messageId);
-                    }
+                  onClick={() => {
+                    setShowDeleteConfirm(true);
                     setShowMenu(false);
                   }}
                   className="flex items-center gap-1.5 px-2 py-1.5 text-[10px] font-bold text-destructive hover:bg-destructive/10 rounded-lg text-left w-full cursor-pointer"
@@ -265,6 +295,39 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, recipientLa
           </div>
         </div>
       </div>
+
+      {/* Dialog Konfirmasi Hapus Pesan */}
+      {showDeleteConfirm && (
+        <Dialog
+          isOpen={true}
+          onClose={() => setShowDeleteConfirm(false)}
+          title="Hapus Pesan"
+          maxWidth="sm"
+          footer={
+            <div className="flex gap-3 w-full">
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 font-bold text-xs py-2.5 rounded-sm border border-border text-foreground hover:bg-muted transition cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  await onDelete?.(msg.messageId);
+                  setShowDeleteConfirm(false);
+                }}
+                className="flex-1 font-bold text-xs py-2.5 rounded-sm bg-destructive hover:bg-destructive/90 text-destructive-foreground border-0 shadow-md shadow-destructive/25 active:scale-[0.99] transition cursor-pointer"
+              >
+                Hapus
+              </button>
+            </div>
+          }
+        >
+          <p className="text-sm text-muted-foreground">Apakah Anda yakin ingin menghapus pesan ini secara permanen?</p>
+        </Dialog>
+      )}
     </>
   );
 }
