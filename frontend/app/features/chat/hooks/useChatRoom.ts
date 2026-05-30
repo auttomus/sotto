@@ -121,10 +121,19 @@ export function useChatRoom({ conversationId }: UseChatRoomOptions) {
     });
   }, [data, localMessages, offersData]);
 
-  // Auto-scroll to bottom on new messages
+  // Helper to scroll to bottom reliably
+  const scrollToBottom = React.useCallback((behavior: ScrollBehavior = "smooth") => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior, block: "end" });
+    }
+  }, []);
+
+  // Auto-scroll to bottom on new messages or loading state changes
   React.useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [allMessages.length]);
+    scrollToBottom("auto");
+    const timer = setTimeout(() => scrollToBottom("smooth"), 100);
+    return () => clearTimeout(timer);
+  }, [allMessages.length, loading, scrollToBottom]);
 
   // Tandai percakapan sebagai telah dibaca
   React.useEffect(() => {

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Link } from "react-router";
-import { Loader2, MessageSquare } from "lucide-react";
+import { Loader2, MessageSquare, Heart } from "lucide-react";
 import { Avatar } from "~/components/ui/Avatar";
 import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
 import { useGetPostQuery } from "~/core/apollo/generated";
@@ -32,7 +32,7 @@ export function ChatMessagePost({ postId }: ChatMessagePostProps) {
   return (
     <Link
       to={`/post/${post.postId}`}
-      className="mt-2 block w-full bg-muted hover:bg-muted border border-border rounded-sm p-3 text-left transition-all duration-200 group max-w-sm shadow-none cursor-pointer"
+      className="mt-2 block w-full bg-muted hover:bg-muted border border-border rounded-sm p-3 text-left transition-all duration-200 group max-w-md shadow-none cursor-pointer"
     >
       {/* Header */}
       <div className="flex items-center gap-2 mb-2">
@@ -49,23 +49,23 @@ export function ChatMessagePost({ postId }: ChatMessagePostProps) {
         </div>
       </div>
 
-      {/* Body Content & Image thumbnail side-by-side if present */}
-      <div className="flex gap-3 items-start">
-        <div className="flex-1 min-w-0">
-          <p className="text-xs text-foreground/90 font-medium leading-relaxed line-clamp-3 whitespace-pre-wrap break-words">
-            {post.content}
-          </p>
-        </div>
-        {mediaUrl && (
-          <div className="h-14 w-14 rounded-sm overflow-hidden shrink-0 border border-border/40 bg-muted">
-            <img
-              src={mediaUrl}
-              alt="Post preview"
-              className="w-full h-full object-cover group-hover:scale-105 transition duration-300 select-none"
-            />
-          </div>
-        )}
+      {/* Description Content on Top */}
+      <div className="w-full mb-2">
+        <p className="text-xs text-foreground/90 font-medium leading-relaxed whitespace-pre-wrap break-words">
+          {post.content}
+        </p>
       </div>
+
+      {/* Full-width Image underneath if present */}
+      {mediaUrl && (
+        <div className="w-full aspect-[16/9] rounded-sm overflow-hidden border border-border/40 bg-muted mb-2 shadow-inner">
+          <img
+            src={mediaUrl}
+            alt="Post preview"
+            className="w-full h-full object-cover group-hover:scale-[1.02] transition duration-300 select-none"
+          />
+        </div>
+      )}
 
       {/* Footer Info */}
       <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-border/30 text-[9px] text-muted-foreground">
@@ -75,9 +75,15 @@ export function ChatMessagePost({ postId }: ChatMessagePostProps) {
             month: "short",
           })}
         </span>
-        <div className="flex items-center gap-1 font-bold">
-          <MessageSquare className="h-3 w-3" />
-          <span>{post.repliesCount || 0} Balasan</span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 font-bold text-destructive">
+            <Heart className="h-3 w-3 fill-current" />
+            <span>{post.likesCount || 0}</span>
+          </div>
+          <div className="flex items-center gap-1 font-bold">
+            <MessageSquare className="h-3 w-3" />
+            <span>{post.repliesCount || 0}</span>
+          </div>
         </div>
       </div>
     </Link>

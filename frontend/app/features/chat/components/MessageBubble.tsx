@@ -35,8 +35,8 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, recipientLa
   const [isEditing, setIsEditing] = React.useState(false);
 
   // Regex untuk memilah UUID Listing atau Postingan yang disebut di dalam pesan
-  const listingRegex = /\s*\/listing\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\s*/g;
-  const postRegex = /\s*\/post\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\s*/g;
+  const listingRegex = /\s*(?:https?:\/\/[^\/\s]+)?\/listing\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\s*/g;
+  const postRegex = /\s*(?:https?:\/\/[^\/\s]+)?\/post\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\s*/g;
 
   const matchListing = msg.content?.match(listingRegex);
   const listingId = matchListing ? matchListing[0].match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/)?.[0] : null;
