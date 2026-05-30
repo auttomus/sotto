@@ -76,7 +76,7 @@ export function ListingCard({ listing, onRemove, className, isLink = true }: Lis
     </div>
   );
 
-  const baseClassName = "w-full flex gap-4 bg-card rounded-sm p-3.5 border border-border shadow-sm hover:shadow-md hover:border-border/80 transition duration-200 group";
+  const baseClassName = "w-full flex gap-4 bg-card rounded-sm p-3.5 border border-border shadow-sm hover:shadow-md hover:border-primary/50 transition duration-200 group";
 
   if (isLink && !onRemove) {
     return (

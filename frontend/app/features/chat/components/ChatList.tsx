@@ -9,9 +9,10 @@ import { PageHeader } from "~/components/layout/PageHeader";
 interface ChatListProps {
   chats: any[];
   user: any;
+  activeConversationId?: string;
 }
 
-export function ChatList({ chats, user }: ChatListProps) {
+export function ChatList({ chats, user, activeConversationId }: ChatListProps) {
   const [searchQuery, setSearchQuery] = React.useState("");
 
   const filteredChats = React.useMemo(() => {
@@ -64,12 +65,18 @@ export function ChatList({ chats, user }: ChatListProps) {
               const avatar = resolveMediaUrl(otherParticipant?.avatarObjectKey);
               const hasUnread = chat.unreadCount > 0;
               
+              const isActiveChat = chat.id === activeConversationId;
+              
               return (
                 <Link 
                   key={chat.id} 
                   to={`/workspace/chat/${chat.id}`} 
-                  className={`flex items-center gap-3 p-3 rounded-sm hover:bg-muted transition cursor-pointer group ${
-                    hasUnread ? "bg-primary/5 font-semibold" : ""
+                  className={`flex items-center gap-3 p-3 rounded-sm transition cursor-pointer group border ${
+                    isActiveChat
+                      ? "border-primary bg-primary/5 ring-1 ring-primary/20 text-primary font-bold shadow-sm"
+                      : `border-transparent hover:bg-primary/5 hover:border-primary/30 ${
+                          hasUnread ? "bg-primary/5 font-semibold" : ""
+                        }`
                   }`}
                 >
                   <div className="relative">

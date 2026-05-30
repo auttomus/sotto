@@ -13,6 +13,7 @@ interface OrderTimelineProps {
   loading: boolean;
   error: any;
   user: any;
+  activeOrderId?: string;
 }
 
 export function OrderTimeline({
@@ -22,6 +23,7 @@ export function OrderTimeline({
   loading,
   error,
   user,
+  activeOrderId,
 }: OrderTimelineProps) {
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -90,12 +92,17 @@ export function OrderTimeline({
           ) : (
             orders.map((order: any) => {
               const isBuyer = order.buyerAccountId === user?.accountId;
+              const isActiveOrder = order.id === activeOrderId;
               
               return (
                 <Link 
                   key={order.id} 
                   to={`/workspace/order/${order.id}`} 
-                  className="block bg-card p-4 rounded-sm border border-border hover:border-primary/50 shadow-sm hover:shadow-md transition group cursor-pointer"
+                  className={`block bg-card p-4 rounded-sm border shadow-sm hover:shadow-md transition group cursor-pointer ${
+                    isActiveOrder
+                      ? "border-primary bg-primary/5 ring-1 ring-primary/20"
+                      : "border-border hover:border-primary/50"
+                  }`}
                 >
                   <div className="flex justify-between items-center mb-3">
                     <div className="flex items-center gap-2">

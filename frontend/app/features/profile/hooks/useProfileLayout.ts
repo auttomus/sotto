@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "react-router";
 import { useFollowAccountMutation, useUnfollowAccountMutation } from "~/core/apollo/generated";
 import { useToastStore } from "~/core/store/useToastStore";
 
@@ -7,8 +8,15 @@ interface UseProfileLayoutOptions {
 }
 
 export function useProfileLayout({ profile }: UseProfileLayoutOptions) {
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState<"posts" | "listings" | "replies" | "likes">("posts");
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(() => {
+    if (location.state && typeof location.state === "object" && "edit" in location.state && location.state.edit) {
+      return true;
+    }
+    const searchParams = new URLSearchParams(location.search);
+    return searchParams.get("edit") === "true";
+  });
   const addToast = useToastStore(s => s.addToast);
 
   const [followMutation, { loading: followLoading }] = useFollowAccountMutation({

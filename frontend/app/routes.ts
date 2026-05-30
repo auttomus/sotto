@@ -13,10 +13,10 @@ export default [
     route("listing/:id", "routes/_main.listing.$id.tsx"),
     route("post/:postId", "routes/_main.post.$postId.tsx"),
     route("notifications", "routes/_main.notifications.tsx"),
+    route("workspace/chat/:conversationId", "routes/workspace.chat.$conversationId.tsx"),
+    route("workspace/order/:orderId", "routes/workspace.order.$orderId.tsx"),
   ]),
   route("login", "routes/login.tsx"),
   route("register", "routes/register.tsx"),
-  route("workspace/chat/:conversationId", "routes/workspace.chat.$conversationId.tsx"),
-  route("workspace/order/:orderId", "routes/workspace.order.$orderId.tsx"),
   route("workspace/create", "routes/workspace.create.tsx"),
 ] satisfies RouteConfig;
