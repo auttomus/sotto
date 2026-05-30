@@ -18,9 +18,13 @@ export function EditProfileForm({ profile, onCancel, onSuccess }: EditProfileFor
     displayName: profile.displayName || "",
     note: profile.note || "",
     avatarObjectKey: profile.avatarObjectKey || "",
+    bannerObjectKey: profile.bannerObjectKey || "",
   });
   const [isUploading, setIsUploading] = React.useState(false);
+  const [isBannerUploading, setIsBannerUploading] = React.useState(false);
+  
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const bannerInputRef = React.useRef<HTMLInputElement>(null);
   
   const addToast = useToastStore(s => s.addToast);
   const { uploadFile } = useUpload();
@@ -36,7 +40,6 @@ export function EditProfileForm({ profile, onCancel, onSuccess }: EditProfileFor
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate type and size (max 5MB)
     if (!file.type.startsWith('image/')) {
       addToast('error', 'Hanya file gambar yang diperbolehkan');
       return;
@@ -58,6 +61,31 @@ export function EditProfileForm({ profile, onCancel, onSuccess }: EditProfileFor
     }
   };
 
+  const handleBannerChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      addToast('error', 'Hanya file gambar yang diperbolehkan');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      addToast('error', 'Ukuran gambar maksimal 5MB');
+      return;
+    }
+
+    try {
+      setIsBannerUploading(true);
+      const media = await uploadFile(file, 'ACCOUNT', profile.id, false);
+      setEditForm(prev => ({ ...prev, bannerObjectKey: media.objectKey }));
+      addToast('success', 'Banner profil berhasil diunggah');
+    } catch (error: any) {
+      addToast('error', `Gagal mengunggah banner: ${error.message}`);
+    } finally {
+      setIsBannerUploading(false);
+    }
+  };
+
   const handleSaveProfile = () => {
     updateProfileMutation({
       variables: {
@@ -65,6 +93,7 @@ export function EditProfileForm({ profile, onCancel, onSuccess }: EditProfileFor
           displayName: editForm.displayName,
           note: editForm.note,
           avatarObjectKey: editForm.avatarObjectKey,
+          bannerObjectKey: editForm.bannerObjectKey,
         }
       }
     });
@@ -72,18 +101,54 @@ export function EditProfileForm({ profile, onCancel, onSuccess }: EditProfileFor
 
   return (
     <div className="w-full">
-      {/* Action Buttons Top Right (Absolute or relative to parent in ProfileLayout) */}
+      {/* Banner Edit Overlay */}
+      <div 
+        className="absolute -top-32 md:-top-48 -left-4 -right-4 h-32 md:h-48 bg-black/45 hover:bg-black/55 transition-colors flex items-center justify-center cursor-pointer group overflow-hidden"
+        onClick={() => bannerInputRef.current?.click()}
+        style={{ zIndex: 10 }}
+      >
+        {editForm.bannerObjectKey && (
+          <img 
+            src={resolveMediaUrl(editForm.bannerObjectKey)} 
+            alt="Preview Banner" 
+            className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-[1.02] transition-transform duration-500"
+          />
+        )}
+        
+        {isBannerUploading ? (
+          <div className="flex flex-col items-center gap-2 text-white relative z-10">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            <span className="text-xs font-semibold">Mengunggah Banner...</span>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-1.5 text-white opacity-95 group-hover:opacity-100 transition-opacity relative z-10">
+            <div className="p-2.5 bg-black/40 rounded-full group-hover:scale-105 transition-transform backdrop-blur-sm border border-white/20">
+              <Camera className="h-5 w-5 text-white" />
+            </div>
+            <span className="text-xs font-bold tracking-wide drop-shadow-md">Ubah Banner Profil</span>
+          </div>
+        )}
+        <input 
+          type="file" 
+          ref={bannerInputRef} 
+          className="hidden" 
+          accept="image/*"
+          onChange={handleBannerChange}
+        />
+      </div>
+
+      {/* Action Buttons Top Right */}
       <div className="flex justify-end gap-2 mb-4 absolute right-4 -top-12" style={{ zIndex: 30 }}>
         <button onClick={onCancel} className="p-2 border border-border bg-card rounded-full hover:bg-muted transition">
           <X className="h-5 w-5 text-foreground" />
         </button>
-        <Button variant="primary" onClick={handleSaveProfile} disabled={updateLoading || isUploading} className="font-bold px-4 rounded-full shadow-md shadow-primary/20">
+        <Button variant="primary" onClick={handleSaveProfile} disabled={updateLoading || isUploading || isBannerUploading} className="font-bold px-4 rounded-full shadow-md shadow-primary/20">
           {updateLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
         </Button>
       </div>
 
       {/* Avatar Edit */}
-      <div className="relative -mt-16 mb-4">
+      <div className="relative -mt-16 mb-4" style={{ zIndex: 20 }}>
         <div className="relative inline-block">
           <div className="rounded-full border-4 border-background bg-card">
             <Avatar 

@@ -57,17 +57,31 @@ export function PostMediaCarousel({ media }: PostMediaCarouselProps) {
   if (total === 1) {
     const item = media[0];
     const url = resolveMediaUrl(item.url || (item as any).objectKey);
+    const isVideo = item.contentType?.startsWith("video/") || /\.(mp4|webm|ogg|mov)$/i.test(item.fileName || "");
+
     return (
       <>
-        <div className="rounded-sm overflow-hidden bg-muted border border-border mt-3 shadow-sm flex items-center justify-center max-h-[512px] w-full cursor-zoom-in group/media">
-          <img
-            src={url || ""}
-            alt={item.fileName || "Post media"}
-            className="w-full h-auto max-h-[512px] object-contain rounded-sm select-none group-hover/media:brightness-95 transition-all duration-200"
-            onClick={() => setLightboxUrl(url ?? null)}
-            loading="lazy"
-          />
-        </div>
+        {isVideo ? (
+          <div className="rounded-sm overflow-hidden bg-black border border-border mt-3 shadow-sm flex items-center justify-center max-h-[512px] w-full aspect-video">
+            <video
+              src={url || ""}
+              controls
+              className="w-full h-full max-h-[512px] object-contain rounded-sm select-none"
+              preload="metadata"
+              playsInline
+            />
+          </div>
+        ) : (
+          <div className="rounded-sm overflow-hidden bg-muted border border-border mt-3 shadow-sm flex items-center justify-center max-h-[512px] w-full cursor-zoom-in group/media">
+            <img
+              src={url || ""}
+              alt={item.fileName || "Post media"}
+              className="w-full h-auto max-h-[512px] object-contain rounded-sm select-none group-hover/media:brightness-95 transition-all duration-200"
+              onClick={() => setLightboxUrl(url ?? null)}
+              loading="lazy"
+            />
+          </div>
+        )}
 
         {lightboxUrl && (
           <div
@@ -106,6 +120,22 @@ export function PostMediaCarousel({ media }: PostMediaCarouselProps) {
         >
           {media.map((item, i) => {
             const url = resolveMediaUrl(item.url || (item as any).objectKey);
+            const isVideo = item.contentType?.startsWith("video/") || /\.(mp4|webm|ogg|mov)$/i.test(item.fileName || "");
+
+            if (isVideo) {
+              return (
+                <div key={item.id || i} className="w-full shrink-0 snap-center relative h-full bg-black flex items-center justify-center">
+                  <video
+                    src={url || ""}
+                    controls
+                    className="absolute inset-0 w-full h-full object-contain rounded-sm select-none"
+                    preload="metadata"
+                    playsInline
+                  />
+                </div>
+              );
+            }
+
             return (
               <div key={item.id || i} className="w-full shrink-0 snap-center relative h-full cursor-zoom-in group/item">
                 <img

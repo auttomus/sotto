@@ -59,4 +59,14 @@ export class CreateListingInput {
   @IsOptional()
   @IsArray()
   mediaIds?: string[];
+
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsString()
+  digitalFileObjectKey?: string;
+
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsString()
+  digitalLink?: string;
 }

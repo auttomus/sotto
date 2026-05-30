@@ -14,6 +14,10 @@ import { PostHeader } from "./postcard/PostHeader";
 import { PostEditor } from "./postcard/PostEditor";
 import { PostMediaCarousel } from "./postcard/PostMediaCarousel";
 import { PostActions } from "./postcard/PostActions";
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Avatar } from "~/components/ui/Avatar";
+import { cn } from "~/core/utils/cn";
+import { ThreadAncestors } from "./ThreadAncestors";
 
 const useToggleLikePostMutation = (Generated as any).useToggleLikePostMutation || (() => [() => Promise.resolve()]);
 const useGetListingDetailQuery = (Generated as any).useGetListingDetailQuery || (() => ({ data: null, loading: false }));
@@ -31,9 +35,139 @@ type ExtendedPost = FeedPost & {
 
 interface PostCardProps {
   post: FeedPost;
+  isThreadParent?: boolean;
+  hideAncestors?: boolean;
 }
 
-export function PostCard({ post: rawPost }: PostCardProps) {
+// 1. Reusable Dropdown Menu Component
+interface PostDropdownMenuProps {
+  showMenu: boolean;
+  setShowMenu: (val: boolean) => void;
+  setIsEditing: (val: boolean) => void;
+  onDelete: () => void;
+}
+
+function PostDropdownMenu({
+  showMenu,
+  setShowMenu,
+  setIsEditing,
+  onDelete
+}: PostDropdownMenuProps) {
+  return (
+    <div className="relative shrink-0">
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowMenu(!showMenu);
+        }}
+        className="text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-muted transition-colors cursor-pointer animate-fade-in"
+      >
+        <MoreHorizontal className="h-4 w-4" />
+      </button>
+      {showMenu && (
+        <div className="absolute right-0 mt-1 z-30 bg-popover text-popover-foreground border border-border rounded-sm shadow-lg p-1.5 min-w-[120px] flex flex-col gap-0.5 animate-scale-in">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsEditing(true);
+              setShowMenu(false);
+            }}
+            className="flex items-center gap-2 px-2.5 py-1.5 text-xs hover:bg-accent hover:text-accent-foreground rounded-lg text-left w-full cursor-pointer font-semibold"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+            Sunting
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+              setShowMenu(false);
+            }}
+            className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-destructive hover:bg-destructive/10 rounded-lg text-left w-full cursor-pointer font-semibold"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            Hapus
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 2. Reusable Content Block Component
+interface PostCardContentProps {
+  post: ExtendedPost;
+  isEditing: boolean;
+  editContent: string;
+  setEditContent: (val: string) => void;
+  setIsEditing: (val: boolean) => void;
+  updatePost: any;
+  listing: any;
+  textSizeClass?: string;
+}
+
+function PostCardContent({
+  post,
+  isEditing,
+  editContent,
+  setEditContent,
+  setIsEditing,
+  updatePost,
+  listing,
+  textSizeClass = "text-[15px]"
+}: PostCardContentProps) {
+  return (
+    <div className="mb-2">
+      {isEditing ? (
+        <PostEditor
+          editContent={editContent}
+          setEditContent={setEditContent}
+          onCancel={() => {
+            setIsEditing(false);
+            setEditContent(post.content || "");
+          }}
+          onSave={async () => {
+            if (editContent.trim() && editContent.trim() !== post.content) {
+              await updatePost({
+                variables: {
+                  postId: post.postId,
+                  input: { content: editContent.trim() }
+                }
+              });
+            }
+            setIsEditing(false);
+          }}
+        />
+      ) : (
+        <Link to={ROUTES.POST_DETAIL(post.postId)} className="block group/content hover:opacity-95 transition-opacity">
+          <p className={cn("text-foreground leading-relaxed mb-2 whitespace-pre-wrap line-clamp-6 font-medium", textSizeClass)}>
+            {formatMentions(post.content)}
+          </p>
+        </Link>
+      )}
+
+      {/* Media Carousel */}
+      {post.media && post.media.length > 0 && (
+        <div onClick={(e) => e.stopPropagation()} className="mb-2">
+          <PostMediaCarousel media={post.media} />
+        </div>
+      )}
+
+      {/* Linked Listing Card */}
+      {post.linkedServiceId && listing && (
+        <div onClick={(e) => e.stopPropagation()} className="mb-2">
+          <ListingCard listing={listing as any} isLink={true} className="mt-2" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 3. Main PostCard Component
+export function PostCard({ post: rawPost, isThreadParent, hideAncestors }: PostCardProps) {
   const post = rawPost as ExtendedPost;
   const navigate = useNavigate();
   const avatarUrl = resolveMediaUrl(post.authorAvatarObjectKey);
@@ -135,7 +269,77 @@ export function PostCard({ post: rawPost }: PostCardProps) {
     navigate(ROUTES.POST_DETAIL(post.postId));
   };
 
-  return (
+  const handleDelete = async () => {
+    if (confirm("Apakah Anda yakin ingin menghapus postingan ini?")) {
+      await deletePost({ variables: { postId: post.postId } });
+    }
+  };
+
+  // CONDITIONAL RENDER: Thread Parent Layout
+  if (isThreadParent) {
+    return (
+      <article
+        onClick={handleCardClick}
+        className="bg-card px-5 pt-4 pb-0 border-b-0 hover:bg-accent/5 transition-all duration-200 cursor-pointer flex gap-3 relative"
+      >
+        {/* Left Column: Avatar + Thread Connector Line */}
+        <div className="flex flex-col items-center shrink-0 w-10 relative">
+          <Link
+            to={post.authorUsername ? ROUTES.PROFILE_PUBLIC(post.authorUsername) : "#"}
+            className="group z-10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Avatar src={avatarUrl || ""} alt={post.authorDisplayName || ""} size="md" />
+          </Link>
+          {/* Vertical line stretching downwards from avatar bottom to article bottom */}
+          <div className="absolute left-1/2 -translate-x-1/2 top-[52px] bottom-0 w-[2px] bg-border z-0" />
+        </div>
+
+        {/* Right Column: Content */}
+        <div className="flex-1 min-w-0">
+          <PostHeader
+            post={post}
+            avatarUrl={avatarUrl || ""}
+            isMine={isMine}
+            showMenu={showMenu}
+            setShowMenu={setShowMenu}
+            setIsEditing={setIsEditing}
+            onDelete={handleDelete}
+            hideAvatar={true}
+          />
+
+          {/* Content Block */}
+          <PostCardContent
+            post={post}
+            isEditing={isEditing}
+            editContent={editContent}
+            setEditContent={setEditContent}
+            setIsEditing={setIsEditing}
+            updatePost={updatePost}
+            listing={listing}
+            textSizeClass="text-[14px]"
+          />
+
+          {/* Actions */}
+          <PostActions
+            postId={post.postId}
+            isLiked={liked}
+            likesCount={count}
+            repliesCount={post.repliesCount ?? 0}
+            onLike={handleLike}
+            onShare={() => shareObject({
+              title: `Karya dari ${post.authorDisplayName || post.authorUsername}`,
+              text: post.content,
+              url: ROUTES.POST_DETAIL(post.postId)
+            })}
+          />
+        </div>
+      </article>
+    );
+  }
+
+  // DEFAULT RENDER: Standard Layout
+  const card = (
     <article 
       onClick={handleCardClick}
       className="bg-card p-5 border-b border-border hover:bg-accent/5 transition-all duration-200 cursor-pointer"
@@ -148,61 +352,20 @@ export function PostCard({ post: rawPost }: PostCardProps) {
         showMenu={showMenu}
         setShowMenu={setShowMenu}
         setIsEditing={setIsEditing}
-        onDelete={async () => {
-          if (confirm("Apakah Anda yakin ingin menghapus postingan ini?")) {
-            await deletePost({ variables: { postId: post.postId } });
-          }
-        }}
+        onDelete={handleDelete}
       />
 
-      {/* Body */}
-      <div className="mb-3">
-        {isEditing ? (
-          <PostEditor
-            editContent={editContent}
-            setEditContent={setEditContent}
-            onCancel={() => {
-              setIsEditing(false);
-              setEditContent(post.content || "");
-            }}
-            onSave={async () => {
-              if (editContent.trim() && editContent.trim() !== post.content) {
-                await updatePost({
-                  variables: {
-                    postId: post.postId,
-                    input: { content: editContent.trim() }
-                  }
-                });
-              }
-              setIsEditing(false);
-            }}
-          />
-        ) : (
-          <Link to={ROUTES.POST_DETAIL(post.postId)} className="block group/content hover:opacity-95 transition-opacity">
-            <p className="text-foreground text-[15px] leading-relaxed mb-3 whitespace-pre-wrap line-clamp-6 font-medium">
-              {formatMentions(post.content)}
-            </p>
-          </Link>
-        )}
-
-        {/* Media Carousel */}
-        {post.media && post.media.length > 0 && (
-          <div onClick={(e) => e.stopPropagation()}>
-            <PostMediaCarousel media={post.media} />
-          </div>
-        )}
-
-        {/* Linked Listing Card */}
-        {post.linkedServiceId && listing && (
-          <div onClick={(e) => e.stopPropagation()}>
-            <ListingCard 
-              listing={listing as any} 
-              isLink={true} 
-              className="mt-3" 
-            />
-          </div>
-        )}
-      </div>
+      {/* Content Block */}
+      <PostCardContent
+        post={post}
+        isEditing={isEditing}
+        editContent={editContent}
+        setEditContent={setEditContent}
+        setIsEditing={setIsEditing}
+        updatePost={updatePost}
+        listing={listing}
+        textSizeClass="text-[15px]"
+      />
 
       {/* Actions (Like, Comment, Share) */}
       <PostActions
@@ -219,4 +382,16 @@ export function PostCard({ post: rawPost }: PostCardProps) {
       />
     </article>
   );
+
+  // If this is a reply and not rendered as a thread parent, render its ancestors chain above it
+  if (post.inReplyToPostId && !isThreadParent && !hideAncestors) {
+    return (
+      <div className="flex flex-col">
+        <ThreadAncestors parentId={post.inReplyToPostId} />
+        {card}
+      </div>
+    );
+  }
+
+  return card;
 }

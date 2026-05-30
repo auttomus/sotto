@@ -11,6 +11,7 @@ import { useScrollDirection } from "~/core/hooks/useScrollDirection";
 import { useInfiniteScroll } from "~/core/hooks/useInfiniteScroll";
 import { PageHeader } from "~/components/layout/PageHeader";
 import { useGetUnreadNotificationCountQuery } from "~/core/apollo/generated";
+import { filterFeedPosts } from "~/core/utils/filterFeedPosts";
 
 export default function FeedTimelineRoute() {
   const [activeTab, setActiveTab] = useState<"for-you" | "following">("for-you");
@@ -110,7 +111,7 @@ export default function FeedTimelineRoute() {
           <FeedEmptyState />
         ) : (
           <>
-            {posts.map((post) => (
+            {filterFeedPosts(posts).map((post) => (
               <PostCard key={post.postId} post={post} />
             ))}
 

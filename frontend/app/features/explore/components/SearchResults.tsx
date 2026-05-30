@@ -2,6 +2,7 @@ import * as React from "react";
 import { Link } from "react-router";
 import { Loader2, Hash, Briefcase, User, Sparkles, Star } from "lucide-react";
 import { PostCard } from "~/features/feed/components/PostCard";
+import { filterFeedPosts } from "~/core/utils/filterFeedPosts";
 import { ListingCard } from "~/features/listings/components/ListingCard";
 import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
 import { LabelBadge } from "~/components/ui/LabelBadge";
@@ -150,7 +151,7 @@ export function SearchResults({
             <Sparkles className="h-3.5 w-3.5 text-primary" /> Karya & Showcase
           </h3>
           <div className="space-y-px bg-card rounded-sm overflow-hidden border border-border shadow-sm divide-y divide-border">
-            {posts.map((post) => (
+            {filterFeedPosts(posts).map((post) => (
               <PostCard key={post.postId} post={post} />
             ))}
           </div>

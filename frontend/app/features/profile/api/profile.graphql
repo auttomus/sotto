@@ -13,6 +13,7 @@ query GetMyProfile {
     majorId
     followersCount
     followingCount
+    bannerObjectKey
   }
 }
 
@@ -30,6 +31,7 @@ query GetUserProfile($username: String!) {
     followingCount
     schoolName
     major
+    bannerObjectKey
   }
 }
 
@@ -73,6 +75,7 @@ mutation UpdateProfile($input: UpdateProfileInput!) {
     avatarUrl
     major
     majorId
+    bannerObjectKey
   }
 }
 
@@ -81,6 +84,7 @@ query GetPostsByAccount($accountId: String!) {
     postId
     content
     createdAt
+    deletedAt
     authorId
     authorDisplayName
     authorUsername
@@ -110,6 +114,7 @@ query GetRepliesByAccount($accountId: String!) {
     postId
     content
     createdAt
+    deletedAt
     authorId
     authorDisplayName
     authorUsername

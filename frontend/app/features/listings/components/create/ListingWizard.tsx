@@ -5,6 +5,7 @@ import { useCreateStore } from "~/features/create/store/useCreateStore";
 import { useToastStore } from "~/core/store/useToastStore";
 import { ListingBasicStep } from "./ListingBasicStep";
 import { ListingPricingStep } from "./ListingPricingStep";
+import { ListingDigitalProductStep } from "./ListingDigitalProductStep";
 import { ListingMediaStep } from "./ListingMediaStep";
 import { useCreateListingLogic } from "~/features/listings/hooks/useCreateListing";
 
@@ -23,6 +24,9 @@ export function ListingWizard() {
   const addToast = useToastStore(s => s.addToast);
   const [showDraftDialog, setShowDraftDialog] = React.useState(false);
   const { submitListing, isSubmitting } = useCreateListingLogic(reset);
+
+  const isDigital = listingData.type === 'DIGITAL_PRODUCT';
+  const totalSteps = isDigital ? 4 : 3;
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -63,7 +67,11 @@ export function ListingWizard() {
   };
 
   const isStep1Valid = listingData.title.trim().length > 0 && listingData.description.trim().length > 0;
-  const isStep2Valid = listingData.price >= 0 && (listingData.type === 'DIGITAL_PRODUCT' || listingData.deliveryTimeDays > 0);
+  const isStep2Valid = listingData.price >= 0 && (isDigital || listingData.deliveryTimeDays > 0);
+  
+  const urlPattern = /^(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/;
+  const isLinkValid = listingData.digitalLink.trim().length > 0 && urlPattern.test(listingData.digitalLink);
+  const isStep3Valid = !isDigital || listingData.digitalFile !== null || isLinkValid;
 
   return (
     <div className="flex flex-col min-h-screen bg-background w-full max-w-lg mx-auto border-x border-border relative">
@@ -88,7 +96,7 @@ export function ListingWizard() {
           </button>
           <div className="flex flex-col">
             <h1 className="font-bold text-foreground text-sm leading-tight">Buat Penawaran</h1>
-            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">Langkah {step} dari 3</span>
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">Langkah {step} dari {totalSteps}</span>
           </div>
         </div>
       </header>
@@ -97,14 +105,23 @@ export function ListingWizard() {
       <div className="w-full bg-muted h-1">
         <div 
           className="bg-primary h-full transition-all duration-300 ease-out" 
-          style={{ width: `${(step / 3) * 100}%` }}
+          style={{ width: `${(step / totalSteps) * 100}%` }}
         />
       </div>
 
       <div className="p-4 md:p-6 overflow-y-auto pb-24">
         {step === 1 && <ListingBasicStep />}
         {step === 2 && <ListingPricingStep />}
-        {step === 3 && <ListingMediaStep handleFileSelect={handleFileSelect} removeFile={removeFile} />}
+        {isDigital ? (
+          <>
+            {step === 3 && <ListingDigitalProductStep />}
+            {step === 4 && <ListingMediaStep handleFileSelect={handleFileSelect} removeFile={removeFile} />}
+          </>
+        ) : (
+          <>
+            {step === 3 && <ListingMediaStep handleFileSelect={handleFileSelect} removeFile={removeFile} />}
+          </>
+        )}
       </div>
 
       {/* Bottom Action Bar */}
@@ -131,19 +148,51 @@ export function ListingWizard() {
           </Button>
         )}
         
-        {step === 3 && (
-          <Button 
-            variant="primary" 
-            className="w-full h-12 text-base font-bold rounded-sm shadow-lg shadow-primary/20"
-            onClick={() => submitListing(listingData, files)}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <span className="flex items-center gap-2"><Loader2 className="h-5 w-5 animate-spin" /> Mengunggah...</span>
-            ) : (
-              "Terbitkan Penawaran"
+        {isDigital ? (
+          <>
+            {step === 3 && (
+              <Button 
+                variant="primary" 
+                className="w-full h-12 text-base font-bold rounded-sm shadow-lg shadow-primary/20"
+                onClick={nextStep}
+                disabled={!isStep3Valid}
+              >
+                Selanjutnya <ArrowRight className="h-5 w-5 ml-1" />
+              </Button>
             )}
-          </Button>
+            
+            {step === 4 && (
+              <Button 
+                variant="primary" 
+                className="w-full h-12 text-base font-bold rounded-sm shadow-lg shadow-primary/20"
+                onClick={() => submitListing(listingData, files)}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center gap-2"><Loader2 className="h-5 w-5 animate-spin" /> Mengunggah...</span>
+                ) : (
+                  "Terbitkan Penawaran"
+                )}
+              </Button>
+            )}
+          </>
+        ) : (
+          <>
+            {step === 3 && (
+              <Button 
+                variant="primary" 
+                className="w-full h-12 text-base font-bold rounded-sm shadow-lg shadow-primary/20"
+                onClick={() => submitListing(listingData, files)}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center gap-2"><Loader2 className="h-5 w-5 animate-spin" /> Mengunggah...</span>
+                ) : (
+                  "Terbitkan Penawaran"
+                )}
+              </Button>
+            )}
+          </>
         )}
       </div>
     </div>

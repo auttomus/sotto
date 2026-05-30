@@ -82,6 +82,34 @@ query GetPost($postId: String!) {
       url
       objectKey
     }
+    ancestors {
+      postId
+      content
+      createdAt
+      editedAt
+      deletedAt
+      authorId
+      authorDisplayName
+      authorUsername
+      authorAvatarObjectKey
+      authorSchoolName
+      linkedServiceId
+      inReplyToPostId
+      likesCount
+      repliesCount
+      likedByMe
+      tags {
+        id
+        name
+      }
+      media {
+        id
+        fileName
+        contentType
+        url
+        objectKey
+      }
+    }
   }
 }
 

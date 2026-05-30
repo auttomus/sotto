@@ -25,6 +25,7 @@ export class AccountsResolver {
       schoolId: string | null;
       note: string | null;
       avatarObjectKey: string | null;
+      bannerObjectKey: string | null;
       followersCount: number | bigint;
       followingCount: number | bigint;
       trustScore: import('@prisma/client').Prisma.Decimal | number;
@@ -44,6 +45,7 @@ export class AccountsResolver {
       schoolId: account.schoolId,
       note: account.note,
       avatarObjectKey: account.avatarObjectKey,
+      bannerObjectKey: account.bannerObjectKey,
       followersCount: account.followersCount.toString(),
       followingCount: account.followingCount.toString(),
       trustScore: Number(account.trustScore),

@@ -30,6 +30,8 @@ query GetListingDetail($id: ID!) {
     type
     isUnlimited
     deliveryTimeDays
+    digitalFileObjectKey
+    digitalLink
     createdAt
     updatedAt
     accountId
@@ -73,6 +75,8 @@ mutation CreateListing($input: CreateListingInput!) {
     description
     price
     status
+    digitalFileObjectKey
+    digitalLink
   }
 }
 
@@ -83,6 +87,8 @@ mutation UpdateListing($id: ID!, $input: UpdateListingInput!) {
     description
     price
     status
+    digitalFileObjectKey
+    digitalLink
     updatedAt
   }
 }

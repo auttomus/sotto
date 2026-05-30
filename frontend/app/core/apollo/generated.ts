@@ -135,7 +135,7 @@ export type GetPostQueryVariables = Exact<{
 }>;
 
 
-export type GetPostQuery = { post: { postId: string, content: string, createdAt: string, editedAt: string | null, deletedAt: string | null, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, repliesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null } | null };
+export type GetPostQuery = { post: { postId: string, content: string, createdAt: string, editedAt: string | null, deletedAt: string | null, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, repliesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null, ancestors: Array<{ postId: string, content: string, createdAt: string, editedAt: string | null, deletedAt: string | null, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, repliesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null }> | null } | null };
 
 export type GetRepliesQueryVariables = Exact<{
   postId: string;
@@ -176,14 +176,14 @@ export type GetListingDetailQueryVariables = Exact<{
 }>;
 
 
-export type GetListingDetailQuery = { listing: { id: string, title: string, description: string, price: number, status: Types.ListingStatus, type: Types.ListingType, isUnlimited: boolean, deliveryTimeDays: number | null, createdAt: string, updatedAt: string, accountId: string, isLikedByMe: boolean, likesCount: number, averageRating: number, reviewsCount: number, account: { displayName: string, major: string | null, trustScore: number, username: string | null, avatarObjectKey: string | null } | null, media: Array<{ id: string, fileName: string, contentType: string, objectKey: string, url: string | null, isPrivate: boolean }> | null, reviews: Array<{ id: string, rating: number, comment: string | null, createdAt: string, reviewer: { displayName: string, username: string, avatarObjectKey: string | null } | null }> | null } | null };
+export type GetListingDetailQuery = { listing: { id: string, title: string, description: string, price: number, status: Types.ListingStatus, type: Types.ListingType, isUnlimited: boolean, deliveryTimeDays: number | null, digitalFileObjectKey: string | null, digitalLink: string | null, createdAt: string, updatedAt: string, accountId: string, isLikedByMe: boolean, likesCount: number, averageRating: number, reviewsCount: number, account: { displayName: string, major: string | null, trustScore: number, username: string | null, avatarObjectKey: string | null } | null, media: Array<{ id: string, fileName: string, contentType: string, objectKey: string, url: string | null, isPrivate: boolean }> | null, reviews: Array<{ id: string, rating: number, comment: string | null, createdAt: string, reviewer: { displayName: string, username: string, avatarObjectKey: string | null } | null }> | null } | null };
 
 export type CreateListingMutationVariables = Exact<{
   input: Types.CreateListingInput;
 }>;
 
 
-export type CreateListingMutation = { createListing: { id: string, title: string, description: string, price: number, status: Types.ListingStatus } };
+export type CreateListingMutation = { createListing: { id: string, title: string, description: string, price: number, status: Types.ListingStatus, digitalFileObjectKey: string | null, digitalLink: string | null } };
 
 export type UpdateListingMutationVariables = Exact<{
   id: string | number;
@@ -191,7 +191,7 @@ export type UpdateListingMutationVariables = Exact<{
 }>;
 
 
-export type UpdateListingMutation = { updateListing: { id: string, title: string, description: string, price: number, status: Types.ListingStatus, updatedAt: string } };
+export type UpdateListingMutation = { updateListing: { id: string, title: string, description: string, price: number, status: Types.ListingStatus, digitalFileObjectKey: string | null, digitalLink: string | null, updatedAt: string } };
 
 export type DeleteListingMutationVariables = Exact<{
   id: string | number;
@@ -329,14 +329,14 @@ export type CreateReviewMutation = { createReview: { id: string, rating: number,
 export type GetMyProfileQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetMyProfileQuery = { myProfile: { id: string, displayName: string, username: string, note: string | null, avatarObjectKey: string | null, avatarUrl: string | null, trustScore: number, schoolName: string | null, schoolId: string | null, major: string | null, majorId: string | null, followersCount: string, followingCount: string } };
+export type GetMyProfileQuery = { myProfile: { id: string, displayName: string, username: string, note: string | null, avatarObjectKey: string | null, avatarUrl: string | null, trustScore: number, schoolName: string | null, schoolId: string | null, major: string | null, majorId: string | null, followersCount: string, followingCount: string, bannerObjectKey: string | null } };
 
 export type GetUserProfileQueryVariables = Exact<{
   username: string;
 }>;
 
 
-export type GetUserProfileQuery = { profile: { id: string, displayName: string, username: string, note: string | null, avatarObjectKey: string | null, avatarUrl: string | null, trustScore: number, isFollowing: boolean | null, followersCount: string, followingCount: string, schoolName: string | null, major: string | null } | null };
+export type GetUserProfileQuery = { profile: { id: string, displayName: string, username: string, note: string | null, avatarObjectKey: string | null, avatarUrl: string | null, trustScore: number, isFollowing: boolean | null, followersCount: string, followingCount: string, schoolName: string | null, major: string | null, bannerObjectKey: string | null } | null };
 
 export type GetListingsByAccountQueryVariables = Exact<{
   accountId: string | number;
@@ -364,21 +364,21 @@ export type UpdateProfileMutationVariables = Exact<{
 }>;
 
 
-export type UpdateProfileMutation = { updateProfile: { id: string, displayName: string, username: string, note: string | null, avatarObjectKey: string | null, avatarUrl: string | null, major: string | null, majorId: string | null } };
+export type UpdateProfileMutation = { updateProfile: { id: string, displayName: string, username: string, note: string | null, avatarObjectKey: string | null, avatarUrl: string | null, major: string | null, majorId: string | null, bannerObjectKey: string | null } };
 
 export type GetPostsByAccountQueryVariables = Exact<{
   accountId: string;
 }>;
 
 
-export type GetPostsByAccountQuery = { postsByAccount: Array<{ postId: string, content: string, createdAt: string, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, repliesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null }> };
+export type GetPostsByAccountQuery = { postsByAccount: Array<{ postId: string, content: string, createdAt: string, deletedAt: string | null, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, repliesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null }> };
 
 export type GetRepliesByAccountQueryVariables = Exact<{
   accountId: string;
 }>;
 
 
-export type GetRepliesByAccountQuery = { repliesByAccount: Array<{ postId: string, content: string, createdAt: string, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, repliesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null }> };
+export type GetRepliesByAccountQuery = { repliesByAccount: Array<{ postId: string, content: string, createdAt: string, deletedAt: string | null, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, repliesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null }> };
 
 export type GetLikedListingsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1196,6 +1196,34 @@ export const GetPostDocument = gql`
       url
       objectKey
     }
+    ancestors {
+      postId
+      content
+      createdAt
+      editedAt
+      deletedAt
+      authorId
+      authorDisplayName
+      authorUsername
+      authorAvatarObjectKey
+      authorSchoolName
+      linkedServiceId
+      inReplyToPostId
+      likesCount
+      repliesCount
+      likedByMe
+      tags {
+        id
+        name
+      }
+      media {
+        id
+        fileName
+        contentType
+        url
+        objectKey
+      }
+    }
   }
 }
     `;
@@ -1509,6 +1537,8 @@ export const GetListingDetailDocument = gql`
     type
     isUnlimited
     deliveryTimeDays
+    digitalFileObjectKey
+    digitalLink
     createdAt
     updatedAt
     accountId
@@ -1589,6 +1619,8 @@ export const CreateListingDocument = gql`
     description
     price
     status
+    digitalFileObjectKey
+    digitalLink
   }
 }
     `;
@@ -1626,6 +1658,8 @@ export const UpdateListingDocument = gql`
     description
     price
     status
+    digitalFileObjectKey
+    digitalLink
     updatedAt
   }
 }
@@ -2399,6 +2433,7 @@ export const GetMyProfileDocument = gql`
     majorId
     followersCount
     followingCount
+    bannerObjectKey
   }
 }
     `;
@@ -2452,6 +2487,7 @@ export const GetUserProfileDocument = gql`
     followingCount
     schoolName
     major
+    bannerObjectKey
   }
 }
     `;
@@ -2623,6 +2659,7 @@ export const UpdateProfileDocument = gql`
     avatarUrl
     major
     majorId
+    bannerObjectKey
   }
 }
     `;
@@ -2658,6 +2695,7 @@ export const GetPostsByAccountDocument = gql`
     postId
     content
     createdAt
+    deletedAt
     authorId
     authorDisplayName
     authorUsername
@@ -2724,6 +2762,7 @@ export const GetRepliesByAccountDocument = gql`
     postId
     content
     createdAt
+    deletedAt
     authorId
     authorDisplayName
     authorUsername

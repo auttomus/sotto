@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Image as ImageIcon, X } from "lucide-react";
+import { MediaPreviewItem } from "~/components/ui/MediaPreviewItem";
 
 interface PostMediaGalleryProps {
   files: File[];
@@ -29,7 +30,7 @@ export function PostMediaGallery({ files, removeFile, fileInputRef }: PostMediaG
     <div className="flex gap-2 overflow-x-auto pb-4 mb-4">
       {files.map((file, i) => (
         <div key={i} className="relative w-32 h-32 shrink-0 rounded-sm overflow-hidden border border-border group">
-          <img src={URL.createObjectURL(file)} alt="preview" className="w-full h-full object-cover" />
+          <MediaPreviewItem file={file} />
           <button 
             type="button"
             onClick={() => removeFile(i)}

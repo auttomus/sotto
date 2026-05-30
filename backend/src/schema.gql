@@ -5,6 +5,7 @@
 type AccountModel {
   avatarObjectKey: String
   avatarUrl: String
+  bannerObjectKey: String
   createdAt: DateTime!
   displayName: String!
   followersCount: String!
@@ -64,6 +65,8 @@ input CreateListingInput {
   basePrice: Float!
   deliveryTimeDays: Int
   description: String!
+  digitalFileObjectKey: String
+  digitalLink: String
   isUnlimited: Boolean = false
   maxActiveOrders: Int
   mediaIds: [ID!]
@@ -123,6 +126,8 @@ type ListingModel {
   createdAt: DateTime!
   deliveryTimeDays: Int
   description: String!
+  digitalFileObjectKey: String
+  digitalLink: String
   id: ID!
   isLikedByMe: Boolean!
   isUnlimited: Boolean!
@@ -271,6 +276,7 @@ enum OrderStatus {
 }
 
 type PostModel {
+  ancestors: [PostModel!]
   authorAvatarObjectKey: String
   authorDisplayName: String
   authorId: String!
@@ -370,6 +376,8 @@ input UpdateListingInput {
   basePrice: Float
   deliveryTimeDays: Int
   description: String
+  digitalFileObjectKey: String
+  digitalLink: String
   isUnlimited: Boolean
   maxActiveOrders: Int
   mediaIds: [ID!]
@@ -390,6 +398,7 @@ input UpdatePostInput {
 
 input UpdateProfileInput {
   avatarObjectKey: String
+  bannerObjectKey: String
   displayName: String
   note: String
 }

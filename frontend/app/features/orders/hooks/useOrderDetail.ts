@@ -179,7 +179,14 @@ export function useOrderDetail({ orderId }: UseOrderDetailOptions) {
   const orderWithListing = order
     ? {
         ...order,
-        listing: listing ? { title: listing.title } : null,
+        listing: listing 
+          ? { 
+              title: listing.title,
+              type: listing.type,
+              digitalFileObjectKey: listing.digitalFileObjectKey,
+              digitalLink: listing.digitalLink,
+            } 
+          : null,
       }
     : null;
 

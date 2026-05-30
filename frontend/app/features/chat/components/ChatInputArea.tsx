@@ -2,6 +2,7 @@ import * as React from "react";
 import { Paperclip, Package, Send, Loader2, X, Tag } from "lucide-react";
 import { useToastStore } from "~/core/store/useToastStore";
 import { MentionSuggestions } from "~/components/ui/MentionSuggestions";
+import { MediaPreviewItem } from "~/components/ui/MediaPreviewItem";
 
 interface ChatInputAreaProps {
   inputText: string;
@@ -59,10 +60,9 @@ export function ChatInputArea({
       {selectedImages.length > 0 && (
         <div className="mb-3 flex gap-2 overflow-x-auto py-1">
           {selectedImages.map((file, idx) => {
-            const previewUrl = URL.createObjectURL(file);
             return (
               <div key={idx} className="relative h-16 w-16 rounded-sm overflow-hidden shrink-0 border border-border bg-muted">
-                <img src={previewUrl} className="h-full w-full object-cover" alt="Preview" />
+                <MediaPreviewItem file={file} />
                 <button
                   type="button"
                   onClick={() => setSelectedImages((prev) => prev.filter((_, i) => i !== idx))}
@@ -104,16 +104,16 @@ export function ChatInputArea({
       {isUploading && (
         <div className="mb-3 flex items-center gap-2 text-xs font-semibold text-primary">
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          <span>Mengirim gambar...</span>
+          <span>Mengirim media...</span>
         </div>
       )}
 
       <div className="flex items-center gap-2 bg-muted rounded-full pr-1.5 pl-3 py-1.5 relative">
-        {/* File Input for Images */}
+        {/* File Input for Images & Videos */}
         <input
           type="file"
           id="chat-image-input"
-          accept="image/*"
+          accept="image/*,video/*"
           multiple
           className="hidden"
           onChange={(e) => {
@@ -126,7 +126,7 @@ export function ChatInputArea({
           type="button"
           onClick={() => document.getElementById("chat-image-input")?.click()}
           className="text-muted-foreground hover:text-primary transition shrink-0 cursor-pointer"
-          title="Pilih Gambar"
+          title="Pilih Gambar atau Video"
         >
           <Paperclip className="h-5 w-5" />
         </button>

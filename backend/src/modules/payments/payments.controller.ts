@@ -81,12 +81,18 @@ export class PaymentsController {
       transaction_status === 'settlement' ||
       transaction_status === 'capture'
     ) {
+      const listing = await this.prisma.listing.findUnique({
+        where: { id: order.listingId },
+      });
+      const isDigital = listing?.type === 'DIGITAL_PRODUCT';
+      const nextStatus = isDigital ? OrderStatus.COMPLETED : OrderStatus.IN_PROGRESS;
+
       const updatedOrder = await this.prisma.order.update({
         where: { id: cleanOrderId },
-        data: { status: OrderStatus.IN_PROGRESS },
+        data: { status: nextStatus },
       });
       this.logger.log(
-        `Order ${cleanOrderId} telah DIBAYAR. Status diperbarui ke IN_PROGRESS.`,
+        `Order ${cleanOrderId} telah DIBAYAR. Status diperbarui ke ${nextStatus}.`,
       );
 
       // Notifikasi ke seller: pembayaran diterima

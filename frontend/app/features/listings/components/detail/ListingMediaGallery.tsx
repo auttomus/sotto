@@ -30,13 +30,28 @@ export function ListingMediaGallery({ media, title, isFullyBooked }: ListingMedi
     );
   }
 
+  const activeMediaItem = media[currentMedia];
+  const url = resolveMediaUrl(activeMediaItem.url || (activeMediaItem as any).objectKey);
+  const isVideo = activeMediaItem.contentType?.startsWith("video/") || /\.(mp4|webm|ogg|mov)$/i.test(activeMediaItem.fileName || "");
+
   return (
     <div className="relative w-full aspect-square md:aspect-video bg-muted overflow-hidden">
-      <img 
-        src={resolveMediaUrl(media[currentMedia].url || (media[currentMedia] as any).objectKey)} 
-        alt={title}
-        className="w-full h-full object-cover"
-      />
+      {isVideo ? (
+        <video
+          src={url || ""}
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <img 
+          src={url || ""} 
+          alt={title}
+          className="w-full h-full object-cover"
+        />
+      )}
       
       {/* Carousel Controls */}
       {media.length > 1 && (

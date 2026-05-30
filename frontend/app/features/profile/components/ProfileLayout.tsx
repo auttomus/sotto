@@ -23,6 +23,7 @@ import { useAuthStore } from "~/core/store/useAuthStore";
 import { useToastStore } from "~/core/store/useToastStore";
 import { ROUTES } from "~/core/constants/ROUTES";
 import { PostCard } from "~/features/feed/components/PostCard";
+import { filterFeedPosts } from "~/core/utils/filterFeedPosts";
 import { ListingCard } from "~/features/listings/components/ListingCard";
 
 interface ProfileLayoutProps {
@@ -148,9 +149,17 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
 
       {/* Cover Section */}
       <div className="relative">
-        <div className="h-32 md:h-48 w-full overflow-hidden bg-gradient-to-r from-primary to-purple-600/80">
-          {/* Default cover gradient */}
-        </div>
+        {profile.bannerObjectKey ? (
+          <div className="h-32 md:h-48 w-full overflow-hidden bg-muted relative">
+            <img 
+              src={resolveMediaUrl(profile.bannerObjectKey)} 
+              alt="Profile Banner" 
+              className="w-full h-full object-cover"
+            />
+          </div>
+        ) : (
+          <div className="h-32 md:h-48 w-full overflow-hidden bg-gradient-to-r from-primary to-purple-600/80" />
+        )}
       </div>
 
       {/* Profile Info Section */}
@@ -319,7 +328,7 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
             ) : !postsData?.postsByAccount || postsData.postsByAccount.length === 0 ? (
               <div className="text-center p-8 text-muted-foreground">Belum ada postingan.</div>
             ) : (
-              postsData.postsByAccount.map((post: any) => (
+              filterFeedPosts(postsData.postsByAccount).map((post: any) => (
                 <PostCard key={post.postId} post={post} />
               ))
             )}
@@ -380,7 +389,7 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
             ) : !repliesData?.repliesByAccount || repliesData.repliesByAccount.length === 0 ? (
               <div className="text-center p-8 text-muted-foreground">Belum ada balasan.</div>
             ) : (
-              repliesData.repliesByAccount.map((post: any) => (
+              filterFeedPosts(repliesData.repliesByAccount).map((post: any) => (
                 <PostCard key={post.postId} post={post} />
               ))
             )}
@@ -423,7 +432,7 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
                 ) : !likedPostsData?.likedPosts || likedPostsData.likedPosts.length === 0 ? (
                   <div className="text-center p-8 text-muted-foreground">Belum ada postingan disukai.</div>
                 ) : (
-                  likedPostsData.likedPosts.map((post: any) => (
+                  filterFeedPosts(likedPostsData.likedPosts).map((post: any) => (
                     <PostCard key={post.postId} post={post} />
                   ))
                 )}

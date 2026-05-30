@@ -18,6 +18,7 @@ export type AccountModel = {
   __typename?: 'AccountModel';
   avatarObjectKey?: Maybe<Scalars['String']['output']>;
   avatarUrl?: Maybe<Scalars['String']['output']>;
+  bannerObjectKey?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   displayName: Scalars['String']['output'];
   followersCount: Scalars['String']['output'];
@@ -80,6 +81,8 @@ export type CreateListingInput = {
   basePrice: Scalars['Float']['input'];
   deliveryTimeDays?: InputMaybe<Scalars['Int']['input']>;
   description: Scalars['String']['input'];
+  digitalFileObjectKey?: InputMaybe<Scalars['String']['input']>;
+  digitalLink?: InputMaybe<Scalars['String']['input']>;
   isUnlimited?: InputMaybe<Scalars['Boolean']['input']>;
   maxActiveOrders?: InputMaybe<Scalars['Int']['input']>;
   mediaIds?: InputMaybe<Array<Scalars['ID']['input']>>;
@@ -136,6 +139,8 @@ export type ListingModel = {
   createdAt: Scalars['DateTime']['output'];
   deliveryTimeDays?: Maybe<Scalars['Int']['output']>;
   description: Scalars['String']['output'];
+  digitalFileObjectKey?: Maybe<Scalars['String']['output']>;
+  digitalLink?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   isLikedByMe: Scalars['Boolean']['output'];
   isUnlimited: Scalars['Boolean']['output'];
@@ -454,6 +459,7 @@ export enum OrderStatus {
 
 export type PostModel = {
   __typename?: 'PostModel';
+  ancestors?: Maybe<Array<PostModel>>;
   authorAvatarObjectKey?: Maybe<Scalars['String']['output']>;
   authorDisplayName?: Maybe<Scalars['String']['output']>;
   authorId: Scalars['String']['output'];
@@ -674,6 +680,8 @@ export type UpdateListingInput = {
   basePrice?: InputMaybe<Scalars['Float']['input']>;
   deliveryTimeDays?: InputMaybe<Scalars['Int']['input']>;
   description?: InputMaybe<Scalars['String']['input']>;
+  digitalFileObjectKey?: InputMaybe<Scalars['String']['input']>;
+  digitalLink?: InputMaybe<Scalars['String']['input']>;
   isUnlimited?: InputMaybe<Scalars['Boolean']['input']>;
   maxActiveOrders?: InputMaybe<Scalars['Int']['input']>;
   mediaIds?: InputMaybe<Array<Scalars['ID']['input']>>;
@@ -694,6 +702,7 @@ export type UpdatePostInput = {
 
 export type UpdateProfileInput = {
   avatarObjectKey?: InputMaybe<Scalars['String']['input']>;
+  bannerObjectKey?: InputMaybe<Scalars['String']['input']>;
   displayName?: InputMaybe<Scalars['String']['input']>;
   note?: InputMaybe<Scalars['String']['input']>;
 };

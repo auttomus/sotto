@@ -106,4 +106,33 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       isTyping: data.isTyping,
     });
   }
+
+  /** Client menandai percakapan sebagai telah dibaca */
+  @SubscribeMessage('readConversation')
+  async handleReadConversation(
+    @WsCurrentUser() user: JwtPayload,
+    @MessageBody() data: { conversationId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    // Validasi: Harus partisipan
+    await this.chatService.validateParticipant(
+      data.conversationId,
+      user.accountId,
+    );
+
+    // Tandai di DB
+    await this.chatService.markAsRead(data.conversationId, user.accountId);
+
+    // Ambil pesan terakhir untuk mendapatkan lastReadMessageId
+    const messages = await this.chatService.getMessages(data.conversationId, 1);
+    const latestMessage = messages[0];
+    const lastReadMessageId = latestMessage?.messageId || null;
+
+    // Siarkan ke client lain di room percakapan ini
+    client.to(`conversation:${data.conversationId}`).emit('conversationRead', {
+      conversationId: data.conversationId,
+      accountId: user.accountId,
+      lastReadMessageId,
+    });
+  }
 }

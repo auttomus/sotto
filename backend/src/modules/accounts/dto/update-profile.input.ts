@@ -19,4 +19,9 @@ export class UpdateProfileInput {
   @IsOptional()
   @IsString()
   avatarObjectKey?: string;
+
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsString()
+  bannerObjectKey?: string;
 }

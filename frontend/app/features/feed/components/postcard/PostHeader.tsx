@@ -5,6 +5,7 @@ import { Avatar } from "~/components/ui/Avatar";
 import { LabelBadge } from "~/components/ui/LabelBadge";
 import { formatDate } from "~/core/utils/formatDate";
 import { ROUTES } from "~/core/constants/ROUTES";
+import { cn } from "~/core/utils/cn";
 
 interface PostHeaderProps {
   post: any;
@@ -14,6 +15,7 @@ interface PostHeaderProps {
   setShowMenu: (show: boolean) => void;
   setIsEditing: (editing: boolean) => void;
   onDelete: () => void;
+  hideAvatar?: boolean;
 }
 
 export function PostHeader({
@@ -24,22 +26,25 @@ export function PostHeader({
   setShowMenu,
   setIsEditing,
   onDelete,
+  hideAvatar,
 }: PostHeaderProps) {
   return (
-    <div className="flex items-start justify-between mb-3">
-      <div className="flex items-start gap-3">
-        <Link
-          to={post.authorUsername ? ROUTES.PROFILE_PUBLIC(post.authorUsername) : "#"}
-          className="shrink-0 group"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <Avatar
-            src={avatarUrl}
-            alt={post.authorDisplayName || post.authorUsername || ""}
-            size="md"
-          />
-        </Link>
-        <div>
+    <div className="flex items-start justify-between mb-3 w-full">
+      <div className={cn("flex items-start w-full", !hideAvatar && "gap-3")}>
+        {!hideAvatar && (
+          <Link
+            to={post.authorUsername ? ROUTES.PROFILE_PUBLIC(post.authorUsername) : "#"}
+            className="shrink-0 group"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Avatar
+              src={avatarUrl}
+              alt={post.authorDisplayName || post.authorUsername || ""}
+              size="md"
+            />
+          </Link>
+        )}
+        <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <Link
               to={post.authorUsername ? ROUTES.PROFILE_PUBLIC(post.authorUsername) : "#"}

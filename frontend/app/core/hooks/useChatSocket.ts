@@ -22,9 +22,14 @@ interface UseChatSocketOptions {
   conversationId: string;
   onNewMessage: (message: ChatMessage) => void;
   onUserTyping?: (data: { accountId: string; isTyping: boolean }) => void;
+  onConversationRead?: (data: {
+    conversationId: string;
+    accountId: string;
+    lastReadMessageId: string | null;
+  }) => void;
 }
 
-export function useChatSocket({ conversationId, onNewMessage, onUserTyping }: UseChatSocketOptions) {
+export function useChatSocket({ conversationId, onNewMessage, onUserTyping, onConversationRead }: UseChatSocketOptions) {
   const socketRef = useRef<Socket | null>(null);
   const token = useAuthStore.getState().token;
 
@@ -43,6 +48,7 @@ export function useChatSocket({ conversationId, onNewMessage, onUserTyping }: Us
 
     socket.on('connect', () => {
       socket.emit('joinRoom', { conversationId });
+      socket.emit('readConversation', { conversationId });
     });
 
     socket.on('newMessage', (message: ChatMessage) => {
@@ -53,19 +59,29 @@ export function useChatSocket({ conversationId, onNewMessage, onUserTyping }: Us
       socket.on('userTyping', onUserTyping);
     }
 
+    if (onConversationRead) {
+      socket.on('conversationRead', onConversationRead);
+    }
+
     return () => {
       socket.disconnect();
       socketRef.current = null;
     };
   }, [conversationId, token]);
 
-  const sendMessage = useCallback((content: string, mediaIds?: string[]) => {
+  const sendMessage = useCallback((content: string, mediaIds?: string[], callback?: (msg: ChatMessage) => void) => {
     if (!socketRef.current?.connected) return;
-    socketRef.current.emit('sendMessage', {
-      conversationId,
-      content,
-      mediaIds,
-    });
+    socketRef.current.emit(
+      'sendMessage',
+      {
+        conversationId,
+        content,
+        mediaIds,
+      },
+      (response: ChatMessage) => {
+        if (callback) callback(response);
+      }
+    );
   }, [conversationId]);
 
   const sendTyping = useCallback((isTyping: boolean) => {
@@ -76,5 +92,12 @@ export function useChatSocket({ conversationId, onNewMessage, onUserTyping }: Us
     });
   }, [conversationId]);
 
-  return { sendMessage, sendTyping };
+  const sendRead = useCallback(() => {
+    if (!socketRef.current?.connected) return;
+    socketRef.current.emit('readConversation', {
+      conversationId,
+    });
+  }, [conversationId]);
+
+  return { sendMessage, sendTyping, sendRead };
 }

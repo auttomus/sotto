@@ -44,6 +44,9 @@ export class AccountsService {
         ...(input.avatarObjectKey !== undefined && {
           avatarObjectKey: input.avatarObjectKey,
         }),
+        ...(input.bannerObjectKey !== undefined && {
+          bannerObjectKey: input.bannerObjectKey,
+        }),
       },
       include: {
         school: { select: { name: true } },

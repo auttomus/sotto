@@ -19,17 +19,36 @@ export interface ListingCardProps {
   isLink?: boolean;
 }
 
+function isVideoFile(path: string | null | undefined): boolean {
+  if (!path) return false;
+  const ext = path.split('.').pop()?.toLowerCase();
+  return ['mp4', 'mov', 'webm', 'avi', 'mkv', 'm4v', '3gp', 'ogv'].includes(ext || '');
+}
+
 export function ListingCard({ listing, onRemove, className, isLink = true }: ListingCardProps) {
+  const mediaUrl = listing.media?.[0] ? resolveMediaUrl(listing.media[0].objectKey || listing.media[0].url) : null;
+  const isVideo = listing.media?.[0] ? isVideoFile(listing.media[0].objectKey || listing.media[0].url) : false;
+
   const content = (
     <div className="flex gap-4 min-w-0 w-full relative">
       {/* Thumbnail Image / Fallback */}
       <div className="h-20 w-20 rounded-sm bg-muted overflow-hidden shrink-0 border border-border">
-        {listing.media?.[0] ? (
-          <img 
-            src={resolveMediaUrl(listing.media[0].objectKey || listing.media[0].url)} 
-            alt={listing.title} 
-            className="w-full h-full object-cover group-hover:scale-105 transition duration-300" 
-          />
+        {mediaUrl ? (
+          isVideo ? (
+            <video 
+              src={mediaUrl} 
+              className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+              muted
+              playsInline
+              preload="metadata"
+            />
+          ) : (
+            <img 
+              src={mediaUrl} 
+              alt={listing.title} 
+              className="w-full h-full object-cover group-hover:scale-105 transition duration-300" 
+            />
+          )
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground text-2xl bg-accent">📦</div>
         )}
