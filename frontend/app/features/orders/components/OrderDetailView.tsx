@@ -35,6 +35,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
     handleReview,
     handleFileComplaint,
     handleRefundDisputedOrder,
+    handleRequestCancellationChat,
   } = useOrderDetail({ orderId });
 
   if (loading && !order) {
@@ -218,6 +219,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
           onPay={handlePay}
           handleFileComplaint={handleFileComplaint}
           handleRefundDisputedOrder={() => setShowRefundConfirm(true)}
+          handleRequestCancellationChat={handleRequestCancellationChat}
         />
       </div>
 

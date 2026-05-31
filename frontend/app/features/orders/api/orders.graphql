@@ -26,6 +26,9 @@ query GetOrderDetail($id: ID!) {
     disputedById
     complaintReason
     complaintNotes
+    proposedSplitBuyerAmount
+    proposedSplitSellerAmount
+    proposedSplitById
     lockVersion
     buyer {
       id
@@ -140,6 +143,30 @@ mutation FileComplaint($orderId: ID!, $reason: String!, $notes: String) {
 
 mutation RefundDisputedOrder($orderId: ID!) {
   refundDisputedOrder(orderId: $orderId) {
+    id
+    status
+  }
+}
+
+mutation ProposeSplitRefund($orderId: ID!, $buyerAmount: Float!, $sellerAmount: Float!) {
+  proposeSplitRefund(orderId: $orderId, buyerAmount: $buyerAmount, sellerAmount: $sellerAmount) {
+    id
+    status
+    proposedSplitBuyerAmount
+    proposedSplitSellerAmount
+    proposedSplitById
+  }
+}
+
+mutation AcceptSplitRefund($orderId: ID!) {
+  acceptSplitRefund(orderId: $orderId) {
+    id
+    status
+  }
+}
+
+mutation RejectSplitRefund($orderId: ID!) {
+  rejectSplitRefund(orderId: $orderId) {
     id
     status
   }

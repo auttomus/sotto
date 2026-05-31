@@ -314,10 +314,11 @@ export class OrdersService {
     });
 
     // Kirim system message ke direct chat room
+    const notesStr = notes ? ` Catatan: ${notes}` : '';
     await this.sendSystemChatMessage(
       updatedOrder,
       'DISPUTED',
-      `Komplain diajukan oleh pembeli. Alasan: ${reason}.`,
+      `Komplain diajukan oleh pembeli. Alasan: ${reason}.${notesStr}`,
     );
 
     this.emitOrderUpdate(updatedOrder);
@@ -371,6 +372,230 @@ export class OrdersService {
       updatedOrder,
       'CANCELLED',
       'Sengketa diselesaikan: Penjual menyetujui pengembalian dana sepenuhnya ke pembeli.',
+    );
+
+    this.emitOrderUpdate(updatedOrder);
+    return updatedOrder;
+  }
+
+  /** Ajukan proposal bagi hasil sengketa */
+  async proposeSplitRefund(
+    orderId: string,
+    proposerId: string,
+    buyerAmount: number,
+    sellerAmount: number,
+  ) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+    });
+    if (!order) throw new NotFoundException('Order tidak ditemukan.');
+
+    if (order.status !== OrderStatus.DISPUTED) {
+      throw new BadRequestException(
+        'Proposal bagi hasil hanya dapat diajukan saat pesanan berstatus DISPUTED.',
+      );
+    }
+
+    if (
+      order.buyerAccountId !== proposerId &&
+      order.sellerAccountId !== proposerId
+    ) {
+      throw new ForbiddenException(
+        'Hanya pembeli atau penjual yang terlibat yang dapat mengajukan proposal bagi hasil.',
+      );
+    }
+
+    const total = buyerAmount + sellerAmount;
+    if (Math.abs(total - order.agreedPrice.toNumber()) > 0.01) {
+      throw new BadRequestException(
+        'Total bagi hasil harus sama dengan nilai harga kesepakatan pesanan.',
+      );
+    }
+
+    const updatedOrder = await this.prisma.order.update({
+      where: { id: orderId, lockVersion: order.lockVersion },
+      data: {
+        proposedSplitBuyerAmount: buyerAmount,
+        proposedSplitSellerAmount: sellerAmount,
+        proposedSplitById: proposerId,
+        lockVersion: { increment: 1 },
+      },
+    });
+
+    const otherPartyId =
+      proposerId === order.buyerAccountId
+        ? order.sellerAccountId
+        : order.buyerAccountId;
+    const proposerRole =
+      proposerId === order.buyerAccountId ? 'Pembeli' : 'Penjual';
+
+    // Kirim Notifikasi ke pihak lain
+    await this.notificationsService.createNotification({
+      accountId: otherPartyId,
+      fromAccountId: proposerId,
+      type: NotificationType.ORDER_UPDATE,
+      targetType: 'Order',
+      targetId: orderId,
+    });
+
+    // Kirim system message ke room chat
+    await this.sendSystemChatMessage(
+      updatedOrder,
+      'DISPUTED',
+      `Proposal bagi hasil diajukan oleh ${proposerRole}: Pembeli Rp ${buyerAmount.toLocaleString('id-ID')}, Penjual Rp ${sellerAmount.toLocaleString('id-ID')}.`,
+    );
+
+    this.emitOrderUpdate(updatedOrder);
+    return updatedOrder;
+  }
+
+  /** Setujui proposal bagi hasil sengketa */
+  async acceptSplitRefund(orderId: string, accepterId: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+    });
+    if (!order) throw new NotFoundException('Order tidak ditemukan.');
+
+    if (order.status !== OrderStatus.DISPUTED) {
+      throw new BadRequestException(
+        'Proposal bagi hasil hanya dapat disetujui saat pesanan berstatus DISPUTED.',
+      );
+    }
+
+    if (
+      !order.proposedSplitById ||
+      !order.proposedSplitBuyerAmount ||
+      !order.proposedSplitSellerAmount
+    ) {
+      throw new BadRequestException(
+        'Tidak ada proposal bagi hasil yang aktif saat ini.',
+      );
+    }
+
+    if (order.proposedSplitById === accepterId) {
+      throw new BadRequestException(
+        'Anda tidak dapat menyetujui proposal bagi hasil yang Anda ajukan sendiri.',
+      );
+    }
+
+    if (
+      order.buyerAccountId !== accepterId &&
+      order.sellerAccountId !== accepterId
+    ) {
+      throw new ForbiddenException('Anda tidak terlibat dalam pesanan ini.');
+    }
+
+    const buyerShare = order.proposedSplitBuyerAmount.toNumber();
+    const sellerShare = order.proposedSplitSellerAmount.toNumber();
+
+    const updatedOrder = await this.prisma.$transaction(async (tx) => {
+      const updated = await tx.order.update({
+        where: { id: orderId, lockVersion: order.lockVersion },
+        data: {
+          status: OrderStatus.CANCELLED,
+          lockVersion: { increment: 1 },
+        },
+      });
+
+      // Proses bagi hasil dana ke wallet masing-masing
+      await this.escrowService.settleSplitFunds(
+        orderId,
+        order.buyerAccountId,
+        order.sellerAccountId,
+        buyerShare,
+        sellerShare,
+        tx,
+      );
+
+      return updated;
+    });
+
+    const otherPartyId =
+      accepterId === order.buyerAccountId
+        ? order.sellerAccountId
+        : order.buyerAccountId;
+
+    // Kirim Notifikasi ke pihak yang mengajukan proposal
+    await this.notificationsService.createNotification({
+      accountId: otherPartyId,
+      fromAccountId: accepterId,
+      type: NotificationType.ORDER_UPDATE,
+      targetType: 'Order',
+      targetId: orderId,
+    });
+
+    // Kirim system message ke room chat
+    await this.sendSystemChatMessage(
+      updatedOrder,
+      'COMPLETED',
+      `Kesepakatan tercapai! Bagi hasil disetujui: Pembeli menerima Rp ${buyerShare.toLocaleString('id-ID')}, Penjual menerima Rp ${sellerShare.toLocaleString('id-ID')}.`,
+    );
+
+    this.emitOrderUpdate(updatedOrder);
+    return updatedOrder;
+  }
+
+  /** Tolak proposal bagi hasil sengketa */
+  async rejectSplitRefund(orderId: string, rejecterId: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+    });
+    if (!order) throw new NotFoundException('Order tidak ditemukan.');
+
+    if (order.status !== OrderStatus.DISPUTED) {
+      throw new BadRequestException(
+        'Proposal bagi hasil hanya dapat ditolak saat sengketa aktif.',
+      );
+    }
+
+    if (!order.proposedSplitById) {
+      throw new BadRequestException(
+        'Tidak ada proposal bagi hasil yang aktif saat ini.',
+      );
+    }
+
+    if (order.proposedSplitById === rejecterId) {
+      throw new BadRequestException(
+        'Anda tidak dapat menolak proposal yang Anda ajukan sendiri. Tunggu respon pihak lawan.',
+      );
+    }
+
+    if (
+      order.buyerAccountId !== rejecterId &&
+      order.sellerAccountId !== rejecterId
+    ) {
+      throw new ForbiddenException('Anda tidak terlibat dalam pesanan ini.');
+    }
+
+    const proposerId = order.proposedSplitById;
+
+    const updatedOrder = await this.prisma.order.update({
+      where: { id: orderId, lockVersion: order.lockVersion },
+      data: {
+        proposedSplitBuyerAmount: null,
+        proposedSplitSellerAmount: null,
+        proposedSplitById: null,
+        lockVersion: { increment: 1 },
+      },
+    });
+
+    const rejecterRole =
+      rejecterId === order.buyerAccountId ? 'Pembeli' : 'Penjual';
+
+    // Kirim Notifikasi ke pihak yang mengajukan proposal
+    await this.notificationsService.createNotification({
+      accountId: proposerId,
+      fromAccountId: rejecterId,
+      type: NotificationType.ORDER_UPDATE,
+      targetType: 'Order',
+      targetId: orderId,
+    });
+
+    // Kirim system message ke room chat
+    await this.sendSystemChatMessage(
+      updatedOrder,
+      'DISPUTED',
+      `Proposal bagi hasil ditolak oleh ${rejecterRole}.`,
     );
 
     this.emitOrderUpdate(updatedOrder);

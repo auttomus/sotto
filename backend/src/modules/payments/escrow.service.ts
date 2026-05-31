@@ -146,4 +146,74 @@ export class EscrowService {
       `Escrow REFUND sukses: Rp ${amount.toString()} dikembalikan ke Wallet ${buyerAccountId}`,
     );
   }
+
+  /** Bagi hasil sengketa (Split Refund Settlement) */
+  async settleSplitFunds(
+    orderId: string,
+    buyerAccountId: string,
+    sellerAccountId: string,
+    buyerAmount: number,
+    sellerAmount: number,
+    txClient?: Prisma.TransactionClient,
+  ): Promise<void> {
+    this.logger.log(
+      `Escrow SPLIT SETTLEMENT: Order ${orderId} → Buyer ${buyerAccountId} (Rp ${buyerAmount}), Seller ${sellerAccountId} (Rp ${sellerAmount})`,
+    );
+
+    const client: Prisma.TransactionClient = txClient || this.prisma;
+
+    // 1. Settle buyer's share (REFUND) if greater than 0
+    if (buyerAmount > 0) {
+      let buyerWallet = await client.wallet.findUnique({
+        where: { accountId: buyerAccountId },
+      });
+      if (!buyerWallet) {
+        buyerWallet = await client.wallet.create({
+          data: { accountId: buyerAccountId, balance: 0 },
+        });
+      }
+      const updatedBuyerWallet = await client.wallet.update({
+        where: { id: buyerWallet.id },
+        data: { balance: { increment: buyerAmount } },
+      });
+      await client.walletTransaction.create({
+        data: {
+          walletId: updatedBuyerWallet.id,
+          amount: buyerAmount,
+          type: 'REFUND',
+          description: `Bagi hasil sengketa pesanan #${orderId.slice(0, 8).toUpperCase()}`,
+          orderId: orderId,
+        },
+      });
+    }
+
+    // 2. Settle seller's share (ESCROW_RELEASE) if greater than 0
+    if (sellerAmount > 0) {
+      let sellerWallet = await client.wallet.findUnique({
+        where: { accountId: sellerAccountId },
+      });
+      if (!sellerWallet) {
+        sellerWallet = await client.wallet.create({
+          data: { accountId: sellerAccountId, balance: 0 },
+        });
+      }
+      const updatedSellerWallet = await client.wallet.update({
+        where: { id: sellerWallet.id },
+        data: { balance: { increment: sellerAmount } },
+      });
+      await client.walletTransaction.create({
+        data: {
+          walletId: updatedSellerWallet.id,
+          amount: sellerAmount,
+          type: 'ESCROW_RELEASE',
+          description: `Bagi hasil sengketa pesanan #${orderId.slice(0, 8).toUpperCase()}`,
+          orderId: orderId,
+        },
+      });
+    }
+
+    this.logger.log(
+      `Escrow SPLIT SETTLEMENT sukses: Buyer Rp ${buyerAmount}, Seller Rp ${sellerAmount}`,
+    );
+  }
 }

@@ -157,6 +157,10 @@ model Order {
   complaintReason  String?     @map("complaint_reason")
   complaintNotes   String?     @map("complaint_notes")
 
+  proposedSplitSellerAmount Decimal? @map("proposed_split_seller_amount") @db.Decimal(12, 2)
+  proposedSplitBuyerAmount  Decimal? @map("proposed_split_buyer_amount") @db.Decimal(12, 2)
+  proposedSplitById         String?  @map("proposed_split_by_id") @db.Uuid
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 

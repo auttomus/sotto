@@ -208,6 +208,7 @@ export type MessageModel = {
 export type Mutation = {
   __typename?: 'Mutation';
   acceptOffer: CustomOfferModel;
+  acceptSplitRefund: OrderModel;
   advanceOrderStatus: OrderModel;
   cancelOrder: OrderModel;
   confirmUpload: MediaAttachmentModel;
@@ -228,8 +229,10 @@ export type Mutation = {
   markAllNotificationsAsRead: Scalars['Boolean']['output'];
   markConversationAsRead: Scalars['Boolean']['output'];
   markNotificationAsRead: Scalars['Boolean']['output'];
+  proposeSplitRefund: OrderModel;
   refundDisputedOrder: OrderModel;
   rejectOffer: CustomOfferModel;
+  rejectSplitRefund: OrderModel;
   requestUploadUrl: PresignedUploadResult;
   toggleLikeListing: Scalars['Boolean']['output'];
   toggleLikePost: Scalars['Boolean']['output'];
@@ -247,6 +250,11 @@ export type Mutation = {
 
 export type MutationAcceptOfferArgs = {
   offerId: Scalars['ID']['input'];
+};
+
+
+export type MutationAcceptSplitRefundArgs = {
+  orderId: Scalars['ID']['input'];
 };
 
 
@@ -351,6 +359,13 @@ export type MutationMarkNotificationAsReadArgs = {
 };
 
 
+export type MutationProposeSplitRefundArgs = {
+  buyerAmount: Scalars['Float']['input'];
+  orderId: Scalars['ID']['input'];
+  sellerAmount: Scalars['Float']['input'];
+};
+
+
 export type MutationRefundDisputedOrderArgs = {
   orderId: Scalars['ID']['input'];
 };
@@ -358,6 +373,11 @@ export type MutationRefundDisputedOrderArgs = {
 
 export type MutationRejectOfferArgs = {
   offerId: Scalars['ID']['input'];
+};
+
+
+export type MutationRejectSplitRefundArgs = {
+  orderId: Scalars['ID']['input'];
 };
 
 
@@ -463,6 +483,9 @@ export type OrderModel = {
   isReviewable: Scalars['Boolean']['output'];
   listingId: Scalars['String']['output'];
   lockVersion: Scalars['Int']['output'];
+  proposedSplitBuyerAmount?: Maybe<Scalars['Float']['output']>;
+  proposedSplitById?: Maybe<Scalars['String']['output']>;
+  proposedSplitSellerAmount?: Maybe<Scalars['Float']['output']>;
   review?: Maybe<ReviewModel>;
   seller?: Maybe<AccountModel>;
   sellerAccountId: Scalars['String']['output'];

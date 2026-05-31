@@ -14,6 +14,7 @@ interface OrderActionPanelProps {
   onPay?: () => void;
   handleFileComplaint?: (reason: string, notes?: string) => void;
   handleRefundDisputedOrder?: () => void;
+  handleRequestCancellationChat?: () => void;
 }
 
 export function OrderActionPanel({
@@ -26,6 +27,7 @@ export function OrderActionPanel({
   onPay,
   handleFileComplaint,
   handleRefundDisputedOrder,
+  handleRequestCancellationChat,
 }: OrderActionPanelProps) {
   // State untuk form komplain modal premium
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -77,13 +79,25 @@ export function OrderActionPanel({
     if (isBuyer) {
       // Pembeli tidak boleh membatalkan secara sepihak (Lapis 1)
       return (
-        <div className="bg-card border-t border-border p-4 pb-safe shrink-0 shadow-lg">
+        <div className="bg-card border-t border-border p-4 pb-safe shrink-0 shadow-lg space-y-3">
           <div className="flex items-start gap-2 px-1 text-[10px] text-muted-foreground font-medium">
             <AlertCircle className="h-4 w-4 shrink-0 text-warning mt-0.5" />
             <p className="leading-normal">
               Pesanan sedang diproses aktif oleh penjual. Anda tidak dapat membatalkan pesanan secara sepihak. Hubungi penjual via chat jika membutuhkan bantuan.
             </p>
           </div>
+          <Button
+            variant="secondary"
+            className="w-full font-bold text-xs py-2.5 rounded-lg border border-destructive/20 text-destructive bg-destructive/5 hover:bg-destructive/10 cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 transition duration-200"
+            onClick={handleRequestCancellationChat}
+            disabled={isActionLoading}
+          >
+            {isActionLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <span>Ajukan Pembatalan (Chat Penjual)</span>
+            )}
+          </Button>
         </div>
       );
     } else {
@@ -184,47 +198,28 @@ export function OrderActionPanel({
 
   // 4. DISPUTED
   if (status === OrderStatus.Disputed) {
-    if (isBuyer) {
-      // Pembeli dapat membatalkan komplain dan menyelesaikan
-      return (
-        <div className="bg-card border-t border-border p-4 pb-safe shrink-0 shadow-lg">
-          <div className="flex gap-3">
-            <Button
-              variant="primary"
-              className="flex-1 font-bold text-xs py-2.5 rounded-sm bg-success hover:opacity-90 text-success-foreground border-0 shadow-lg active:scale-[0.99] transition cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
-              onClick={handleAdvance}
-              disabled={isActionLoading}
-            >
-              {isActionLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <span>Tarik Komplain & Selesaikan</span>
-              )}
-            </Button>
-          </div>
+    return (
+      <div className="bg-card border-t border-border p-4 pb-safe shrink-0 shadow-lg space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        <div className="flex items-start gap-2 px-1 text-[10px] text-muted-foreground font-medium">
+          <AlertCircle className="h-4.5 w-4.5 shrink-0 text-rose-500 mt-0.5" />
+          <p className="leading-normal">
+            Sengketa pesanan aktif. Semua opsi mediasi (penarikan komplain, refund penuh, bagi hasil split, dan negosiasi) dipindahkan langsung ke dalam ruang chat untuk mendorong diskusi interaktif.
+          </p>
         </div>
-      );
-    } else {
-      // Penjual dapat setuju refund secara sukarela untuk menyelesaikan sengketa
-      return (
-        <div className="bg-card border-t border-border p-4 pb-safe shrink-0 shadow-lg">
-          <div className="flex gap-3">
-            <Button
-              variant="primary"
-              className="flex-1 font-bold text-xs py-2.5 rounded-sm bg-destructive hover:opacity-90 text-destructive-foreground border-0 shadow-lg active:scale-[0.99] transition cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
-              onClick={handleRefundDisputedOrder}
-              disabled={isActionLoading}
-            >
-              {isActionLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <span>Setujui Refund & Kembalikan Dana</span>
-              )}
-            </Button>
-          </div>
-        </div>
-      );
-    }
+        <Button
+          variant="primary"
+          className="w-full font-bold text-xs py-2.5 rounded-lg bg-primary hover:opacity-90 text-primary-foreground border-0 shadow-lg flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 transition duration-200"
+          onClick={handleRequestCancellationChat}
+          disabled={isActionLoading}
+        >
+          {isActionLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <span>Bahas Solusi di Chat Sengketa</span>
+          )}
+        </Button>
+      </div>
+    );
   }
 
   return null;

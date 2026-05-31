@@ -7,6 +7,7 @@ import {
   Context,
   ResolveField,
   Parent,
+  Float,
 } from '@nestjs/graphql';
 import { OrdersService } from './orders.service';
 import { ReviewsService } from './reviews.service';
@@ -53,6 +54,13 @@ export class OrdersResolver {
       disputedById: order.disputedById,
       complaintReason: order.complaintReason,
       complaintNotes: order.complaintNotes,
+      proposedSplitSellerAmount: order.proposedSplitSellerAmount
+        ? Number(order.proposedSplitSellerAmount)
+        : null,
+      proposedSplitBuyerAmount: order.proposedSplitBuyerAmount
+        ? Number(order.proposedSplitBuyerAmount)
+        : null,
+      proposedSplitById: order.proposedSplitById,
       lockVersion: order.lockVersion,
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
@@ -111,6 +119,46 @@ export class OrdersResolver {
     @Args('orderId', { type: () => ID }) orderId: string,
   ) {
     const order = await this.ordersService.refundDisputedOrder(
+      orderId,
+      user.accountId,
+    );
+    return this.serializeOrder(order);
+  }
+
+  @Mutation(() => OrderModel)
+  async proposeSplitRefund(
+    @CurrentUser() user: CurrentUserPayload,
+    @Args('orderId', { type: () => ID }) orderId: string,
+    @Args('buyerAmount', { type: () => Float }) buyerAmount: number,
+    @Args('sellerAmount', { type: () => Float }) sellerAmount: number,
+  ) {
+    const order = await this.ordersService.proposeSplitRefund(
+      orderId,
+      user.accountId,
+      buyerAmount,
+      sellerAmount,
+    );
+    return this.serializeOrder(order);
+  }
+
+  @Mutation(() => OrderModel)
+  async acceptSplitRefund(
+    @CurrentUser() user: CurrentUserPayload,
+    @Args('orderId', { type: () => ID }) orderId: string,
+  ) {
+    const order = await this.ordersService.acceptSplitRefund(
+      orderId,
+      user.accountId,
+    );
+    return this.serializeOrder(order);
+  }
+
+  @Mutation(() => OrderModel)
+  async rejectSplitRefund(
+    @CurrentUser() user: CurrentUserPayload,
+    @Args('orderId', { type: () => ID }) orderId: string,
+  ) {
+    const order = await this.ordersService.rejectSplitRefund(
       orderId,
       user.accountId,
     );

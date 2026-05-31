@@ -12,6 +12,7 @@ interface UseChatRoomOptions {
 export function useChatRoom({ conversationId }: UseChatRoomOptions) {
   const location = useLocation();
   const incomingMention = location.state?.mentionListing;
+  const initialMessage = location.state?.initialMessage;
 
   const { user } = useAuthStore();
   const { uploadFile } = useUpload();
@@ -23,10 +24,12 @@ export function useChatRoom({ conversationId }: UseChatRoomOptions) {
   React.useEffect(() => {
     if (incomingMention) {
       setSelectedListing(incomingMention);
-      // Clear browser history state to avoid duplication on page reload
+      window.history.replaceState({}, document.title);
+    } else if (initialMessage) {
+      setInputText(initialMessage);
       window.history.replaceState({}, document.title);
     }
-  }, [incomingMention]);
+  }, [incomingMention, initialMessage]);
 
   const [isUploading, setIsUploading] = React.useState(false);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);

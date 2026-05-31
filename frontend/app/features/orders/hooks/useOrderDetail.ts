@@ -8,16 +8,20 @@ import {
   useGetListingDetailQuery,
   useCreateReviewMutation,
   useFileComplaintMutation,
-  useRefundDisputedOrderMutation
+  useRefundDisputedOrderMutation,
+  useCreateConversationMutation
 } from "~/core/apollo/generated";
 import { useAuthStore } from "~/core/store/useAuthStore";
 import { useToastStore } from "~/core/store/useToastStore";
+import { useNavigate } from "react-router";
+import { ROUTES } from "~/core/constants/ROUTES";
 
 interface UseOrderDetailOptions {
   orderId: string;
 }
 
 export function useOrderDetail({ orderId }: UseOrderDetailOptions) {
+  const navigate = useNavigate();
   const { user } = useAuthStore();
   const addToast = useToastStore((s) => s.addToast);
 
@@ -150,7 +154,37 @@ export function useOrderDetail({ orderId }: UseOrderDetailOptions) {
     onError: (e: any) => addToast("error", e.message),
   });
 
-  const isActionLoading = advanceLoading || cancelLoading || reviewLoading || complaintLoading || refundDisputedLoading;
+  const [createConversation, { loading: chatLoading }] = useCreateConversationMutation({
+    onCompleted: (res) => {
+      const convoId = res.createConversation.id;
+      const listingTitle = listing?.title || "Jasa/Produk";
+      const shortOrderId = orderId.substring(0, 8).toUpperCase();
+      const messageText = `Halo ${order?.seller?.displayName || "Penjual"}, saya ingin mengajukan permohonan pembatalan untuk pesanan #${shortOrderId} (${listingTitle}). Apakah kita bisa mendiskusikan hal ini?`;
+      navigate(ROUTES.WORKSPACE_CHAT(convoId), {
+        state: {
+          initialMessage: messageText
+        }
+      });
+    },
+    onError: (err) => {
+      addToast("error", `Gagal memulai chat: ${err.message}`);
+    }
+  });
+
+  const handleRequestCancellationChat = () => {
+    if (order?.sellerAccountId) {
+      createConversation({
+        variables: {
+          input: {
+            participantIds: [order.sellerAccountId],
+            type: "DIRECT",
+          }
+        }
+      });
+    }
+  };
+
+  const isActionLoading = advanceLoading || cancelLoading || reviewLoading || complaintLoading || refundDisputedLoading || chatLoading;
 
   const getStatusLabel = (status: string) => {
     switch (status) {
@@ -242,6 +276,7 @@ export function useOrderDetail({ orderId }: UseOrderDetailOptions) {
     handleReview,
     handleFileComplaint,
     handleRefundDisputedOrder,
+    handleRequestCancellationChat,
     refetch,
   };
 }

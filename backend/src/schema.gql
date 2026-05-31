@@ -191,6 +191,7 @@ type MessageModel {
 
 type Mutation {
   acceptOffer(offerId: ID!): CustomOfferModel!
+  acceptSplitRefund(orderId: ID!): OrderModel!
   advanceOrderStatus(orderId: ID!): OrderModel!
   cancelOrder(orderId: ID!): OrderModel!
   confirmUpload(input: RequestUploadInput!, objectKey: String!): MediaAttachmentModel!
@@ -211,8 +212,10 @@ type Mutation {
   markAllNotificationsAsRead: Boolean!
   markConversationAsRead(conversationId: ID!): Boolean!
   markNotificationAsRead(id: ID!): Boolean!
+  proposeSplitRefund(buyerAmount: Float!, orderId: ID!, sellerAmount: Float!): OrderModel!
   refundDisputedOrder(orderId: ID!): OrderModel!
   rejectOffer(offerId: ID!): CustomOfferModel!
+  rejectSplitRefund(orderId: ID!): OrderModel!
   requestUploadUrl(input: RequestUploadInput!): PresignedUploadResult!
   toggleLikeListing(id: ID!): Boolean!
   toggleLikePost(postId: String!): Boolean!
@@ -269,6 +272,9 @@ type OrderModel {
   isReviewable: Boolean!
   listingId: String!
   lockVersion: Int!
+  proposedSplitBuyerAmount: Float
+  proposedSplitById: String
+  proposedSplitSellerAmount: Float
   review: ReviewModel
   seller: AccountModel
   sellerAccountId: String!

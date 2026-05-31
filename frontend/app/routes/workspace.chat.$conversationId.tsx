@@ -11,6 +11,7 @@ import { MessageBubble } from "~/features/chat/components/MessageBubble";
 import { ChatInputArea } from "~/features/chat/components/ChatInputArea";
 import { ListingSelectionModal } from "~/features/chat/components/ListingSelectionModal";
 import { CreateOfferModal } from "~/features/chat/components/CreateOfferModal";
+import { DisputeHeaderBanner } from "~/features/chat/components/DisputeHeaderBanner";
 
 export default function ChatRoute() {
   const { conversationId } = useParams();
@@ -21,6 +22,7 @@ export default function ChatRoute() {
     allMessages,
     loading,
     recipient,
+    conversation,
     user,
     selectedImages,
     setSelectedImages,
@@ -83,6 +85,23 @@ export default function ChatRoute() {
             <MoreVertical className="h-5 w-5 text-muted-foreground" />
           </button>
         </header>
+
+        {/* Dispute Sengketa Mediasi Banner */}
+        {conversation?.activeOrder && conversation.activeOrder.status === "DISPUTED" && (
+          <DisputeHeaderBanner
+            orderId={conversation.activeOrder.id}
+            status={conversation.activeOrder.status}
+            agreedPrice={conversation.activeOrder.agreedPrice}
+            buyerAccountId={conversation.activeOrder.buyerAccountId}
+            sellerAccountId={conversation.activeOrder.sellerAccountId}
+            complaintReason={conversation.activeOrder.complaintReason}
+            complaintNotes={conversation.activeOrder.complaintNotes}
+            proposedSplitBuyerAmount={conversation.activeOrder.proposedSplitBuyerAmount}
+            proposedSplitSellerAmount={conversation.activeOrder.proposedSplitSellerAmount}
+            proposedSplitById={conversation.activeOrder.proposedSplitById}
+            currentUserId={user?.accountId || ""}
+          />
+        )}
 
         {/* Chat Area */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 flex flex-col">

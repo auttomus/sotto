@@ -28,7 +28,7 @@ export type MajorsBySchoolQuery = { majorsBySchool: Array<{ id: string, name: st
 export type GetConversationsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetConversationsQuery = { conversations: Array<{ id: string, type: Types.ConversationType, createdAt: string, updatedAt: string, lastMessageContent: string | null, lastMessageAt: string | null, unreadCount: number, participants: Array<{ accountId: string, displayName: string, avatarObjectKey: string | null, username: string | null, lastReadMessageId: string | null }> | null, activeOrder: { id: string, status: Types.OrderStatus, agreedPrice: number, createdAt: string } | null }> };
+export type GetConversationsQuery = { conversations: Array<{ id: string, type: Types.ConversationType, createdAt: string, updatedAt: string, lastMessageContent: string | null, lastMessageAt: string | null, unreadCount: number, participants: Array<{ accountId: string, displayName: string, avatarObjectKey: string | null, username: string | null, lastReadMessageId: string | null }> | null, activeOrder: { id: string, status: Types.OrderStatus, agreedPrice: number, createdAt: string, buyerAccountId: string, sellerAccountId: string, complaintReason: string | null, complaintNotes: string | null, proposedSplitBuyerAmount: number | null, proposedSplitSellerAmount: number | null, proposedSplitById: string | null } | null }> };
 
 export type GetMessagesQueryVariables = Exact<{
   conversationId: string | number;
@@ -245,7 +245,7 @@ export type GetOrderDetailQueryVariables = Exact<{
 }>;
 
 
-export type GetOrderDetailQuery = { order: { id: string, status: Types.OrderStatus, agreedPrice: number, createdAt: string, buyerAccountId: string, sellerAccountId: string, listingId: string, isReviewable: boolean, deliveredAt: string | null, disputedAt: string | null, disputedById: string | null, complaintReason: string | null, complaintNotes: string | null, lockVersion: number, buyer: { id: string, displayName: string, username: string, avatarObjectKey: string | null } | null, seller: { id: string, displayName: string, username: string, avatarObjectKey: string | null } | null, review: { id: string, rating: number, comment: string | null } | null } | null };
+export type GetOrderDetailQuery = { order: { id: string, status: Types.OrderStatus, agreedPrice: number, createdAt: string, buyerAccountId: string, sellerAccountId: string, listingId: string, isReviewable: boolean, deliveredAt: string | null, disputedAt: string | null, disputedById: string | null, complaintReason: string | null, complaintNotes: string | null, proposedSplitBuyerAmount: number | null, proposedSplitSellerAmount: number | null, proposedSplitById: string | null, lockVersion: number, buyer: { id: string, displayName: string, username: string, avatarObjectKey: string | null } | null, seller: { id: string, displayName: string, username: string, avatarObjectKey: string | null } | null, review: { id: string, rating: number, comment: string | null } | null } | null };
 
 export type GetOffersForConversationQueryVariables = Exact<{
   conversationId: string | number;
@@ -341,6 +341,29 @@ export type RefundDisputedOrderMutationVariables = Exact<{
 
 
 export type RefundDisputedOrderMutation = { refundDisputedOrder: { id: string, status: Types.OrderStatus } };
+
+export type ProposeSplitRefundMutationVariables = Exact<{
+  orderId: string | number;
+  buyerAmount: number;
+  sellerAmount: number;
+}>;
+
+
+export type ProposeSplitRefundMutation = { proposeSplitRefund: { id: string, status: Types.OrderStatus, proposedSplitBuyerAmount: number | null, proposedSplitSellerAmount: number | null, proposedSplitById: string | null } };
+
+export type AcceptSplitRefundMutationVariables = Exact<{
+  orderId: string | number;
+}>;
+
+
+export type AcceptSplitRefundMutation = { acceptSplitRefund: { id: string, status: Types.OrderStatus } };
+
+export type RejectSplitRefundMutationVariables = Exact<{
+  orderId: string | number;
+}>;
+
+
+export type RejectSplitRefundMutation = { rejectSplitRefund: { id: string, status: Types.OrderStatus } };
 
 export type GetMyProfileQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -517,6 +540,13 @@ export const GetConversationsDocument = gql`
       status
       agreedPrice
       createdAt
+      buyerAccountId
+      sellerAccountId
+      complaintReason
+      complaintNotes
+      proposedSplitBuyerAmount
+      proposedSplitSellerAmount
+      proposedSplitById
     }
   }
 }
@@ -1989,6 +2019,9 @@ export const GetOrderDetailDocument = gql`
     disputedById
     complaintReason
     complaintNotes
+    proposedSplitBuyerAmount
+    proposedSplitSellerAmount
+    proposedSplitById
     lockVersion
     buyer {
       id
@@ -2509,6 +2542,117 @@ export function useRefundDisputedOrderMutation(baseOptions?: ApolloReactHooks.Mu
 export type RefundDisputedOrderMutationHookResult = ReturnType<typeof useRefundDisputedOrderMutation>;
 export type RefundDisputedOrderMutationResult = Apollo.MutationResult<RefundDisputedOrderMutation>;
 export type RefundDisputedOrderMutationOptions = Apollo.BaseMutationOptions<RefundDisputedOrderMutation, RefundDisputedOrderMutationVariables>;
+export const ProposeSplitRefundDocument = gql`
+    mutation ProposeSplitRefund($orderId: ID!, $buyerAmount: Float!, $sellerAmount: Float!) {
+  proposeSplitRefund(
+    orderId: $orderId
+    buyerAmount: $buyerAmount
+    sellerAmount: $sellerAmount
+  ) {
+    id
+    status
+    proposedSplitBuyerAmount
+    proposedSplitSellerAmount
+    proposedSplitById
+  }
+}
+    `;
+export type ProposeSplitRefundMutationFn = Apollo.MutationFunction<ProposeSplitRefundMutation, ProposeSplitRefundMutationVariables>;
+
+/**
+ * __useProposeSplitRefundMutation__
+ *
+ * To run a mutation, you first call `useProposeSplitRefundMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useProposeSplitRefundMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [proposeSplitRefundMutation, { data, loading, error }] = useProposeSplitRefundMutation({
+ *   variables: {
+ *      orderId: // value for 'orderId'
+ *      buyerAmount: // value for 'buyerAmount'
+ *      sellerAmount: // value for 'sellerAmount'
+ *   },
+ * });
+ */
+export function useProposeSplitRefundMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ProposeSplitRefundMutation, ProposeSplitRefundMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<ProposeSplitRefundMutation, ProposeSplitRefundMutationVariables>(ProposeSplitRefundDocument, options);
+      }
+export type ProposeSplitRefundMutationHookResult = ReturnType<typeof useProposeSplitRefundMutation>;
+export type ProposeSplitRefundMutationResult = Apollo.MutationResult<ProposeSplitRefundMutation>;
+export type ProposeSplitRefundMutationOptions = Apollo.BaseMutationOptions<ProposeSplitRefundMutation, ProposeSplitRefundMutationVariables>;
+export const AcceptSplitRefundDocument = gql`
+    mutation AcceptSplitRefund($orderId: ID!) {
+  acceptSplitRefund(orderId: $orderId) {
+    id
+    status
+  }
+}
+    `;
+export type AcceptSplitRefundMutationFn = Apollo.MutationFunction<AcceptSplitRefundMutation, AcceptSplitRefundMutationVariables>;
+
+/**
+ * __useAcceptSplitRefundMutation__
+ *
+ * To run a mutation, you first call `useAcceptSplitRefundMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAcceptSplitRefundMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [acceptSplitRefundMutation, { data, loading, error }] = useAcceptSplitRefundMutation({
+ *   variables: {
+ *      orderId: // value for 'orderId'
+ *   },
+ * });
+ */
+export function useAcceptSplitRefundMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<AcceptSplitRefundMutation, AcceptSplitRefundMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<AcceptSplitRefundMutation, AcceptSplitRefundMutationVariables>(AcceptSplitRefundDocument, options);
+      }
+export type AcceptSplitRefundMutationHookResult = ReturnType<typeof useAcceptSplitRefundMutation>;
+export type AcceptSplitRefundMutationResult = Apollo.MutationResult<AcceptSplitRefundMutation>;
+export type AcceptSplitRefundMutationOptions = Apollo.BaseMutationOptions<AcceptSplitRefundMutation, AcceptSplitRefundMutationVariables>;
+export const RejectSplitRefundDocument = gql`
+    mutation RejectSplitRefund($orderId: ID!) {
+  rejectSplitRefund(orderId: $orderId) {
+    id
+    status
+  }
+}
+    `;
+export type RejectSplitRefundMutationFn = Apollo.MutationFunction<RejectSplitRefundMutation, RejectSplitRefundMutationVariables>;
+
+/**
+ * __useRejectSplitRefundMutation__
+ *
+ * To run a mutation, you first call `useRejectSplitRefundMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRejectSplitRefundMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [rejectSplitRefundMutation, { data, loading, error }] = useRejectSplitRefundMutation({
+ *   variables: {
+ *      orderId: // value for 'orderId'
+ *   },
+ * });
+ */
+export function useRejectSplitRefundMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<RejectSplitRefundMutation, RejectSplitRefundMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<RejectSplitRefundMutation, RejectSplitRefundMutationVariables>(RejectSplitRefundDocument, options);
+      }
+export type RejectSplitRefundMutationHookResult = ReturnType<typeof useRejectSplitRefundMutation>;
+export type RejectSplitRefundMutationResult = Apollo.MutationResult<RejectSplitRefundMutation>;
+export type RejectSplitRefundMutationOptions = Apollo.BaseMutationOptions<RejectSplitRefundMutation, RejectSplitRefundMutationVariables>;
 export const GetMyProfileDocument = gql`
     query GetMyProfile {
   myProfile {

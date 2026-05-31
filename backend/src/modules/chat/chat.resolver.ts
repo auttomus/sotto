@@ -186,6 +186,12 @@ export class ChatConversationResolver {
     return {
       ...activeOrder,
       agreedPrice: activeOrder.agreedPrice.toNumber(),
+      proposedSplitSellerAmount: activeOrder.proposedSplitSellerAmount
+        ? activeOrder.proposedSplitSellerAmount.toNumber()
+        : null,
+      proposedSplitBuyerAmount: activeOrder.proposedSplitBuyerAmount
+        ? activeOrder.proposedSplitBuyerAmount.toNumber()
+        : null,
     };
   }
 
@@ -198,6 +204,23 @@ export class ChatConversationResolver {
     if (!lastMsg) return null;
     if (lastMsg.deletedAt) {
       return 'Pesan ini telah dihapus';
+    }
+    if (!lastMsg.content) {
+      const hasMedia = await this.prisma.mediaAttachment.findFirst({
+        where: { attachedId: lastMsg.messageId, attachedType: 'ScyllaMessage' },
+      });
+      if (hasMedia) {
+        if (hasMedia.contentType.startsWith('video/')) {
+          return '[sotto:video]';
+        }
+        if (hasMedia.contentType.startsWith('image/')) {
+          return '[sotto:image]';
+        }
+        return '[sotto:file]';
+      }
+    }
+    if (lastMsg.content && lastMsg.content.startsWith('[SYSTEM_ORDER_')) {
+      return lastMsg.content.replace(/^\[SYSTEM_ORDER_[A-Z_]+\]\s*/, '');
     }
     return lastMsg.content || null;
   }

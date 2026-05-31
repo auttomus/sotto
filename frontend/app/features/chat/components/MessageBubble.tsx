@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Check, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Check, MoreHorizontal, Pencil, Trash2, Clock, Briefcase, ShieldAlert, CheckCircle2, XCircle } from "lucide-react";
 import { useNavigate } from "react-router";
 import { Avatar } from "~/components/ui/Avatar";
 import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
@@ -108,23 +108,30 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, recipientLa
     
     // Default style (Sotto rounded-sm border aesthetic)
     let bgColor = "bg-muted/30 border-border text-muted-foreground";
+    let icon = <Clock className="h-3.5 w-3.5 shrink-0" />;
     
     if (statusType === "IN_PROGRESS" || statusType === "CREATED") {
       bgColor = "bg-primary/5 border-primary/20 text-primary";
+      icon = <Clock className="h-3.5 w-3.5 shrink-0 text-primary" />;
     } else if (statusType === "DELIVERED") {
       bgColor = "bg-amber-500/5 border-amber-500/20 text-amber-600 dark:text-amber-500";
+      icon = <Briefcase className="h-3.5 w-3.5 shrink-0 text-amber-500" />;
     } else if (statusType === "DISPUTED") {
-      bgColor = "bg-destructive/5 border-destructive/20 text-destructive";
+      bgColor = "bg-rose-500/5 border-rose-500/20 text-rose-600 dark:text-rose-500";
+      icon = <ShieldAlert className="h-3.5 w-3.5 shrink-0 text-rose-500" />;
     } else if (statusType === "COMPLETED") {
       bgColor = "bg-emerald-500/5 border-emerald-500/20 text-emerald-600 dark:text-emerald-500";
+      icon = <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />;
     } else if (statusType === "CANCELLED") {
-      bgColor = "bg-destructive/5 border-destructive/20 text-destructive";
+      bgColor = "bg-rose-500/5 border-rose-500/20 text-rose-600 dark:text-rose-500";
+      icon = <XCircle className="h-3.5 w-3.5 shrink-0 text-rose-500" />;
     }
 
     return (
       <div className="flex justify-center w-full my-3 animate-fade-in relative z-10 select-none">
-        <div className={`px-4 py-2 rounded-sm text-[10px] font-extrabold border tracking-wide uppercase text-center max-w-[85%] shadow-sm ${bgColor}`}>
-          <span className="normal-case font-semibold">{textContent}</span>
+        <div className={`px-4 py-2.5 rounded-lg text-[10px] font-extrabold border tracking-wide uppercase flex items-center gap-2.5 max-w-[85%] shadow-sm ${bgColor}`}>
+          {icon}
+          <span className="normal-case font-semibold text-left leading-normal">{textContent}</span>
         </div>
       </div>
     );

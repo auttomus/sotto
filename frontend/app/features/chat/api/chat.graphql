@@ -19,6 +19,13 @@ query GetConversations {
       status
       agreedPrice
       createdAt
+      buyerAccountId
+      sellerAccountId
+      complaintReason
+      complaintNotes
+      proposedSplitBuyerAmount
+      proposedSplitSellerAmount
+      proposedSplitById
     }
   }
 }

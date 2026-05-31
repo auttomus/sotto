@@ -62,6 +62,15 @@ export class OrderModel {
   @Field(() => String, { nullable: true })
   complaintNotes?: string | null;
 
+  @Field(() => Float, { nullable: true })
+  proposedSplitSellerAmount?: number | null;
+
+  @Field(() => Float, { nullable: true })
+  proposedSplitBuyerAmount?: number | null;
+
+  @Field(() => String, { nullable: true })
+  proposedSplitById?: string | null;
+
   @Field(() => Int)
   lockVersion: number;
 
