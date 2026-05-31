@@ -154,33 +154,39 @@ export function useOrderDetail({ orderId }: UseOrderDetailOptions) {
     onError: (e: any) => addToast("error", e.message),
   });
 
-  const [createConversation, { loading: chatLoading }] = useCreateConversationMutation({
-    onCompleted: (res) => {
-      const convoId = res.createConversation.id;
-      const listingTitle = listing?.title || "Jasa/Produk";
-      const shortOrderId = orderId.substring(0, 8).toUpperCase();
-      const messageText = `Halo ${order?.seller?.displayName || "Penjual"}, saya ingin mengajukan permohonan pembatalan untuk pesanan #${shortOrderId} (${listingTitle}). Apakah kita bisa mendiskusikan hal ini?`;
-      navigate(ROUTES.WORKSPACE_CHAT(convoId), {
-        state: {
-          initialMessage: messageText
-        }
-      });
-    },
-    onError: (err) => {
-      addToast("error", `Gagal memulai chat: ${err.message}`);
-    }
-  });
+  const [createConversation, { loading: chatLoading }] = useCreateConversationMutation();
 
-  const handleRequestCancellationChat = () => {
-    if (order?.sellerAccountId) {
-      createConversation({
+  const handleRequestCancellationChat = async (withMessage: boolean = false) => {
+    const recipientId = isBuyer ? order?.sellerAccountId : order?.buyerAccountId;
+    if (!recipientId) return;
+
+    try {
+      const res = await createConversation({
         variables: {
           input: {
-            participantIds: [order.sellerAccountId],
+            participantIds: [recipientId],
             type: "DIRECT",
           }
         }
       });
+      
+      const convoId = res.data?.createConversation?.id;
+      if (convoId) {
+        if (withMessage && isBuyer) {
+          const listingTitle = listing?.title || "Jasa/Produk";
+          const shortOrderId = orderId.substring(0, 8).toUpperCase();
+          const messageText = `Halo ${order?.seller?.displayName || "Penjual"}, saya ingin mengajukan permohonan pembatalan untuk pesanan #${shortOrderId} (${listingTitle}). Apakah kita bisa mendiskusikan hal ini?`;
+          navigate(ROUTES.WORKSPACE_CHAT(convoId), {
+            state: {
+              initialMessage: messageText
+            }
+          });
+        } else {
+          navigate(ROUTES.WORKSPACE_CHAT(convoId));
+        }
+      }
+    } catch (err: any) {
+      addToast("error", `Gagal memulai chat: ${err.message}`);
     }
   };
 

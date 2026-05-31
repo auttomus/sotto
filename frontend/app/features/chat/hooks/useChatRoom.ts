@@ -47,7 +47,7 @@ export function useChatRoom({ conversationId }: UseChatRoomOptions) {
   });
 
   const { data: convData } = useGetConversationsQuery({
-    fetchPolicy: "cache-first"
+    fetchPolicy: "cache-and-network"
   });
 
   const conversation = convData?.conversations?.find((c: any) => c.id === conversationId);

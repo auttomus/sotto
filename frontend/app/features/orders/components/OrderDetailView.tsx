@@ -1,7 +1,7 @@
 import * as React from "react";
 import { ArrowLeft, Loader2, Download, ExternalLink, Lock, Sparkles } from "lucide-react";
 import { Link } from "react-router";
-import { Dialog } from "~/components/ui/Dialog";
+import { useDialogStore } from "~/core/store/useDialogStore";
 import { useOrderDetail } from "~/features/orders/hooks/useOrderDetail";
 import { OrderProgressTracker } from "~/features/orders/components/OrderProgressTracker";
 import { OrderDetailCard } from "~/features/orders/components/OrderDetailCard";
@@ -16,8 +16,7 @@ interface OrderDetailViewProps {
 }
 
 export function OrderDetailView({ orderId }: OrderDetailViewProps) {
-  const [showCancelConfirm, setShowCancelConfirm] = React.useState(false);
-  const [showRefundConfirm, setShowRefundConfirm] = React.useState(false);
+  const confirm = useDialogStore((s) => s.confirm);
 
   // Load all logic, state, dynamic Midtrans snap, and nested listing details via hook
   const {
@@ -215,79 +214,37 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
           isActionLoading={isActionLoading}
           isPaying={isPaying}
           handleAdvance={handleAdvance}
-          handleCancel={() => setShowCancelConfirm(true)}
+          handleCancel={async () => {
+            const isAccepted = await confirm({
+              title: "Batalkan Pesanan",
+              message: "Apakah Anda yakin ingin membatalkan pesanan ini?",
+              confirmText: "Batalkan Pesanan",
+              cancelText: "Batal",
+              variant: "destructive",
+              maxWidth: "sm",
+            });
+            if (isAccepted) {
+              handleCancel();
+            }
+          }}
           onPay={handlePay}
           handleFileComplaint={handleFileComplaint}
-          handleRefundDisputedOrder={() => setShowRefundConfirm(true)}
+          handleRefundDisputedOrder={async () => {
+            const isAccepted = await confirm({
+              title: "Setujui Refund Dana",
+              message: "Apakah Anda yakin ingin menyetujui pengembalian dana (refund) penuh ke pembeli?",
+              confirmText: "Setujui Refund",
+              cancelText: "Batal",
+              variant: "success",
+              maxWidth: "sm",
+            });
+            if (isAccepted) {
+              handleRefundDisputedOrder();
+            }
+          }}
           handleRequestCancellationChat={handleRequestCancellationChat}
         />
       </div>
-
-      {/* Dialog Konfirmasi Pembatalan Pesanan */}
-      {showCancelConfirm && (
-        <Dialog
-          isOpen={true}
-          onClose={() => setShowCancelConfirm(false)}
-          title="Batalkan Pesanan"
-          maxWidth="sm"
-          footer={
-            <div className="flex gap-3 w-full">
-              <button
-                type="button"
-                onClick={() => setShowCancelConfirm(false)}
-                className="flex-1 font-bold text-xs py-2.5 rounded-sm border border-border text-foreground hover:bg-muted transition cursor-pointer"
-              >
-                Batal
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  handleCancel();
-                  setShowCancelConfirm(false);
-                }}
-                className="flex-1 font-bold text-xs py-2.5 rounded-sm bg-destructive hover:bg-destructive/90 text-destructive-foreground border-0 shadow-md shadow-destructive/25 active:scale-[0.99] transition cursor-pointer"
-              >
-                Batalkan Pesanan
-              </button>
-            </div>
-          }
-        >
-          <p className="text-xs font-semibold text-muted-foreground">Apakah Anda yakin ingin membatalkan pesanan ini?</p>
-        </Dialog>
-      )}
-
-      {/* Dialog Konfirmasi Refund Mediasi Damai */}
-      {showRefundConfirm && (
-        <Dialog
-          isOpen={true}
-          onClose={() => setShowRefundConfirm(false)}
-          title="Setujui Refund Dana"
-          maxWidth="sm"
-          footer={
-            <div className="flex gap-3 w-full">
-              <button
-                type="button"
-                onClick={() => setShowRefundConfirm(false)}
-                className="flex-1 font-bold text-xs py-2.5 rounded-sm border border-border text-foreground hover:bg-muted transition cursor-pointer"
-              >
-                Batal
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  handleRefundDisputedOrder();
-                  setShowRefundConfirm(false);
-                }}
-                className="flex-1 font-bold text-xs py-2.5 rounded-sm bg-emerald-600 hover:bg-emerald-600/90 text-white border-0 shadow-md shadow-emerald-600/25 active:scale-[0.99] transition cursor-pointer"
-              >
-                Setujui Refund
-              </button>
-            </div>
-          }
-        >
-          <p className="text-xs font-semibold text-muted-foreground">Apakah Anda yakin ingin menyetujui pengembalian dana (refund) penuh ke pembeli?</p>
-        </Dialog>
-      )}
     </div>
   );
 }

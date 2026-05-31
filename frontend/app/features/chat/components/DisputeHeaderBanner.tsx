@@ -2,9 +2,7 @@ import * as React from "react";
 import { 
   ShieldAlert, 
   Coins, 
-  Check, 
   X, 
-  Mail, 
   AlertCircle, 
   Loader2 
 } from "lucide-react";
@@ -16,7 +14,6 @@ import {
   useRejectSplitRefundMutation 
 } from "~/core/apollo/generated";
 import { useToastStore } from "~/core/store/useToastStore";
-import { Button } from "~/components/ui/Button";
 
 interface DisputeHeaderBannerProps {
   orderId: string;
@@ -38,8 +35,6 @@ export function DisputeHeaderBanner({
   agreedPrice,
   buyerAccountId,
   sellerAccountId,
-  complaintReason,
-  complaintNotes,
   proposedSplitBuyerAmount,
   proposedSplitSellerAmount,
   proposedSplitById,
@@ -136,207 +131,149 @@ export function DisputeHeaderBanner({
     }
   };
 
-  // Auto calculate values for form
   const buyerVal = parseFloat(buyerInputAmount) || 0;
   const computedSellerVal = Math.max(0, agreedPrice - buyerVal);
 
   const isActionLoading = advanceLoading || refundLoading || proposeLoading || acceptLoading || rejectLoading;
 
   return (
-    <div className="w-full bg-rose-500/5 backdrop-blur-md border border-rose-500/10 border-x-0 p-4 shadow-lg animate-in fade-in duration-300 relative z-20 flex flex-col gap-4">
-      {/* Upper Info Section */}
-      <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
-        <div className="flex items-start gap-3">
-          <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-500 shrink-0 mt-0.5">
-            <ShieldAlert className="h-5 w-5" />
-          </div>
-          <div className="space-y-1">
-            <h4 className="text-xs font-black tracking-wider uppercase text-rose-500 flex items-center gap-1.5">
-              <span>Pesanan Dalam Sengketa</span>
-              <span className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-pulse" />
-            </h4>
-            <p className="text-xs font-semibold text-foreground">
-              Alasan: <span className="text-rose-500 font-bold">{complaintReason || "Lainnya"}</span>
-            </p>
-            {complaintNotes && (
-              <p className="text-[11px] text-muted-foreground bg-muted/30 border border-border px-2.5 py-1.5 rounded-md italic">
-                "{complaintNotes}"
-              </p>
-            )}
-            <p className="text-[10px] text-muted-foreground leading-normal max-w-xl">
-              Platform membekukan Rp {agreedPrice.toLocaleString("id-ID")} di escrow untuk keamanan. Silakan cari solusi bagi hasil (split) atau persetujuan penyelesaian bersama di bawah ini.
-            </p>
-          </div>
-        </div>
-
-        {/* Mediation Warning Notice */}
-        <div className="text-[10px] text-rose-600 dark:text-rose-400 bg-rose-500/5 border border-rose-500/10 rounded-lg p-3 max-w-xs space-y-1">
-          <div className="flex items-center gap-1 font-bold">
-            <Mail className="h-3.5 w-3.5" />
-            <span>Deadlock Mediasi Platform</span>
-          </div>
-          <p className="leading-relaxed">
-            Jika pihak lawan tidak merespon dalam waktu <strong>3 hari</strong>, hubungi tim mediasi kami di <a href="mailto:support@sotto.auttomus.xyz" className="underline font-bold text-rose-500 hover:text-rose-600">support@sotto.auttomus.xyz</a> untuk keputusan pencairan sepihak.
-          </p>
-        </div>
-      </div>
-
-      {/* Control Actions Row */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-3 border-t border-rose-500/10">
-        
-        {/* Split Proposal Status Info */}
-        <div className="flex-1">
+    <div className="w-full bg-rose-500/5 dark:bg-rose-950/10 border-b border-rose-500/10 px-4 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs select-none relative z-20 animate-in fade-in slide-in-from-top-1 duration-200">
+      {/* Left: Info Indicator */}
+      <div className="flex items-center gap-2.5 min-w-0">
+        <ShieldAlert className="h-4.5 w-4.5 text-rose-500 shrink-0 animate-pulse" />
+        <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+          <span className="bg-rose-500/15 text-rose-600 dark:text-rose-400 font-extrabold px-2.5 py-0.5 rounded-full text-[9px] tracking-wide uppercase shrink-0">
+            Sengketa
+          </span>
           {hasProposal ? (
-            <div className="bg-muted/40 border border-border rounded-lg px-3 py-2 text-[10px] font-semibold flex items-center gap-2">
-              <Coins className="h-4 w-4 text-warning shrink-0 animate-bounce" />
-              <div>
-                {isProposer ? (
-                  <span className="text-muted-foreground">
-                    Menunggu keputusan lawan atas proposal bagi hasil Anda:{" "}
-                    <strong className="text-foreground">Pembeli Rp {proposedSplitBuyerAmount?.toLocaleString("id-ID")}</strong> |{" "}
-                    <strong className="text-foreground">Penjual Rp {proposedSplitSellerAmount?.toLocaleString("id-ID")}</strong>
-                  </span>
-                ) : (
-                  <span className="text-foreground">
-                    Lawan mengajukan bagi hasil:{" "}
-                    <strong className="text-primary">Pembeli Rp {proposedSplitBuyerAmount?.toLocaleString("id-ID")}</strong> |{" "}
-                    <strong className="text-primary">Penjual Rp {proposedSplitSellerAmount?.toLocaleString("id-ID")}</strong>
-                  </span>
-                )}
-              </div>
-            </div>
+            <span className="text-muted-foreground truncate font-semibold text-[11px]">
+              {isProposer ? (
+                <>
+                  Menunggu respon lawan atas proposal Anda:{" "}
+                  <strong className="text-foreground">Pembeli Rp {proposedSplitBuyerAmount?.toLocaleString("id-ID")}</strong> |{" "}
+                  <strong className="text-foreground">Penjual Rp {proposedSplitSellerAmount?.toLocaleString("id-ID")}</strong>
+                </>
+              ) : (
+                <>
+                  Lawan mengajukan porsi:{" "}
+                  <strong className="text-primary">Pembeli Rp {proposedSplitBuyerAmount?.toLocaleString("id-ID")}</strong> |{" "}
+                  <strong className="text-primary">Penjual Rp {proposedSplitSellerAmount?.toLocaleString("id-ID")}</strong>
+                </>
+              )}
+            </span>
           ) : (
-            <p className="text-[10px] text-muted-foreground italic">
-              Belum ada proposal bagi hasil (split refund) yang diajukan.
-            </p>
-          )}
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          {isActionLoading && (
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mr-2 select-none">
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              <span>Memproses...</span>
-            </div>
-          )}
-
-          {/* ACTIVE INCOMING PROPOSAL ACTIONS */}
-          {hasProposal && !isProposer && (
-            <div className="flex gap-2">
-              <Button
-                variant="primary"
-                className="bg-success text-success-foreground hover:opacity-90 font-bold text-xs py-2 px-4 rounded-lg flex items-center gap-1 cursor-pointer disabled:opacity-50"
-                onClick={handleAcceptProposal}
-                disabled={isActionLoading}
-              >
-                <Check className="h-3.5 w-3.5" />
-                <span>Setujui Bagi Hasil</span>
-              </Button>
-              <Button
-                variant="secondary"
-                className="border-destructive/20 text-destructive bg-destructive/5 hover:bg-destructive/10 font-bold text-xs py-2 px-3 rounded-lg flex items-center gap-1 cursor-pointer disabled:opacity-50"
-                onClick={handleRejectProposal}
-                disabled={isActionLoading}
-              >
-                <X className="h-3.5 w-3.5" />
-                <span>Tolak</span>
-              </Button>
-            </div>
-          )}
-
-          {/* NO ACTIVE PROPOSAL OR PROPOSED BY ME ACTIONS */}
-          {(!hasProposal || isProposer) && (
-            <>
-              {/* Role specific resolving actions */}
-              {isBuyer && (
-                <Button
-                  variant="primary"
-                  className="bg-success text-success-foreground hover:opacity-90 font-bold text-xs py-2 px-4 rounded-lg flex items-center gap-1 cursor-pointer disabled:opacity-50"
-                  onClick={handleBuyerTarikKomplain}
-                  disabled={isActionLoading}
-                >
-                  <Check className="h-3.5 w-3.5" />
-                  <span>Tarik Komplain & Selesaikan</span>
-                </Button>
-              )}
-
-              {isSeller && (
-                <Button
-                  variant="primary"
-                  className="bg-destructive text-destructive-foreground hover:opacity-90 font-bold text-xs py-2 px-4 rounded-lg flex items-center gap-1 cursor-pointer disabled:opacity-50"
-                  onClick={handleSellerRefund100}
-                  disabled={isActionLoading}
-                >
-                  <X className="h-3.5 w-3.5" />
-                  <span>Setujui Refund Penuh (100%)</span>
-                </Button>
-              )}
-
-              {/* Split refund proposal form trigger */}
-              <Button
-                variant="secondary"
-                className="border-border text-foreground hover:bg-muted font-bold text-xs py-2 px-3.5 rounded-lg flex items-center gap-1 cursor-pointer disabled:opacity-50"
-                onClick={() => {
-                  setBuyerInputAmount(Math.floor(agreedPrice / 2).toString());
-                  setIsSplitModalOpen(true);
-                }}
-                disabled={isActionLoading}
-              >
-                <Coins className="h-3.5 w-3.5 text-warning" />
-                <span>{isProposer ? "Ubah Proposal Split" : "Ajukan Bagi Hasil (Split)"}</span>
-              </Button>
-            </>
+            <span className="text-muted-foreground truncate font-semibold text-[11px]">
+              Diskusikan solusi bagi hasil (split refund) atau penyelesaian bersama di sini.
+            </span>
           )}
         </div>
       </div>
 
-      {/* SPLIT PROPOSAL POPUP MODAL */}
+      {/* Right: Actions */}
+      <div className="flex items-center gap-2 shrink-0">
+        {isActionLoading && (
+          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground mr-1" />
+        )}
+
+        {hasProposal && !isProposer ? (
+          <div className="flex gap-2">
+            <button
+              onClick={handleAcceptProposal}
+              disabled={isActionLoading}
+              className="bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold px-3.5 py-1.5 rounded-full transition cursor-pointer disabled:opacity-50 text-[10px] active:scale-[0.98]"
+            >
+              Setujui
+            </button>
+            <button
+              onClick={handleRejectProposal}
+              disabled={isActionLoading}
+              className="border border-rose-500/25 text-rose-600 hover:bg-rose-500/5 font-extrabold px-3.5 py-1.5 rounded-full transition cursor-pointer disabled:opacity-50 text-[10px] active:scale-[0.98]"
+            >
+              Tolak
+            </button>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            {isBuyer && (
+              <button
+                onClick={handleBuyerTarikKomplain}
+                disabled={isActionLoading}
+                className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold px-3.5 py-1.5 rounded-full transition cursor-pointer disabled:opacity-50 text-[10px] active:scale-[0.98]"
+              >
+                Tarik Komplain
+              </button>
+            )}
+
+            {isSeller && (
+              <button
+                onClick={handleSellerRefund100}
+                disabled={isActionLoading}
+                className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 font-extrabold px-3.5 py-1.5 rounded-full transition cursor-pointer disabled:opacity-50 text-[10px] active:scale-[0.98]"
+              >
+                Refund 100%
+              </button>
+            )}
+
+            <button
+              onClick={() => {
+                setBuyerInputAmount(Math.floor(agreedPrice / 2).toString());
+                setIsSplitModalOpen(true);
+              }}
+              disabled={isActionLoading}
+              className="border border-border bg-card hover:bg-muted font-extrabold px-3.5 py-1.5 rounded-full transition cursor-pointer disabled:opacity-50 text-[10px] flex items-center gap-1 active:scale-[0.98]"
+            >
+              <Coins className="h-3.5 w-3.5 text-warning shrink-0" />
+              <span>{isProposer ? "Ubah Split" : "Bagi Hasil (Split)"}</span>
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* SPLIT PROPOSAL POPUP MODAL (Clean, Modern Modal) */}
       {isSplitModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-card border border-border rounded-xl shadow-2xl overflow-hidden p-6 space-y-4 animate-in scale-in duration-300">
-            
+          <div className="w-full max-w-sm bg-card border border-border rounded-2xl shadow-2xl p-5 space-y-4 animate-in scale-in duration-300">
             {/* Header */}
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="text-sm font-black tracking-wide uppercase text-foreground flex items-center gap-2">
+                <h3 className="text-sm font-extrabold text-foreground flex items-center gap-1.5">
                   <Coins className="h-4.5 w-4.5 text-warning" />
-                  <span>Proposal Bagi Hasil (Split Refund)</span>
+                  <span>Proposal Bagi Hasil</span>
                 </h3>
                 <p className="text-[10px] text-muted-foreground mt-0.5">
-                  Tentukan persentase/pembagian dana escrow pesanan ini.
+                  Tentukan pembagian porsi dana escrow.
                 </p>
               </div>
               <button 
-                className="p-1 rounded-md hover:bg-muted text-muted-foreground cursor-pointer"
+                className="p-1 rounded-full hover:bg-muted text-muted-foreground cursor-pointer transition"
                 onClick={() => setIsSplitModalOpen(false)}
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
-            {/* Total Balance Panel */}
-            <div className="bg-muted/40 rounded-lg p-3 border border-border flex justify-between items-center text-xs font-bold">
-              <span className="text-muted-foreground">Total Nilai Pesanan:</span>
-              <span className="text-foreground text-sm font-extrabold">Rp {agreedPrice.toLocaleString("id-ID")}</span>
+            {/* Total Balance */}
+            <div className="bg-muted/40 rounded-xl p-3 border border-border flex justify-between items-center text-xs font-semibold">
+              <span className="text-muted-foreground">Total Escrow:</span>
+              <span className="text-foreground font-extrabold">Rp {agreedPrice.toLocaleString("id-ID")}</span>
             </div>
 
-            {/* Input Form */}
+            {/* Form */}
             <form onSubmit={handleProposeSplitSubmit} className="space-y-4">
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase text-muted-foreground tracking-wider block">
-                  Refund untuk Pembeli (Rp)
+                  Porsi Pembeli (Rp)
                 </label>
                 <div className="relative">
                   <input
                     type="number"
                     required
-                    placeholder="Masukkan jumlah refund pembeli"
+                    placeholder="Contoh: 50000"
                     value={buyerInputAmount}
                     onChange={(e) => setBuyerInputAmount(e.target.value)}
                     max={agreedPrice}
                     min={0}
-                    className="w-full bg-muted/30 border border-border focus:border-rose-500/40 rounded-lg py-2.5 px-3 text-xs font-bold outline-none transition duration-200"
+                    className="w-full bg-muted/30 border border-border focus:border-primary/40 rounded-xl py-2.5 px-3 text-xs font-bold outline-none transition duration-200"
                   />
                   <div className="absolute right-3 top-2.5 text-[10px] text-muted-foreground font-black">
                     IDR
@@ -344,25 +281,25 @@ export function DisputeHeaderBanner({
                 </div>
               </div>
 
-              {/* Calculated Outputs */}
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                <div className="bg-success/5 border border-success/15 rounded-lg p-2.5 text-center">
-                  <div className="text-[9px] font-black uppercase text-success/70 tracking-wider">
+              {/* Grid Output */}
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-2.5 text-center">
+                  <div className="text-[9px] font-black uppercase text-emerald-600/80 tracking-wider">
                     Porsi Pembeli
                   </div>
-                  <div className="text-xs font-extrabold text-success mt-1">
+                  <div className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5">
                     Rp {buyerVal.toLocaleString("id-ID")}
                   </div>
-                  <div className="text-[9px] text-success/60 font-semibold mt-0.5">
+                  <div className="text-[9px] text-emerald-600/60 font-semibold mt-0.5">
                     ({((buyerVal / agreedPrice) * 100).toFixed(0)}%)
                   </div>
                 </div>
 
-                <div className="bg-primary/5 border border-primary/15 rounded-lg p-2.5 text-center">
-                  <div className="text-[9px] font-black uppercase text-primary/70 tracking-wider">
+                <div className="bg-primary/5 border border-primary/10 rounded-xl p-2.5 text-center">
+                  <div className="text-[9px] font-black uppercase text-primary/80 tracking-wider">
                     Porsi Penjual
                   </div>
-                  <div className="text-xs font-extrabold text-primary mt-1">
+                  <div className="text-xs font-extrabold text-primary mt-0.5">
                     Rp {computedSellerVal.toLocaleString("id-ID")}
                   </div>
                   <div className="text-[9px] text-primary/60 font-semibold mt-0.5">
@@ -371,36 +308,34 @@ export function DisputeHeaderBanner({
                 </div>
               </div>
 
-              {/* Info Disclaimer */}
-              <div className="bg-rose-500/5 border border-rose-500/10 rounded-lg p-3 text-[9px] font-medium text-muted-foreground flex gap-2">
-                <AlertCircle className="h-4 w-4 shrink-0 text-rose-500" />
-                <p className="leading-relaxed">
-                  Dengan mengirim proposal ini, Anda mengajukan bagi hasil. Transaksi wallet/escrow hanya akan dieksekusi bila pihak lawan menekan tombol <strong>"Setujui Bagi Hasil"</strong>.
+              {/* Info Alert */}
+              <div className="bg-rose-500/5 border border-rose-500/10 rounded-xl p-3 text-[9px] leading-relaxed text-muted-foreground flex gap-2">
+                <AlertCircle className="h-4 w-4 shrink-0 text-rose-500 mt-0.5" />
+                <p>
+                  Negosiasi ini didasarkan pada kesepakatan bersama. Wallet akan dicairkan secara aman ketika pihak lawan menekan tombol <strong>"Setujui"</strong>.
                 </p>
               </div>
 
-              {/* Buttons */}
-              <div className="flex gap-2.5 pt-2">
-                <Button
+              {/* Actions */}
+              <div className="flex gap-2 pt-1">
+                <button
                   type="button"
-                  variant="secondary"
-                  className="flex-1 border-border font-bold text-xs py-2 rounded-lg cursor-pointer"
                   onClick={() => setIsSplitModalOpen(false)}
+                  className="flex-1 border border-border hover:bg-muted font-bold text-xs py-2 rounded-xl transition cursor-pointer text-foreground"
                 >
                   Batal
-                </Button>
-                <Button
+                </button>
+                <button
                   type="submit"
-                  variant="primary"
-                  className="flex-2 bg-primary hover:opacity-90 text-primary-foreground font-bold text-xs py-2 rounded-lg cursor-pointer flex justify-center items-center gap-1.5"
                   disabled={isActionLoading}
+                  className="flex-1 bg-primary hover:opacity-90 text-primary-foreground font-bold text-xs py-2 rounded-xl transition cursor-pointer flex justify-center items-center gap-1.5 disabled:opacity-50"
                 >
                   {isActionLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin text-primary-foreground" />
                   ) : (
                     <span>Kirim Proposal</span>
                   )}
-                </Button>
+                </button>
               </div>
             </form>
           </div>

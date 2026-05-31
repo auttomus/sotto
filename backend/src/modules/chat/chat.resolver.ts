@@ -219,9 +219,6 @@ export class ChatConversationResolver {
         return '[sotto:file]';
       }
     }
-    if (lastMsg.content && lastMsg.content.startsWith('[SYSTEM_ORDER_')) {
-      return lastMsg.content.replace(/^\[SYSTEM_ORDER_[A-Z_]+\]\s*/, '');
-    }
     return lastMsg.content || null;
   }
 

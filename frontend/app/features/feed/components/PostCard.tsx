@@ -16,7 +16,7 @@ import { PostMediaCarousel } from "./postcard/PostMediaCarousel";
 import { PostActions } from "./postcard/PostActions";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { Avatar } from "~/components/ui/Avatar";
-import { Dialog } from "~/components/ui/Dialog";
+import { useDialogStore } from "~/core/store/useDialogStore";
 import { cn } from "~/core/utils/cn";
 import { ThreadAncestors } from "./ThreadAncestors";
 
@@ -178,7 +178,7 @@ export function PostCard({ post: rawPost, isThreadParent, hideAncestors }: PostC
   const [showMenu, setShowMenu] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(post.content || "");
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const confirm = useDialogStore((s) => s.confirm);
 
   const { user } = useAuthStore();
   const addToast = useToastStore((s) => s.addToast);
@@ -271,43 +271,19 @@ export function PostCard({ post: rawPost, isThreadParent, hideAncestors }: PostC
     navigate(ROUTES.POST_DETAIL(post.postId));
   };
 
-  const handleDelete = () => {
-    setShowDeleteConfirm(true);
+  const handleDelete = async () => {
+    const isAccepted = await confirm({
+      title: "Hapus Postingan",
+      message: "Apakah Anda yakin ingin menghapus postingan ini? Tindakan ini tidak dapat dibatalkan.",
+      confirmText: "Hapus",
+      cancelText: "Batal",
+      variant: "destructive",
+      maxWidth: "sm",
+    });
+    if (isAccepted) {
+      await deletePost({ variables: { postId: post.postId } });
+    }
   };
-
-  const confirmDelete = async () => {
-    await deletePost({ variables: { postId: post.postId } });
-    setShowDeleteConfirm(false);
-  };
-
-  const deleteConfirmDialog = showDeleteConfirm && (
-    <Dialog
-      isOpen={true}
-      onClose={() => setShowDeleteConfirm(false)}
-      title="Hapus Postingan"
-      maxWidth="sm"
-      footer={
-        <div className="flex gap-3 w-full">
-          <button
-            type="button"
-            onClick={() => setShowDeleteConfirm(false)}
-            className="flex-1 font-bold text-xs py-2.5 rounded-sm border border-border text-foreground hover:bg-muted transition cursor-pointer"
-          >
-            Batal
-          </button>
-          <button
-            type="button"
-            onClick={confirmDelete}
-            className="flex-1 font-bold text-xs py-2.5 rounded-sm bg-destructive hover:bg-destructive/90 text-destructive-foreground border-0 shadow-md shadow-destructive/25 active:scale-[0.99] transition cursor-pointer"
-          >
-            Hapus
-          </button>
-        </div>
-      }
-    >
-      <p className="text-xs font-semibold text-muted-foreground">Apakah Anda yakin ingin menghapus postingan ini? Tindakan ini tidak dapat dibatalkan.</p>
-    </Dialog>
-  );
 
   // CONDITIONAL RENDER: Thread Parent Layout
   if (isThreadParent) {
@@ -370,7 +346,6 @@ export function PostCard({ post: rawPost, isThreadParent, hideAncestors }: PostC
             />
           </div>
         </article>
-        {deleteConfirmDialog}
       </>
     );
   }
@@ -426,15 +401,9 @@ export function PostCard({ post: rawPost, isThreadParent, hideAncestors }: PostC
       <div className="flex flex-col">
         <ThreadAncestors parentId={post.inReplyToPostId} />
         {card}
-        {deleteConfirmDialog}
       </div>
     );
   }
 
-  return (
-    <>
-      {card}
-      {deleteConfirmDialog}
-    </>
-  );
+  return card;
 }

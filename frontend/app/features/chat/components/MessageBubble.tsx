@@ -15,7 +15,7 @@ import { formatMentions } from "~/core/utils/formatMentions";
 import { DeletedMessageTombstone } from "./message/DeletedMessageTombstone";
 import { CustomOfferCard } from "./message/CustomOfferCard";
 import { ChatMessageMedia } from "./message/ChatMessageMedia";
-import { Dialog } from "~/components/ui/Dialog";
+import { useDialogStore } from "~/core/store/useDialogStore";
 
 interface MessageBubbleProps {
   msg: any;
@@ -31,10 +31,10 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, recipientLa
   const isMine = msg.senderId === userAccountId;
   const navigate = useNavigate();
   const addToast = useToastStore((s) => s.addToast);
+  const confirm = useDialogStore((s) => s.confirm);
 
   const [showMenu, setShowMenu] = React.useState(false);
   const [isEditing, setIsEditing] = React.useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
 
   // Regex untuk memilah UUID Listing atau Postingan yang disebut di dalam pesan
   const listingRegex = /\s*(?:https?:\/\/[^\/\s]+)?\/listing\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\s*/g;
@@ -195,9 +195,19 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, recipientLa
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    setShowDeleteConfirm(true);
+                  onClick={async () => {
                     setShowMenu(false);
+                    const isAccepted = await confirm({
+                      title: "Hapus Pesan",
+                      message: "Apakah Anda yakin ingin menghapus pesan ini secara permanen?",
+                      confirmText: "Hapus Pesan",
+                      cancelText: "Batal",
+                      variant: "destructive",
+                      maxWidth: "sm",
+                    });
+                    if (isAccepted) {
+                      await onDelete?.(msg.messageId);
+                    }
                   }}
                   className="flex items-center gap-1.5 px-2 py-1.5 text-[10px] font-bold text-destructive hover:bg-destructive/10 rounded-lg text-left w-full cursor-pointer"
                 >
@@ -302,39 +312,6 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, recipientLa
           </div>
         </div>
       </div>
-
-      {/* Dialog Konfirmasi Hapus Pesan */}
-      {showDeleteConfirm && (
-        <Dialog
-          isOpen={true}
-          onClose={() => setShowDeleteConfirm(false)}
-          title="Hapus Pesan"
-          maxWidth="sm"
-          footer={
-            <div className="flex gap-3 w-full">
-              <button
-                type="button"
-                onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 font-bold text-xs py-2.5 rounded-sm border border-border text-foreground hover:bg-muted transition cursor-pointer"
-              >
-                Batal
-              </button>
-              <button
-                type="button"
-                onClick={async () => {
-                  await onDelete?.(msg.messageId);
-                  setShowDeleteConfirm(false);
-                }}
-                className="flex-1 font-bold text-xs py-2.5 rounded-sm bg-destructive hover:bg-destructive/90 text-destructive-foreground border-0 shadow-md shadow-destructive/25 active:scale-[0.99] transition cursor-pointer"
-              >
-                Hapus
-              </button>
-            </div>
-          }
-        >
-          <p className="text-sm text-muted-foreground">Apakah Anda yakin ingin menghapus pesan ini secara permanen?</p>
-        </Dialog>
-      )}
     </>
   );
 }
