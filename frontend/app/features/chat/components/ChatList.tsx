@@ -1,7 +1,17 @@
 import * as React from "react";
 import { Link } from "react-router";
 import { Avatar } from "~/components/ui/Avatar";
-import { Search } from "lucide-react";
+import { 
+  Search,
+  Image as ImageIcon,
+  Video as VideoIcon,
+  Paperclip,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  ShieldAlert,
+  Briefcase
+} from "lucide-react";
 import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
 import { formatDate } from "~/core/utils/formatDate";
 import { PageHeader } from "~/components/layout/PageHeader";
@@ -21,13 +31,96 @@ export function ChatList({ chats, user, activeConversationId }: ChatListProps) {
     return chats.filter((chat) => {
       const otherParticipant = chat.participants?.find((p: any) => p.accountId !== user?.accountId) || chat.participants?.[0];
       const displayName = otherParticipant?.displayName || "";
-      const lastMessage = chat.lastMessageContent || "";
+      let lastMessage = chat.lastMessageContent || "";
+      
+      // Parse tags for searchable terms
+      if (lastMessage === "[sotto:image]") lastMessage = "foto gambar image pic";
+      else if (lastMessage === "[sotto:video]") lastMessage = "video rekaman clip";
+      else if (lastMessage === "[sotto:file]") lastMessage = "lampiran file dokumen pdf zip doc";
+      else if (lastMessage.startsWith("[SYSTEM_ORDER_")) {
+        lastMessage = lastMessage.replace(/^\[SYSTEM_ORDER_[A-Z_]+\]\s*/, "");
+      }
+
       return (
         displayName.toLowerCase().includes(query) ||
         lastMessage.toLowerCase().includes(query)
       );
     });
   }, [chats, searchQuery, user]);
+
+  // Helper to render media and system message previews cleanly with high fidelity icons
+  const renderLastMessage = (content: string | null, activeOrder: any) => {
+    if (!content) {
+      return (
+        <span className="text-muted-foreground text-xs italic">
+          {activeOrder ? "Order Aktif" : "Buka pesan"}
+        </span>
+      );
+    }
+
+    // 1. Media Attachment Tag Checks
+    if (content === "[sotto:image]") {
+      return (
+        <span className="flex items-center gap-1.5 text-xs text-muted-foreground font-semibold">
+          <ImageIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          <span>Foto</span>
+        </span>
+      );
+    }
+    if (content === "[sotto:video]") {
+      return (
+        <span className="flex items-center gap-1.5 text-xs text-muted-foreground font-semibold">
+          <VideoIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          <span>Video</span>
+        </span>
+      );
+    }
+    if (content === "[sotto:file]") {
+      return (
+        <span className="flex items-center gap-1.5 text-xs text-muted-foreground font-semibold">
+          <Paperclip className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          <span>Lampiran</span>
+        </span>
+      );
+    }
+
+    // 2. System Message Check
+    if (content.startsWith("[SYSTEM_ORDER_")) {
+      const matchType = content.match(/^\[SYSTEM_ORDER_([A-Z_]+)\]/);
+      const statusType = matchType ? matchType[1] : null;
+      const textContent = content.replace(/^\[SYSTEM_ORDER_[A-Z_]+\]\s*/, "");
+
+      let icon = <Clock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />;
+      let colorClass = "text-muted-foreground";
+
+      if (statusType === "IN_PROGRESS" || statusType === "CREATED") {
+        icon = <Clock className="h-3.5 w-3.5 text-primary shrink-0" />;
+        colorClass = "text-primary font-medium";
+      } else if (statusType === "DELIVERED") {
+        icon = <Briefcase className="h-3.5 w-3.5 text-amber-500 shrink-0" />;
+        colorClass = "text-amber-600 dark:text-amber-500 font-medium";
+      } else if (statusType === "DISPUTED") {
+        icon = <ShieldAlert className="h-3.5 w-3.5 text-rose-500 shrink-0" />;
+        colorClass = "text-rose-600 dark:text-rose-500 font-medium";
+      } else if (statusType === "COMPLETED") {
+        icon = <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />;
+        colorClass = "text-emerald-600 dark:text-emerald-500 font-medium";
+      } else if (statusType === "CANCELLED") {
+        icon = <XCircle className="h-3.5 w-3.5 text-rose-500 shrink-0" />;
+        colorClass = "text-rose-600 dark:text-rose-500 font-medium";
+      }
+
+      return (
+        <span className={`flex items-center gap-1.5 text-[11px] font-semibold leading-none truncate ${colorClass}`}>
+          {icon}
+          <span className="truncate">{textContent}</span>
+        </span>
+      );
+    }
+
+    // 3. Regular Chat message
+    return <span className="truncate text-xs font-medium text-muted-foreground">{content}</span>;
+  };
 
   return (
     <div className="flex flex-col h-full bg-background w-full relative">
@@ -93,9 +186,9 @@ export function ChatList({ chats, user, activeConversationId }: ChatListProps) {
                       </span>
                     </div>
                     <div className="flex items-center justify-between gap-2">
-                      <p className={`text-sm truncate flex-1 ${hasUnread ? "font-medium text-foreground" : "text-muted-foreground"}`}>
-                        {chat.lastMessageContent || (chat.activeOrder ? "Order Aktif" : "Buka pesan")}
-                      </p>
+                      <div className={`text-sm truncate flex-1 min-w-0 flex items-center ${hasUnread ? "font-medium text-foreground" : "text-muted-foreground"}`}>
+                        {renderLastMessage(chat.lastMessageContent, chat.activeOrder)}
+                      </div>
                       {hasUnread && (
                         <span className="flex-shrink-0 text-[10px] font-bold bg-primary text-primary-foreground h-4 px-1.5 rounded-full flex items-center justify-center min-w-4">
                           {chat.unreadCount}

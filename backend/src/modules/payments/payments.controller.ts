@@ -12,6 +12,9 @@ import { OrderStatus, NotificationType } from '@prisma/client';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationsGateway } from '../notifications/notifications.gateway';
 
+import { EscrowService } from './escrow.service';
+import { ChatService } from '../chat/chat.service';
+
 export interface MidtransWebhookBody {
   order_id: string;
   transaction_status: string;
@@ -34,6 +37,8 @@ export class PaymentsController {
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
     private readonly notificationsGateway: NotificationsGateway,
+    private readonly escrowService: EscrowService,
+    private readonly chatService: ChatService,
   ) {}
 
   @Public()
@@ -85,12 +90,36 @@ export class PaymentsController {
         where: { id: order.listingId },
       });
       const isDigital = listing?.type === 'DIGITAL_PRODUCT';
-      const nextStatus = isDigital ? OrderStatus.COMPLETED : OrderStatus.IN_PROGRESS;
+      const nextStatus = isDigital
+        ? OrderStatus.COMPLETED
+        : OrderStatus.IN_PROGRESS;
 
-      const updatedOrder = await this.prisma.order.update({
-        where: { id: cleanOrderId },
-        data: { status: nextStatus },
+      // Jalankan sebagai transaksi atomik di database
+      const updatedOrder = await this.prisma.$transaction(async (tx) => {
+        const updated = await tx.order.update({
+          where: { id: cleanOrderId },
+          data: { status: nextStatus },
+        });
+
+        if (nextStatus === OrderStatus.IN_PROGRESS) {
+          // Kunci dana secara virtual di escrow
+          await this.escrowService.holdFunds(
+            cleanOrderId,
+            Number(order.agreedPrice),
+            tx,
+          );
+        } else if (nextStatus === OrderStatus.COMPLETED) {
+          // Jika digital produk, langsung cairkan dana escrow ke wallet seller
+          await this.escrowService.releaseFunds(
+            cleanOrderId,
+            order.sellerAccountId,
+            tx,
+          );
+        }
+
+        return updated;
       });
+
       this.logger.log(
         `Order ${cleanOrderId} telah DIBAYAR. Status diperbarui ke ${nextStatus}.`,
       );
@@ -103,6 +132,37 @@ export class PaymentsController {
         targetType: 'Order',
         targetId: cleanOrderId,
       });
+
+      // Kirim system message ke direct conversation antara buyer dan seller
+      try {
+        const conversation = await this.prisma.conversation.findFirst({
+          where: {
+            type: 'DIRECT',
+            AND: [
+              { participants: { some: { accountId: order.buyerAccountId } } },
+              { participants: { some: { accountId: order.sellerAccountId } } },
+            ],
+          },
+        });
+
+        if (conversation) {
+          const sysTag =
+            nextStatus === OrderStatus.COMPLETED ? 'COMPLETED' : 'IN_PROGRESS';
+          const sysMsg =
+            nextStatus === OrderStatus.COMPLETED
+              ? 'Pembayaran produk digital sukses. Pesanan langsung selesai!'
+              : 'Pembayaran sukses diverifikasi! Dana escrow aman tersimpan, pesanan resmi dimulai.';
+          await this.chatService.sendMessage(
+            conversation.id,
+            order.buyerAccountId,
+            `[SYSTEM_ORDER_${sysTag}] ${sysMsg}`,
+          );
+        }
+      } catch (chatErr) {
+        this.logger.error(
+          `Gagal mengirim pesan sistem chat untuk order ${cleanOrderId}: ${chatErr instanceof Error ? chatErr.message : String(chatErr)}`,
+        );
+      }
 
       // Real-time order update ke kedua pihak
       const payload = {

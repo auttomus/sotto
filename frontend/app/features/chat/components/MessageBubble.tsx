@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Check, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Check, MoreHorizontal, Pencil, Trash2, Clock, Briefcase, ShieldAlert, CheckCircle2, XCircle } from "lucide-react";
 import { useNavigate } from "react-router";
 import { Avatar } from "~/components/ui/Avatar";
 import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
@@ -15,6 +15,7 @@ import { formatMentions } from "~/core/utils/formatMentions";
 import { DeletedMessageTombstone } from "./message/DeletedMessageTombstone";
 import { CustomOfferCard } from "./message/CustomOfferCard";
 import { ChatMessageMedia } from "./message/ChatMessageMedia";
+import { useDialogStore } from "~/core/store/useDialogStore";
 
 interface MessageBubbleProps {
   msg: any;
@@ -30,6 +31,7 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, recipientLa
   const isMine = msg.senderId === userAccountId;
   const navigate = useNavigate();
   const addToast = useToastStore((s) => s.addToast);
+  const confirm = useDialogStore((s) => s.confirm);
 
   const [showMenu, setShowMenu] = React.useState(false);
   const [isEditing, setIsEditing] = React.useState(false);
@@ -98,6 +100,43 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, recipientLa
     );
   }
 
+  // Render System Order Transaction Event
+  if (msg.content?.startsWith("[SYSTEM_ORDER_")) {
+    const matchType = msg.content.match(/^\[SYSTEM_ORDER_([A-Z_]+)\]/);
+    const statusType = matchType ? matchType[1] : null;
+    const textContent = msg.content.replace(/^\[SYSTEM_ORDER_[A-Z_]+\]\s*/, "");
+    
+    // Default style (Sotto rounded-sm border aesthetic)
+    let bgColor = "bg-muted/30 border-border text-muted-foreground";
+    let icon = <Clock className="h-3.5 w-3.5 shrink-0" />;
+    
+    if (statusType === "IN_PROGRESS" || statusType === "CREATED") {
+      bgColor = "bg-primary/5 border-primary/20 text-primary";
+      icon = <Clock className="h-3.5 w-3.5 shrink-0 text-primary" />;
+    } else if (statusType === "DELIVERED") {
+      bgColor = "bg-amber-500/5 border-amber-500/20 text-amber-600 dark:text-amber-500";
+      icon = <Briefcase className="h-3.5 w-3.5 shrink-0 text-amber-500" />;
+    } else if (statusType === "DISPUTED") {
+      bgColor = "bg-rose-500/5 border-rose-500/20 text-rose-600 dark:text-rose-500";
+      icon = <ShieldAlert className="h-3.5 w-3.5 shrink-0 text-rose-500" />;
+    } else if (statusType === "COMPLETED") {
+      bgColor = "bg-emerald-500/5 border-emerald-500/20 text-emerald-600 dark:text-emerald-500";
+      icon = <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />;
+    } else if (statusType === "CANCELLED") {
+      bgColor = "bg-rose-500/5 border-rose-500/20 text-rose-600 dark:text-rose-500";
+      icon = <XCircle className="h-3.5 w-3.5 shrink-0 text-rose-500" />;
+    }
+
+    return (
+      <div className="flex justify-center w-full my-3 animate-fade-in relative z-10 select-none">
+        <div className={`px-4 py-2.5 rounded-lg text-[10px] font-extrabold border tracking-wide uppercase flex items-center gap-2.5 max-w-[85%] shadow-sm ${bgColor}`}>
+          {icon}
+          <span className="normal-case font-semibold text-left leading-normal">{textContent}</span>
+        </div>
+      </div>
+    );
+  }
+
   // Render Custom Offer Card
   if (msg.isCustomOffer) {
     return (
@@ -157,10 +196,18 @@ export function MessageBubble({ msg, userAccountId, recipientAvatar, recipientLa
                 <button
                   type="button"
                   onClick={async () => {
-                    if (confirm("Apakah Anda yakin ingin menghapus pesan ini?")) {
+                    setShowMenu(false);
+                    const isAccepted = await confirm({
+                      title: "Hapus Pesan",
+                      message: "Apakah Anda yakin ingin menghapus pesan ini secara permanen?",
+                      confirmText: "Hapus Pesan",
+                      cancelText: "Batal",
+                      variant: "destructive",
+                      maxWidth: "sm",
+                    });
+                    if (isAccepted) {
                       await onDelete?.(msg.messageId);
                     }
-                    setShowMenu(false);
                   }}
                   className="flex items-center gap-1.5 px-2 py-1.5 text-[10px] font-bold text-destructive hover:bg-destructive/10 rounded-lg text-left w-full cursor-pointer"
                 >

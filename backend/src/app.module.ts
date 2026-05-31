@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
+import { ScheduleModule } from '@nestjs/schedule';
 
 // Common
 import { JwtAuthGuard } from './common/guards/jwt-auth-guard';
@@ -50,6 +51,7 @@ import { MajorsModule } from './modules/majors/majors.module';
   imports: [
     // ─── 1. Konfigurasi Global ──────────────────────────
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(),
 
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,

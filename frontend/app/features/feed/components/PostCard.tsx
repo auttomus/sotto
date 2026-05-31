@@ -16,6 +16,7 @@ import { PostMediaCarousel } from "./postcard/PostMediaCarousel";
 import { PostActions } from "./postcard/PostActions";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { Avatar } from "~/components/ui/Avatar";
+import { useDialogStore } from "~/core/store/useDialogStore";
 import { cn } from "~/core/utils/cn";
 import { ThreadAncestors } from "./ThreadAncestors";
 
@@ -177,6 +178,7 @@ export function PostCard({ post: rawPost, isThreadParent, hideAncestors }: PostC
   const [showMenu, setShowMenu] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(post.content || "");
+  const confirm = useDialogStore((s) => s.confirm);
 
   const { user } = useAuthStore();
   const addToast = useToastStore((s) => s.addToast);
@@ -270,7 +272,15 @@ export function PostCard({ post: rawPost, isThreadParent, hideAncestors }: PostC
   };
 
   const handleDelete = async () => {
-    if (confirm("Apakah Anda yakin ingin menghapus postingan ini?")) {
+    const isAccepted = await confirm({
+      title: "Hapus Postingan",
+      message: "Apakah Anda yakin ingin menghapus postingan ini? Tindakan ini tidak dapat dibatalkan.",
+      confirmText: "Hapus",
+      cancelText: "Batal",
+      variant: "destructive",
+      maxWidth: "sm",
+    });
+    if (isAccepted) {
       await deletePost({ variables: { postId: post.postId } });
     }
   };
@@ -278,63 +288,65 @@ export function PostCard({ post: rawPost, isThreadParent, hideAncestors }: PostC
   // CONDITIONAL RENDER: Thread Parent Layout
   if (isThreadParent) {
     return (
-      <article
-        onClick={handleCardClick}
-        className="bg-card px-5 pt-4 pb-0 border-b-0 hover:bg-accent/5 transition-all duration-200 cursor-pointer flex gap-3 relative"
-      >
-        {/* Left Column: Avatar + Thread Connector Line */}
-        <div className="flex flex-col items-center shrink-0 w-10 relative">
-          <Link
-            to={post.authorUsername ? ROUTES.PROFILE_PUBLIC(post.authorUsername) : "#"}
-            className="group z-10"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Avatar src={avatarUrl || ""} alt={post.authorDisplayName || ""} size="md" />
-          </Link>
-          {/* Vertical line stretching downwards from avatar bottom to article bottom */}
-          <div className="absolute left-1/2 -translate-x-1/2 top-[52px] bottom-0 w-[2px] bg-border z-0" />
-        </div>
+      <>
+        <article
+          onClick={handleCardClick}
+          className="bg-card px-5 pt-4 pb-0 border-b-0 hover:bg-accent/5 transition-all duration-200 cursor-pointer flex gap-3 relative"
+        >
+          {/* Left Column: Avatar + Thread Connector Line */}
+          <div className="flex flex-col items-center shrink-0 w-10 relative">
+            <Link
+              to={post.authorUsername ? ROUTES.PROFILE_PUBLIC(post.authorUsername) : "#"}
+              className="group z-10"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Avatar src={avatarUrl || ""} alt={post.authorDisplayName || ""} size="md" />
+            </Link>
+            {/* Vertical line stretching downwards from avatar bottom to article bottom */}
+            <div className="absolute left-1/2 -translate-x-1/2 top-[52px] bottom-0 w-[2px] bg-border z-0" />
+          </div>
 
-        {/* Right Column: Content */}
-        <div className="flex-1 min-w-0">
-          <PostHeader
-            post={post}
-            avatarUrl={avatarUrl || ""}
-            isMine={isMine}
-            showMenu={showMenu}
-            setShowMenu={setShowMenu}
-            setIsEditing={setIsEditing}
-            onDelete={handleDelete}
-            hideAvatar={true}
-          />
+          {/* Right Column: Content */}
+          <div className="flex-1 min-w-0">
+            <PostHeader
+              post={post}
+              avatarUrl={avatarUrl || ""}
+              isMine={isMine}
+              showMenu={showMenu}
+              setShowMenu={setShowMenu}
+              setIsEditing={setIsEditing}
+              onDelete={handleDelete}
+              hideAvatar={true}
+            />
 
-          {/* Content Block */}
-          <PostCardContent
-            post={post}
-            isEditing={isEditing}
-            editContent={editContent}
-            setEditContent={setEditContent}
-            setIsEditing={setIsEditing}
-            updatePost={updatePost}
-            listing={listing}
-            textSizeClass="text-[14px]"
-          />
+            {/* Content Block */}
+            <PostCardContent
+              post={post}
+              isEditing={isEditing}
+              editContent={editContent}
+              setEditContent={setEditContent}
+              setIsEditing={setIsEditing}
+              updatePost={updatePost}
+              listing={listing}
+              textSizeClass="text-[14px]"
+            />
 
-          {/* Actions */}
-          <PostActions
-            postId={post.postId}
-            isLiked={liked}
-            likesCount={count}
-            repliesCount={post.repliesCount ?? 0}
-            onLike={handleLike}
-            onShare={() => shareObject({
-              title: `Karya dari ${post.authorDisplayName || post.authorUsername}`,
-              text: post.content,
-              url: ROUTES.POST_DETAIL(post.postId)
-            })}
-          />
-        </div>
-      </article>
+            {/* Actions */}
+            <PostActions
+              postId={post.postId}
+              isLiked={liked}
+              likesCount={count}
+              repliesCount={post.repliesCount ?? 0}
+              onLike={handleLike}
+              onShare={() => shareObject({
+                title: `Karya dari ${post.authorDisplayName || post.authorUsername}`,
+                text: post.content,
+                url: ROUTES.POST_DETAIL(post.postId)
+              })}
+            />
+          </div>
+        </article>
+      </>
     );
   }
 

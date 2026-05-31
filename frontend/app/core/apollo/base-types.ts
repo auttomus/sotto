@@ -208,6 +208,7 @@ export type MessageModel = {
 export type Mutation = {
   __typename?: 'Mutation';
   acceptOffer: CustomOfferModel;
+  acceptSplitRefund: OrderModel;
   advanceOrderStatus: OrderModel;
   cancelOrder: OrderModel;
   confirmUpload: MediaAttachmentModel;
@@ -222,12 +223,16 @@ export type Mutation = {
   deleteMedia: Scalars['Boolean']['output'];
   deleteMessage: Scalars['Boolean']['output'];
   deletePost: Scalars['Boolean']['output'];
+  fileComplaint: OrderModel;
   follow: Scalars['Boolean']['output'];
   getMidtransSnapToken: Scalars['String']['output'];
   markAllNotificationsAsRead: Scalars['Boolean']['output'];
   markConversationAsRead: Scalars['Boolean']['output'];
   markNotificationAsRead: Scalars['Boolean']['output'];
+  proposeSplitRefund: OrderModel;
+  refundDisputedOrder: OrderModel;
   rejectOffer: CustomOfferModel;
+  rejectSplitRefund: OrderModel;
   requestUploadUrl: PresignedUploadResult;
   toggleLikeListing: Scalars['Boolean']['output'];
   toggleLikePost: Scalars['Boolean']['output'];
@@ -245,6 +250,11 @@ export type Mutation = {
 
 export type MutationAcceptOfferArgs = {
   offerId: Scalars['ID']['input'];
+};
+
+
+export type MutationAcceptSplitRefundArgs = {
+  orderId: Scalars['ID']['input'];
 };
 
 
@@ -322,6 +332,13 @@ export type MutationDeletePostArgs = {
 };
 
 
+export type MutationFileComplaintArgs = {
+  notes?: InputMaybe<Scalars['String']['input']>;
+  orderId: Scalars['ID']['input'];
+  reason: Scalars['String']['input'];
+};
+
+
 export type MutationFollowArgs = {
   targetAccountId: Scalars['ID']['input'];
 };
@@ -342,8 +359,25 @@ export type MutationMarkNotificationAsReadArgs = {
 };
 
 
+export type MutationProposeSplitRefundArgs = {
+  buyerAmount: Scalars['Float']['input'];
+  orderId: Scalars['ID']['input'];
+  sellerAmount: Scalars['Float']['input'];
+};
+
+
+export type MutationRefundDisputedOrderArgs = {
+  orderId: Scalars['ID']['input'];
+};
+
+
 export type MutationRejectOfferArgs = {
   offerId: Scalars['ID']['input'];
+};
+
+
+export type MutationRejectSplitRefundArgs = {
+  orderId: Scalars['ID']['input'];
 };
 
 
@@ -438,11 +472,20 @@ export type OrderModel = {
   agreedPrice: Scalars['Float']['output'];
   buyer?: Maybe<AccountModel>;
   buyerAccountId: Scalars['String']['output'];
+  complaintNotes?: Maybe<Scalars['String']['output']>;
+  complaintReason?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   customOfferId?: Maybe<Scalars['String']['output']>;
+  deliveredAt?: Maybe<Scalars['DateTime']['output']>;
+  disputedAt?: Maybe<Scalars['DateTime']['output']>;
+  disputedById?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   isReviewable: Scalars['Boolean']['output'];
   listingId: Scalars['String']['output'];
+  lockVersion: Scalars['Int']['output'];
+  proposedSplitBuyerAmount?: Maybe<Scalars['Float']['output']>;
+  proposedSplitById?: Maybe<Scalars['String']['output']>;
+  proposedSplitSellerAmount?: Maybe<Scalars['Float']['output']>;
   review?: Maybe<ReviewModel>;
   seller?: Maybe<AccountModel>;
   sellerAccountId: Scalars['String']['output'];
@@ -453,6 +496,8 @@ export type OrderModel = {
 export enum OrderStatus {
   Cancelled = 'CANCELLED',
   Completed = 'COMPLETED',
+  Delivered = 'DELIVERED',
+  Disputed = 'DISPUTED',
   InProgress = 'IN_PROGRESS',
   PendingPayment = 'PENDING_PAYMENT'
 }

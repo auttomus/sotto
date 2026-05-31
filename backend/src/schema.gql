@@ -191,6 +191,7 @@ type MessageModel {
 
 type Mutation {
   acceptOffer(offerId: ID!): CustomOfferModel!
+  acceptSplitRefund(orderId: ID!): OrderModel!
   advanceOrderStatus(orderId: ID!): OrderModel!
   cancelOrder(orderId: ID!): OrderModel!
   confirmUpload(input: RequestUploadInput!, objectKey: String!): MediaAttachmentModel!
@@ -205,12 +206,16 @@ type Mutation {
   deleteMedia(id: ID!): Boolean!
   deleteMessage(conversationId: ID!, messageId: ID!): Boolean!
   deletePost(postId: String!): Boolean!
+  fileComplaint(notes: String, orderId: ID!, reason: String!): OrderModel!
   follow(targetAccountId: ID!): Boolean!
   getMidtransSnapToken(orderId: ID!): String!
   markAllNotificationsAsRead: Boolean!
   markConversationAsRead(conversationId: ID!): Boolean!
   markNotificationAsRead(id: ID!): Boolean!
+  proposeSplitRefund(buyerAmount: Float!, orderId: ID!, sellerAmount: Float!): OrderModel!
+  refundDisputedOrder(orderId: ID!): OrderModel!
   rejectOffer(offerId: ID!): CustomOfferModel!
+  rejectSplitRefund(orderId: ID!): OrderModel!
   requestUploadUrl(input: RequestUploadInput!): PresignedUploadResult!
   toggleLikeListing(id: ID!): Boolean!
   toggleLikePost(postId: String!): Boolean!
@@ -256,11 +261,20 @@ type OrderModel {
   agreedPrice: Float!
   buyer: AccountModel
   buyerAccountId: String!
+  complaintNotes: String
+  complaintReason: String
   createdAt: DateTime!
   customOfferId: String
+  deliveredAt: DateTime
+  disputedAt: DateTime
+  disputedById: String
   id: ID!
   isReviewable: Boolean!
   listingId: String!
+  lockVersion: Int!
+  proposedSplitBuyerAmount: Float
+  proposedSplitById: String
+  proposedSplitSellerAmount: Float
   review: ReviewModel
   seller: AccountModel
   sellerAccountId: String!
@@ -271,6 +285,8 @@ type OrderModel {
 enum OrderStatus {
   CANCELLED
   COMPLETED
+  DELIVERED
+  DISPUTED
   IN_PROGRESS
   PENDING_PAYMENT
 }

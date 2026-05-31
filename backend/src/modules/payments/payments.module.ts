@@ -3,9 +3,10 @@ import { PaymentsController } from './payments.controller';
 import { EscrowService } from './escrow.service';
 import { PaymentsService } from './payments.service';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { ChatModule } from '../chat/chat.module';
 
 @Module({
-  imports: [NotificationsModule],
+  imports: [NotificationsModule, ChatModule],
   controllers: [PaymentsController],
   providers: [EscrowService, PaymentsService],
   exports: [EscrowService, PaymentsService],

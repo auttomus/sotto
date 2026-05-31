@@ -44,6 +44,36 @@ export function OrderStatusAlert({ status, isBuyer, agreedPrice }: OrderStatusAl
         </div>
       );
 
+    case OrderStatus.Delivered:
+      return (
+        <div className="bg-primary/10 border border-primary/20 rounded-sm p-4 flex gap-3 animate-fade-in">
+          <Clock className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+          <div className="space-y-0.5">
+            <h4 className="font-bold text-foreground text-sm">Pekerjaan Selesai Dikirim</h4>
+            <p className="text-xs text-muted-foreground leading-relaxed font-medium">
+              {isBuyer
+                ? "Penjual telah menyelesaikan pekerjaannya. Silakan periksa deliverables. Klik 'Selesaikan Pesanan' jika sudah sesuai, atau 'Ajukan Komplain' dalam 1x24 jam sebelum otomatis selesai."
+                : "Anda telah menandai pekerjaan selesai. Menunggu konfirmasi penyelesaian oleh pembeli. Pesanan akan otomatis selesai dalam 1x24 jam jika pembeli tidak mengajukan komplain."}
+            </p>
+          </div>
+        </div>
+      );
+
+    case OrderStatus.Disputed:
+      return (
+        <div className="bg-destructive/10 border border-destructive/20 rounded-sm p-4 flex gap-3 animate-fade-in">
+          <AlertCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+          <div className="space-y-0.5">
+            <h4 className="font-bold text-foreground text-sm">Sengketa / Komplain Aktif</h4>
+            <p className="text-xs text-muted-foreground leading-relaxed font-medium">
+              {isBuyer
+                ? "Sengketa diajukan. Anda telah mengajukan keluhan atas pesanan ini. Silakan berkoordinasi via ruang chat untuk berunding demi mencapai kesepakatan damai."
+                : "Pesanan ini dikomplain oleh pembeli. Silakan hubungi pembeli via chat untuk bermusyawarah. Anda dapat menekan 'Refund Dana' untuk mengembalikan uang secara sukarela."}
+            </p>
+          </div>
+        </div>
+      );
+
     case OrderStatus.Completed:
       return (
         <div className="bg-success/10 border border-success/20 rounded-sm p-4 flex gap-3 animate-fade-in">

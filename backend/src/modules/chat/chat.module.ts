@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { ChatGateway } from './chat.gateway';
 import { ChatMessageResolver, ChatConversationResolver } from './chat.resolver';
@@ -8,7 +8,12 @@ import { OrdersModule } from '../orders/orders.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [MediaModule, IamModule, OrdersModule, NotificationsModule],
+  imports: [
+    MediaModule,
+    IamModule,
+    forwardRef(() => OrdersModule),
+    NotificationsModule,
+  ],
   providers: [
     ChatGateway,
     ChatMessageResolver,
