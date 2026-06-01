@@ -1,0 +1,29 @@
+meta {
+  name: Update Message
+  type: graphql
+  seq: 7
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  mutation {
+    updateMessage(
+      conversationId: "{{conversation_id}}",
+      messageId: "{{message_id}}",
+      input: {
+        content: "Halo, saya update pesan ini!",
+        mediaIds: []
+      }
+    ) {
+      messageId
+      senderId
+      content
+      updatedAt
+    }
+  }
+}

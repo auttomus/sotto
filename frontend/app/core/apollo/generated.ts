@@ -429,6 +429,24 @@ export type GetLikedPostsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type GetLikedPostsQuery = { likedPosts: Array<{ postId: string, content: string, createdAt: string, authorId: string, authorDisplayName: string | null, authorUsername: string | null, authorAvatarObjectKey: string | null, authorSchoolName: string | null, linkedServiceId: string | null, inReplyToPostId: string | null, likesCount: number, repliesCount: number, likedByMe: boolean, tags: Array<{ id: string, name: string }> | null, media: Array<{ id: string, fileName: string, contentType: string, url: string | null, objectKey: string }> | null }> };
 
+export type GetFollowersQueryVariables = Exact<{
+  accountId: string | number;
+  cursor?: string | null | undefined;
+  take?: number | null | undefined;
+}>;
+
+
+export type GetFollowersQuery = { followers: Array<{ id: string, username: string, displayName: string, avatarObjectKey: string | null, avatarUrl: string | null, trustScore: number, isFollowing: boolean | null }> };
+
+export type GetFollowingQueryVariables = Exact<{
+  accountId: string | number;
+  cursor?: string | null | undefined;
+  take?: number | null | undefined;
+}>;
+
+
+export type GetFollowingQuery = { following: Array<{ id: string, username: string, displayName: string, avatarObjectKey: string | null, avatarUrl: string | null, trustScore: number, isFollowing: boolean | null }> };
+
 
 export const SearchSchoolsDocument = gql`
     query SearchSchools($query: String!) {
@@ -3193,3 +3211,105 @@ export type GetLikedPostsQueryHookResult = ReturnType<typeof useGetLikedPostsQue
 export type GetLikedPostsLazyQueryHookResult = ReturnType<typeof useGetLikedPostsLazyQuery>;
 export type GetLikedPostsSuspenseQueryHookResult = ReturnType<typeof useGetLikedPostsSuspenseQuery>;
 export type GetLikedPostsQueryResult = Apollo.QueryResult<GetLikedPostsQuery, GetLikedPostsQueryVariables>;
+export const GetFollowersDocument = gql`
+    query GetFollowers($accountId: ID!, $cursor: String, $take: Int) {
+  followers(accountId: $accountId, cursor: $cursor, take: $take) {
+    id
+    username
+    displayName
+    avatarObjectKey
+    avatarUrl
+    trustScore
+    isFollowing
+  }
+}
+    `;
+
+/**
+ * __useGetFollowersQuery__
+ *
+ * To run a query within a React component, call `useGetFollowersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetFollowersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetFollowersQuery({
+ *   variables: {
+ *      accountId: // value for 'accountId'
+ *      cursor: // value for 'cursor'
+ *      take: // value for 'take'
+ *   },
+ * });
+ */
+export function useGetFollowersQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetFollowersQuery, GetFollowersQueryVariables> & ({ variables: GetFollowersQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetFollowersQuery, GetFollowersQueryVariables>(GetFollowersDocument, options);
+      }
+export function useGetFollowersLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetFollowersQuery, GetFollowersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetFollowersQuery, GetFollowersQueryVariables>(GetFollowersDocument, options);
+        }
+// @ts-ignore
+export function useGetFollowersSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<GetFollowersQuery, GetFollowersQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetFollowersQuery, GetFollowersQueryVariables>;
+export function useGetFollowersSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetFollowersQuery, GetFollowersQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetFollowersQuery | undefined, GetFollowersQueryVariables>;
+export function useGetFollowersSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetFollowersQuery, GetFollowersQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetFollowersQuery, GetFollowersQueryVariables>(GetFollowersDocument, options);
+        }
+export type GetFollowersQueryHookResult = ReturnType<typeof useGetFollowersQuery>;
+export type GetFollowersLazyQueryHookResult = ReturnType<typeof useGetFollowersLazyQuery>;
+export type GetFollowersSuspenseQueryHookResult = ReturnType<typeof useGetFollowersSuspenseQuery>;
+export type GetFollowersQueryResult = Apollo.QueryResult<GetFollowersQuery, GetFollowersQueryVariables>;
+export const GetFollowingDocument = gql`
+    query GetFollowing($accountId: ID!, $cursor: String, $take: Int) {
+  following(accountId: $accountId, cursor: $cursor, take: $take) {
+    id
+    username
+    displayName
+    avatarObjectKey
+    avatarUrl
+    trustScore
+    isFollowing
+  }
+}
+    `;
+
+/**
+ * __useGetFollowingQuery__
+ *
+ * To run a query within a React component, call `useGetFollowingQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetFollowingQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetFollowingQuery({
+ *   variables: {
+ *      accountId: // value for 'accountId'
+ *      cursor: // value for 'cursor'
+ *      take: // value for 'take'
+ *   },
+ * });
+ */
+export function useGetFollowingQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetFollowingQuery, GetFollowingQueryVariables> & ({ variables: GetFollowingQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetFollowingQuery, GetFollowingQueryVariables>(GetFollowingDocument, options);
+      }
+export function useGetFollowingLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetFollowingQuery, GetFollowingQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetFollowingQuery, GetFollowingQueryVariables>(GetFollowingDocument, options);
+        }
+// @ts-ignore
+export function useGetFollowingSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<GetFollowingQuery, GetFollowingQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetFollowingQuery, GetFollowingQueryVariables>;
+export function useGetFollowingSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetFollowingQuery, GetFollowingQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetFollowingQuery | undefined, GetFollowingQueryVariables>;
+export function useGetFollowingSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetFollowingQuery, GetFollowingQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetFollowingQuery, GetFollowingQueryVariables>(GetFollowingDocument, options);
+        }
+export type GetFollowingQueryHookResult = ReturnType<typeof useGetFollowingQuery>;
+export type GetFollowingLazyQueryHookResult = ReturnType<typeof useGetFollowingLazyQuery>;
+export type GetFollowingSuspenseQueryHookResult = ReturnType<typeof useGetFollowingSuspenseQuery>;
+export type GetFollowingQueryResult = Apollo.QueryResult<GetFollowingQuery, GetFollowingQueryVariables>;

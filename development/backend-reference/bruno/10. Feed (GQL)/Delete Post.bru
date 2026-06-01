@@ -1,0 +1,17 @@
+meta {
+  name: Delete Post
+  type: graphql
+  seq: 10
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  mutation {
+    deletePost(postId: "{{last_post_id}}")
+  }
+}

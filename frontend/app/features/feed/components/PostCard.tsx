@@ -38,6 +38,7 @@ interface PostCardProps {
   post: FeedPost;
   isThreadParent?: boolean;
   hideAncestors?: boolean;
+  preloadedListing?: any;
 }
 
 // 1. Reusable Dropdown Menu Component
@@ -167,8 +168,7 @@ function PostCardContent({
   );
 }
 
-// 3. Main PostCard Component
-export function PostCard({ post: rawPost, isThreadParent, hideAncestors }: PostCardProps) {
+export function PostCard({ post: rawPost, isThreadParent, hideAncestors, preloadedListing }: PostCardProps) {
   const post = rawPost as ExtendedPost;
   const navigate = useNavigate();
   const avatarUrl = resolveMediaUrl(post.authorAvatarObjectKey);
@@ -187,10 +187,10 @@ export function PostCard({ post: rawPost, isThreadParent, hideAncestors }: PostC
 
   const { data: listingData } = useGetListingDetailQuery({
     variables: { id: post.linkedServiceId || "" },
-    skip: !post.linkedServiceId,
+    skip: !post.linkedServiceId || !!preloadedListing,
   });
 
-  const listing = listingData?.listing;
+  const listing = preloadedListing || listingData?.listing;
 
   React.useEffect(() => {
     setLiked(post.likedByMe || false);

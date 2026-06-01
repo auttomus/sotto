@@ -534,6 +534,8 @@ export type Query = {
   __typename?: 'Query';
   conversations: Array<ConversationModel>;
   feed: Array<PostModel>;
+  followers: Array<AccountModel>;
+  following: Array<AccountModel>;
   globalFeed: Array<PostModel>;
   likedListings: Array<ListingModel>;
   likedPosts: Array<PostModel>;
@@ -568,6 +570,20 @@ export type Query = {
 
 export type QueryFeedArgs = {
   limit?: Scalars['Int']['input'];
+};
+
+
+export type QueryFollowersArgs = {
+  accountId: Scalars['ID']['input'];
+  cursor?: InputMaybe<Scalars['String']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryFollowingArgs = {
+  accountId: Scalars['ID']['input'];
+  cursor?: InputMaybe<Scalars['String']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
 };
 
 

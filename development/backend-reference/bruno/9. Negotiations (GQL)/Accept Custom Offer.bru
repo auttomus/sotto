@@ -1,0 +1,22 @@
+meta {
+  name: Accept Custom Offer
+  type: graphql
+  seq: 3
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  mutation {
+    acceptOffer(offerId: "{{offer_id}}") {
+      id
+      status
+      orderId
+      updatedAt
+    }
+  }
+}

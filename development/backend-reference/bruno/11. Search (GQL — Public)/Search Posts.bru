@@ -1,0 +1,23 @@
+meta {
+  name: Search Posts
+  type: graphql
+  seq: 3
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: none
+}
+
+body:graphql {
+  query {
+    searchPosts(query: "sotto", tagIds: []) {
+      postId
+      content
+      createdAt
+      likesCount
+      repliesCount
+    }
+  }
+}

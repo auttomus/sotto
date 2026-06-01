@@ -1,0 +1,27 @@
+meta {
+  name: Get Replies for Post
+  type: graphql
+  seq: 4
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  query {
+    replies(postId: "{{last_post_id}}") {
+      postId
+      authorId
+      authorUsername
+      authorDisplayName
+      authorAvatarObjectKey
+      content
+      createdAt
+      likesCount
+      repliesCount
+    }
+  }
+}

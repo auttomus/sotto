@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Star, MapPin, Link as LinkIcon, Settings, Calendar, Briefcase, Loader2, X, Check, MessageCircle, Pencil, Trash2 } from "lucide-react";
+import { Star, MapPin, Link as LinkIcon, Settings, Calendar, Briefcase, Loader2, X, Check, MessageCircle, Pencil, Trash2, ArrowLeft } from "lucide-react";
 import { Avatar } from "~/components/ui/Avatar";
 import { Button } from "~/components/ui/Button";
 import { Dialog } from "~/components/ui/Dialog";
@@ -12,10 +12,14 @@ import {
   useGetPostsByAccountQuery,
   useGetRepliesByAccountQuery,
   useGetLikedListingsQuery,
-  useGetLikedPostsQuery
+  useGetLikedPostsQuery,
+  useGetFollowersLazyQuery,
+  useGetFollowingLazyQuery,
+  useFollowAccountMutation,
+  useUnfollowAccountMutation
 } from "~/core/apollo/generated";
 import { formatDate } from "~/core/utils/formatDate";
-import { useNavigate, Link } from "react-router";
+import { useNavigate, Link, useSearchParams } from "react-router";
 import { EditProfileForm } from "./EditProfileForm";
 import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
 import { useProfileLayout } from "~/features/profile/hooks/useProfileLayout";
@@ -25,6 +29,7 @@ import { ROUTES } from "~/core/constants/ROUTES";
 import { PostCard } from "~/features/feed/components/PostCard";
 import { filterFeedPosts } from "~/core/utils/filterFeedPosts";
 import { ListingCard } from "~/features/listings/components/ListingCard";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ProfileLayoutProps {
   profile: any; // Using any or extended type since it can be myProfile or userProfile
@@ -80,7 +85,16 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
     isEditing,
     setIsEditing,
     handleFollowToggle,
-    isFollowLoading
+    isFollowLoading,
+    searchParams,
+    setSearchParams,
+    view,
+    items,
+    loadingFollowers,
+    loadingFollowing,
+    hasMore,
+    sentinelRef,
+    handleItemFollowToggle
   } = useProfileLayout({ profile });
 
   const { data: likedListingsData, loading: likedListingsLoading } = useGetLikedListingsQuery({
@@ -128,6 +142,94 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
     skip: !profile.id,
     fetchPolicy: "cache-and-network",
   });
+
+  if (view) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+        className="min-h-screen bg-background flex flex-col pb-20 px-4 md:px-0 md:max-w-2xl md:mx-auto"
+      >
+        {/* Header */}
+        <div className="sticky top-0 z-10 bg-card/85 backdrop-blur-md px-4 md:px-6 py-4 border-b border-border flex items-center gap-3 shrink-0">
+          <button 
+            onClick={() => navigate(-1)} 
+            className="p-2 rounded-full hover:bg-muted transition text-foreground cursor-pointer"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <div>
+            <h2 className="font-bold text-foreground text-lg leading-none">
+              {view === "followers" ? "Pengikut" : "Mengikuti"}
+            </h2>
+            <p className="text-xs text-muted-foreground mt-1">
+              {view === "followers" ? `${profile.followersCount ?? 0} orang` : `${profile.followingCount ?? 0} orang`}
+            </p>
+          </div>
+        </div>
+
+        {/* List */}
+        <div className="flex-1 overflow-y-auto px-4 md:px-6 py-2 divide-y divide-border">
+          {items.length === 0 && !loadingFollowers && !loadingFollowing ? (
+            <div className="flex flex-col items-center justify-center h-64 text-center">
+              <span className="text-4xl">👥</span>
+              <p className="text-muted-foreground mt-3 font-semibold text-sm">
+                {view === "followers" ? "Belum memiliki pengikut." : "Belum mengikuti siapapun."}
+              </p>
+            </div>
+          ) : (
+            <>
+              {items.map(item => (
+                <div key={item.id} className="flex items-center justify-between py-3.5 border-b border-border last:border-b-0 hover:bg-muted/30 px-2 rounded-sm transition">
+                  {/* User Info */}
+                  <Link 
+                    to={item.username === user?.username ? "/profile" : `/profile/${item.username}`}
+                    onClick={() => setSearchParams({})} // Close view on click
+                    className="flex items-center gap-3 flex-1 min-w-0"
+                  >
+                    <Avatar 
+                      src={resolveMediaUrl(item.avatarObjectKey)} 
+                      alt={item.displayName} 
+                      size="md" 
+                      className="w-10 h-10 shrink-0"
+                    />
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-semibold text-sm text-foreground truncate">{item.displayName}</span>
+                        <span className="text-[10px] bg-warning/10 text-warning px-1.5 py-0.5 rounded-full font-bold flex items-center gap-0.5 shrink-0">
+                          ⭐ {item.trustScore.toFixed(1)}
+                        </span>
+                      </div>
+                      <span className="text-xs text-muted-foreground truncate block">@{item.username}</span>
+                    </div>
+                  </Link>
+                  
+                  {/* Follow/Unfollow Button */}
+                  {user && item.id !== user.accountId && (
+                    <Button
+                      variant={item.isFollowing ? "outline" : "primary"}
+                      className="font-bold text-xs rounded-full px-4 h-8 tracking-wide transition active:scale-[0.98]"
+                      onClick={() => handleItemFollowToggle(item)}
+                    >
+                      {item.isFollowing ? "Mengikuti" : "Ikuti"}
+                    </Button>
+                  )}
+                </div>
+              ))}
+              
+              {/* Infinite Scroll Sentinel */}
+              {hasMore && (
+                <div ref={sentinelRef} className="py-6 flex justify-center items-center">
+                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <div className="pb-20 relative bg-background min-h-screen">
@@ -256,14 +358,20 @@ export function ProfileLayout({ profile, listings, isOwnProfile = false }: Profi
         </div>
 
         <div className="flex items-center gap-4 mt-3 text-sm">
-          <div className="flex gap-1 hover:underline cursor-pointer">
-            <span className="font-bold text-foreground">{profile.followingCount ?? 0}</span>
+          <button 
+            onClick={() => setSearchParams({ view: "following" })}
+            className="flex gap-1 hover:underline text-foreground cursor-pointer focus:outline-none bg-transparent border-none p-0 text-sm font-medium"
+          >
+            <span className="font-bold">{profile.followingCount ?? 0}</span>
             <span className="text-muted-foreground">Mengikuti</span>
-          </div>
-          <div className="flex gap-1 hover:underline cursor-pointer">
-            <span className="font-bold text-foreground">{profile.followersCount ?? 0}</span>
+          </button>
+          <button 
+            onClick={() => setSearchParams({ view: "followers" })}
+            className="flex gap-1 hover:underline text-foreground cursor-pointer focus:outline-none bg-transparent border-none p-0 text-sm font-medium"
+          >
+            <span className="font-bold">{profile.followersCount ?? 0}</span>
             <span className="text-muted-foreground">Pengikut</span>
-          </div>
+          </button>
         </div>
       </div>
 

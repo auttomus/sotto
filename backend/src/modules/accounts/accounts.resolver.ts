@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ID, Int } from '@nestjs/graphql';
 import { AccountsService } from './accounts.service';
 import { FollowsService } from './follows.service';
 import { AccountModel } from './models/account.model';
@@ -21,16 +21,16 @@ export class AccountsResolver {
       id: string;
       username: string;
       displayName: string;
-      majorId: string | null;
-      schoolId: string | null;
-      note: string | null;
-      avatarObjectKey: string | null;
-      bannerObjectKey: string | null;
-      followersCount: number | bigint;
-      followingCount: number | bigint;
-      trustScore: import('@prisma/client').Prisma.Decimal | number;
-      createdAt: Date;
-      updatedAt: Date;
+      majorId?: string | null;
+      schoolId?: string | null;
+      note?: string | null;
+      avatarObjectKey?: string | null;
+      bannerObjectKey?: string | null;
+      followersCount?: number | bigint;
+      followingCount?: number | bigint;
+      trustScore?: import('@prisma/client').Prisma.Decimal | number;
+      createdAt?: Date;
+      updatedAt?: Date;
       school?: { name?: string | null } | null;
       major?: { name?: string | null } | null;
     },
@@ -41,17 +41,17 @@ export class AccountsResolver {
       username: account.username,
       displayName: account.displayName,
       major: account.major?.name ?? null,
-      majorId: account.majorId,
-      schoolId: account.schoolId,
-      note: account.note,
-      avatarObjectKey: account.avatarObjectKey,
-      bannerObjectKey: account.bannerObjectKey,
-      followersCount: account.followersCount.toString(),
-      followingCount: account.followingCount.toString(),
-      trustScore: Number(account.trustScore),
-      schoolName: account.school?.name,
-      createdAt: account.createdAt,
-      updatedAt: account.updatedAt,
+      majorId: account.majorId ?? null,
+      schoolId: account.schoolId ?? null,
+      note: account.note ?? null,
+      avatarObjectKey: account.avatarObjectKey ?? null,
+      bannerObjectKey: account.bannerObjectKey ?? null,
+      followersCount: (account.followersCount ?? 0).toString(),
+      followingCount: (account.followingCount ?? 0).toString(),
+      trustScore: Number(account.trustScore ?? 0),
+      schoolName: account.school?.name ?? null,
+      createdAt: account.createdAt ?? new Date(),
+      updatedAt: account.updatedAt ?? new Date(),
       ...extra,
     };
   }
@@ -77,6 +77,60 @@ export class AccountsResolver {
       );
     }
     return this.serializeAccount(account, { isFollowing });
+  }
+
+  @Public()
+  @Query(() => [AccountModel], { name: 'followers' })
+  async getFollowers(
+    @Args('accountId', { type: () => ID }) accountId: string,
+    @Args('cursor', { type: () => String, nullable: true }) cursor?: string,
+    @Args('take', { type: () => Int, nullable: true }) take?: number,
+    @CurrentUser() user?: CurrentUserPayload,
+  ) {
+    const followers = await this.accountsService.getFollowers(
+      accountId,
+      cursor,
+      take,
+    );
+    return Promise.all(
+      followers.map(async (follower) => {
+        let isFollowing = false;
+        if (user) {
+          isFollowing = await this.followsService.isFollowing(
+            user.accountId,
+            follower.id,
+          );
+        }
+        return this.serializeAccount(follower, { isFollowing });
+      }),
+    );
+  }
+
+  @Public()
+  @Query(() => [AccountModel], { name: 'following' })
+  async getFollowing(
+    @Args('accountId', { type: () => ID }) accountId: string,
+    @Args('cursor', { type: () => String, nullable: true }) cursor?: string,
+    @Args('take', { type: () => Int, nullable: true }) take?: number,
+    @CurrentUser() user?: CurrentUserPayload,
+  ) {
+    const following = await this.accountsService.getFollowing(
+      accountId,
+      cursor,
+      take,
+    );
+    return Promise.all(
+      following.map(async (followingUser) => {
+        let isFollowing = false;
+        if (user) {
+          isFollowing = await this.followsService.isFollowing(
+            user.accountId,
+            followingUser.id,
+          );
+        }
+        return this.serializeAccount(followingUser, { isFollowing });
+      }),
+    );
   }
 
   @Mutation(() => AccountModel)

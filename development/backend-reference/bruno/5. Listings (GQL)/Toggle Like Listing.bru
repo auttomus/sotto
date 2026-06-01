@@ -1,0 +1,17 @@
+meta {
+  name: Toggle Like Listing
+  type: graphql
+  seq: 8
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  mutation {
+    toggleLikeListing(id: "{{listing_id}}")
+  }
+}

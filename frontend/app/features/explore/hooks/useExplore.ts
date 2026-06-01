@@ -76,7 +76,6 @@ export function useExplore() {
     fetchPolicy: "cache-and-network"
   });
 
-  // Default queries ketika tidak melakukan pencarian (rekomendasi)
   const { 
     data: defaultAccountsData, 
     loading: defaultAccountsLoading,

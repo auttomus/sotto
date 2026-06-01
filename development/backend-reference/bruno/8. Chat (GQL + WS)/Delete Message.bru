@@ -1,0 +1,20 @@
+meta {
+  name: Delete Message
+  type: graphql
+  seq: 8
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  mutation {
+    deleteMessage(
+      conversationId: "{{conversation_id}}",
+      messageId: "{{message_id}}"
+    )
+  }
+}

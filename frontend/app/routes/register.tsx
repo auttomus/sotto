@@ -17,9 +17,5 @@ export default function RegisterRoute() {
     }
   }, [isAuthenticated, navigate, initTheme]);
 
-  return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans">
-      <RegisterWizard />
-    </div>
-  );
+  return <RegisterWizard />;
 }

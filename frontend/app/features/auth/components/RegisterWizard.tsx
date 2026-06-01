@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router';
-import { ChevronRight, ChevronLeft, Loader2, Search, GraduationCap } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Loader2, Search, GraduationCap, Eye, EyeOff } from 'lucide-react';
 import { useRegister, type RegisterPayload } from '../hooks/useRegister';
 import { ROUTES } from '~/core/constants/ROUTES';
 import { useSearchSchoolsQuery, useMajorsBySchoolQuery } from '~/core/apollo/generated';
@@ -152,6 +152,8 @@ export default function RegisterWizard() {
   });
 
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const nextStep = () => setStep((s) => Math.min(s + 1, 3));
   const prevStep = () => setStep((s) => Math.max(s - 1, 1));
@@ -170,19 +172,18 @@ export default function RegisterWizard() {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto p-6 bg-card text-foreground rounded-sm shadow-sm border border-border">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-primary font-serif italic mb-2">
-          Sotto
+    <div className="w-full max-w-xl mx-auto space-y-8">
+      <div className="text-center lg:text-left mb-8">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">
+          Buat Akun Sotto
         </h1>
-        <p className="text-muted-foreground">Buat akun untuk memulai</p>
-        
+        <p className="text-muted-foreground">Langkah pertamamu menuju karir profesional dimulai di sini</p>
+      </div>  
         {/* Progress Bar */}
         <div className="flex gap-2 mt-6">
           <div className={`h-1.5 flex-1 rounded-full ${step >= 1 ? 'bg-primary' : 'bg-muted'}`} />
           <div className={`h-1.5 flex-1 rounded-full ${step >= 2 ? 'bg-primary' : 'bg-muted'}`} />
         </div>
-      </div>
 
       <form onSubmit={onSubmit} className="space-y-4">
         {error && (
@@ -204,25 +205,47 @@ export default function RegisterWizard() {
               />
             </div>
             <div>
-              <label className="form-label">Kata Sandi</label>
-              <input
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="form-input"
-                required
-                minLength={8}
-              />
+              <label className="form-label" htmlFor="password">Kata Sandi</label>
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="form-input pr-10"
+                  placeholder="••••••••"
+                  required
+                  minLength={8}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
             </div>
             <div>
-              <label className="form-label">Konfirmasi Kata Sandi</label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className={`form-input ${confirmPassword && formData.password !== confirmPassword ? 'border-destructive focus:ring-destructive focus:border-destructive' : ''}`}
-                required
-              />
+              <label className="form-label" htmlFor="confirmPassword">Konfirmasi Kata Sandi</label>
+              <div className="relative">
+                <input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className={`form-input pr-10 ${confirmPassword && formData.password !== confirmPassword ? 'border-destructive focus:ring-destructive focus:border-destructive' : ''}`}
+                  placeholder="••••••••"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground"
+                >
+                  {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
               {confirmPassword && formData.password !== confirmPassword && (
                 <p className="text-xs text-destructive mt-1">Kata sandi tidak cocok</p>
               )}
