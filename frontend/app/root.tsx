@@ -13,6 +13,7 @@ import { apolloClient } from "~/core/apollo/client";
 import type { Route } from "./+types/root";
 import "./app.css";
 import { ToastProvider } from "~/components/ui/ToastProvider";
+import { DialogProvider } from "~/components/ui/DialogProvider";
 import { useRealtimeGateway } from "~/core/hooks/useRealtimeGateway";
 
 export const links: Route.LinksFunction = () => [
@@ -88,6 +89,7 @@ export default function App() {
         <Outlet />
       </RealtimeProvider>
       <ToastProvider />
+      <DialogProvider />
     </ApolloProvider>
   );
 }

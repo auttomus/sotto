@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Loader2, AlertCircle, ShieldCheck } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { OrderStatus } from "~/core/apollo/base-types";
 import { Button } from "~/components/ui/Button";
 import { ComplaintModal } from "./ComplaintModal";
@@ -38,28 +38,50 @@ export function OrderActionPanel({
       <div className="bg-card border-t border-border p-4 pb-safe shrink-0 shadow-lg space-y-3">
         {isBuyer && onPay && (
           <div className="flex items-center gap-2 px-1 text-[9px] text-primary font-bold uppercase tracking-wider">
-            <ShieldCheck className="h-4 w-4" />
-            <span>Pembayaran Escrow Terjamin & Aman</span>
+            <AlertCircle className="h-4 w-4" />
+            <span>Fitur Dalam Tahap Uji Coba</span>
           </div>
         )}
         <div className="flex gap-3">
-          {isBuyer && onPay ? (
-            <Button
-              variant="primary"
-              className="flex-1 font-bold text-xs py-2.5 rounded-sm bg-primary hover:opacity-90 text-primary-foreground border-0 shadow-md shadow-primary/25 active:scale-[0.99] transition cursor-pointer disabled:opacity-50"
-              onClick={onPay}
-              disabled={isPaying || isActionLoading}
-            >
-              {isPaying ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <span>Bayar Sekarang</span>
+          {isBuyer ? (
+            <>
+              <Button
+                variant="secondary"
+                className="flex-1 font-bold text-xs py-2.5 rounded-sm border border-border text-foreground hover:bg-muted cursor-pointer disabled:opacity-50"
+                onClick={handleCancel}
+                disabled={isActionLoading || isPaying}
+              >
+                Batalkan Order
+              </Button>
+              {onPay && (
+                <Button
+                  variant="primary"
+                  className="flex-[2] font-bold text-xs py-2.5 rounded-sm bg-primary hover:opacity-90 text-primary-foreground border-0 shadow-md shadow-primary/25 active:scale-[0.99] transition cursor-pointer disabled:opacity-50"
+                  onClick={onPay}
+                  disabled={isPaying || isActionLoading}
+                >
+                  {isPaying ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <span>Bayar Sekarang</span>
+                  )}
+                </Button>
               )}
-            </Button>
+            </>
           ) : (
-            <div className="w-full bg-muted/40 text-muted-foreground text-center py-2.5 rounded-sm text-xs font-semibold select-none italic">
-              Menunggu pembayaran dari pembeli
-            </div>
+            <>
+              <Button
+                variant="secondary"
+                className="flex-1 font-bold text-xs py-2.5 rounded-sm border border-border text-foreground hover:bg-muted cursor-pointer disabled:opacity-50"
+                onClick={handleCancel}
+                disabled={isActionLoading}
+              >
+                Batalkan Order
+              </Button>
+              <div className="flex-[2] bg-muted/40 text-muted-foreground text-center py-2.5 rounded-sm text-[11px] font-semibold select-none italic flex items-center justify-center">
+                Menunggu pembayaran dari pembeli
+              </div>
+            </>
           )}
         </div>
       </div>
@@ -174,7 +196,7 @@ export function OrderActionPanel({
     return (
       <div className="bg-card border-t border-border p-4 pb-safe shrink-0 shadow-lg space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
         <div className="flex items-start gap-2 px-1 text-[10px] text-muted-foreground font-medium">
-          <AlertCircle className="h-4.5 w-4.5 shrink-0 text-rose-500 mt-0.5" />
+          <AlertCircle className="h-4.5 w-4.5 shrink-0 text-destructive mt-0.5" />
           <p className="leading-normal">
             Sengketa pesanan aktif. Semua opsi mediasi (penarikan komplain, refund penuh, bagi hasil split, dan negosiasi) dipindahkan langsung ke dalam ruang chat untuk mendorong diskusi interaktif.
           </p>

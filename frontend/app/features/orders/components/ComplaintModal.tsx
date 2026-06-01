@@ -25,12 +25,8 @@ export function ComplaintModal({ onSubmit, onClose }: ComplaintModalProps) {
       maxWidth="md"
       title={
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20 shadow-sm">
-            <ShieldAlert className="h-5 w-5" />
-          </div>
           <div>
             <h3 className="font-extrabold text-foreground text-sm tracking-tight leading-none">Ajukan Komplain Sengketa</h3>
-            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mt-1">Langkah Mediasi Escrow Sotto</p>
           </div>
         </div>
       }
