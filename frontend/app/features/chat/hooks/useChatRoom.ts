@@ -31,6 +31,10 @@ export function useChatRoom({ conversationId }: UseChatRoomOptions) {
     }
   }, [incomingMention, initialMessage]);
 
+  React.useEffect(() => {
+    setLocalMessages([]);
+  }, [conversationId]);
+
   const [isUploading, setIsUploading] = React.useState(false);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
@@ -125,7 +129,11 @@ export function useChatRoom({ conversationId }: UseChatRoomOptions) {
 
   const allMessages = React.useMemo(() => {
     const serverMessages = data?.messages || [];
-    const chatMsgs = [...serverMessages].reverse().concat(localMessages);
+    // Filter local messages to exclude any message that is already present in serverMessages
+    const serverMessageIds = new Set(serverMessages.map((m: any) => m.messageId));
+    const filteredLocal = localMessages.filter((msg) => !serverMessageIds.has(msg.messageId));
+
+    const chatMsgs = [...serverMessages].reverse().concat(filteredLocal);
     const offers = offersData?.offersForConversation || [];
 
     // Map each Custom Offer to a pseudo-message object

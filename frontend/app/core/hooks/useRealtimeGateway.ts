@@ -88,6 +88,7 @@ export function useRealtimeGateway() {
       client.refetchQueries({
         include: [
           'GetConversations',
+          'GetMessages',
           'GetUnreadChatCount',
           'GetOffersForConversation',
         ]

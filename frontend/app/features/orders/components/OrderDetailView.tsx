@@ -29,11 +29,11 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
     isPaying,
     getStatusLabel,
     handleAdvance,
-    handleCancel,
+    handleCancel: triggerCancelMutation,
     handlePay,
     handleReview,
     handleFileComplaint,
-    handleRefundDisputedOrder,
+    handleRefundDisputedOrder: triggerRefundMutation,
     handleRequestCancellationChat,
   } = useOrderDetail({ orderId });
 
@@ -224,7 +224,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
               maxWidth: "sm",
             });
             if (isAccepted) {
-              handleCancel();
+              triggerCancelMutation();
             }
           }}
           onPay={handlePay}
@@ -239,7 +239,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
               maxWidth: "sm",
             });
             if (isAccepted) {
-              handleRefundDisputedOrder();
+              triggerRefundMutation();
             }
           }}
           handleRequestCancellationChat={handleRequestCancellationChat}
