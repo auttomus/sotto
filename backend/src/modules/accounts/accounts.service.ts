@@ -61,7 +61,17 @@ export class AccountsService {
       where: { targetAccountId: accountId },
       orderBy: { createdAt: 'desc' },
       take: take + 1,
-      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+      ...(cursor
+        ? {
+            cursor: {
+              accountId_targetAccountId: {
+                accountId: cursor,
+                targetAccountId: accountId,
+              },
+            },
+            skip: 1,
+          }
+        : {}),
       include: {
         follower: {
           select: {
@@ -83,7 +93,17 @@ export class AccountsService {
       where: { accountId },
       orderBy: { createdAt: 'desc' },
       take: take + 1,
-      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+      ...(cursor
+        ? {
+            cursor: {
+              accountId_targetAccountId: {
+                accountId: accountId,
+                targetAccountId: cursor,
+              },
+            },
+            skip: 1,
+          }
+        : {}),
       include: {
         following: {
           select: {

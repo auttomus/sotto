@@ -18,12 +18,12 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto p-6 bg-card text-foreground rounded-sm shadow-sm border border-border">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-primary font-serif italic mb-2">
-          Sotto
+    <div className="w-full max-w-xl mx-auto space-y-8">
+      <div className="text-center lg:text-left mb-8">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">
+          Selamat Datang Kembali
         </h1>
-        <p className="text-muted-foreground">Masuk untuk melanjutkan karya Anda</p>
+        <p className="text-muted-foreground">Masuk ke akun Sotto Anda untuk melanjutkan</p>
       </div>
 
       <form onSubmit={onSubmit} className="space-y-4">

@@ -1,0 +1,30 @@
+meta {
+  name: Get Global Feed
+  type: graphql
+  seq: 5
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: none
+}
+
+body:graphql {
+  query {
+    globalFeed(limit: 20) {
+      postId
+      authorId
+      authorUsername
+      authorDisplayName
+      authorAvatarObjectKey
+      content
+      createdAt
+      media {
+        url
+      }
+      likesCount
+      repliesCount
+    }
+  }
+}

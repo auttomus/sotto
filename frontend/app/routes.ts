@@ -16,7 +16,9 @@ export default [
     route("workspace/chat/:conversationId", "routes/workspace.chat.$conversationId.tsx"),
     route("workspace/order/:orderId", "routes/workspace.order.$orderId.tsx"),
   ]),
-  route("login", "routes/login.tsx"),
-  route("register", "routes/register.tsx"),
+  layout("routes/_auth.tsx", [
+    route("login", "routes/login.tsx"),
+    route("register", "routes/register.tsx"),
+  ]),
   route("workspace/create", "routes/workspace.create.tsx"),
 ] satisfies RouteConfig;

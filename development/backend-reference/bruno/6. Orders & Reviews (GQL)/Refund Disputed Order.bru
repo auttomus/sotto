@@ -1,0 +1,21 @@
+meta {
+  name: Refund Disputed Order
+  type: graphql
+  seq: 8
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  mutation {
+    refundDisputedOrder(orderId: "{{order_id}}") {
+      id
+      status
+      updatedAt
+    }
+  }
+}

@@ -1,0 +1,28 @@
+meta {
+  name: File Complaint (Dispute)
+  type: graphql
+  seq: 7
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  mutation {
+    fileComplaint(
+      orderId: "{{order_id}}",
+      reason: "Hasil pengerjaan tidak sesuai dengan kesepakatan awal dan ada keterlambatan pengiriman.",
+      notes: "Lampiran bukti chat dan file hasil pengerjaan terlampir."
+    ) {
+      id
+      status
+      disputedAt
+      disputedById
+      complaintReason
+      complaintNotes
+    }
+  }
+}

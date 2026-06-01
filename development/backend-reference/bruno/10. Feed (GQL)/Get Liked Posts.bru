@@ -1,0 +1,22 @@
+meta {
+  name: Get Liked Posts
+  type: graphql
+  seq: 8
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  query {
+    likedPosts {
+      postId
+      authorUsername
+      content
+      createdAt
+    }
+  }
+}

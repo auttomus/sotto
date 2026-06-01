@@ -200,3 +200,27 @@ query GetLikedPosts {
     }
   }
 }
+
+query GetFollowers($accountId: ID!, $cursor: String, $take: Int) {
+  followers(accountId: $accountId, cursor: $cursor, take: $take) {
+    id
+    username
+    displayName
+    avatarObjectKey
+    avatarUrl
+    trustScore
+    isFollowing
+  }
+}
+
+query GetFollowing($accountId: ID!, $cursor: String, $take: Int) {
+  following(accountId: $accountId, cursor: $cursor, take: $take) {
+    id
+    username
+    displayName
+    avatarObjectKey
+    avatarUrl
+    trustScore
+    isFollowing
+  }
+}

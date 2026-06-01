@@ -1,0 +1,24 @@
+meta {
+  name: Get Replies by Account
+  type: graphql
+  seq: 7
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: none
+}
+
+body:graphql {
+  query {
+    repliesByAccount(accountId: "{{account_id}}") {
+      postId
+      inReplyToPostId
+      content
+      createdAt
+      likesCount
+      repliesCount
+    }
+  }
+}

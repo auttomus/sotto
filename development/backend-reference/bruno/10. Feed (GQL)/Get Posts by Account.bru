@@ -1,0 +1,23 @@
+meta {
+  name: Get Posts by Account
+  type: graphql
+  seq: 6
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: none
+}
+
+body:graphql {
+  query {
+    postsByAccount(accountId: "{{account_id}}") {
+      postId
+      content
+      createdAt
+      likesCount
+      repliesCount
+    }
+  }
+}

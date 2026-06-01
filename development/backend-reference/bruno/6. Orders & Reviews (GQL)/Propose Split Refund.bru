@@ -1,0 +1,27 @@
+meta {
+  name: Propose Split Refund
+  type: graphql
+  seq: 9
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  mutation {
+    proposeSplitRefund(
+      orderId: "{{order_id}}",
+      buyerAmount: 50000,
+      sellerAmount: 50000
+    ) {
+      id
+      status
+      proposedSplitBuyerAmount
+      proposedSplitSellerAmount
+      proposedSplitById
+    }
+  }
+}

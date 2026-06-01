@@ -1,0 +1,21 @@
+meta {
+  name: Accept Split Refund
+  type: graphql
+  seq: 10
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  mutation {
+    acceptSplitRefund(orderId: "{{order_id}}") {
+      id
+      status
+      updatedAt
+    }
+  }
+}

@@ -1,0 +1,17 @@
+meta {
+  name: Toggle Like Post
+  type: graphql
+  seq: 11
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  mutation {
+    toggleLikePost(postId: "{{last_post_id}}")
+  }
+}

@@ -320,6 +320,8 @@ type PresignedUploadResult {
 type Query {
   conversations: [ConversationModel!]!
   feed(limit: Int! = 20): [PostModel!]!
+  followers(accountId: ID!, cursor: String, take: Int): [AccountModel!]!
+  following(accountId: ID!, cursor: String, take: Int): [AccountModel!]!
   globalFeed(limit: Int! = 20): [PostModel!]!
   likedListings: [ListingModel!]!
   likedPosts: [PostModel!]!

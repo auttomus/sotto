@@ -1,0 +1,21 @@
+meta {
+  name: Withdraw Custom Offer
+  type: graphql
+  seq: 5
+}
+
+post {
+  url: {{gql_url}}
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  mutation {
+    withdrawOffer(offerId: "{{offer_id}}") {
+      id
+      status
+      updatedAt
+    }
+  }
+}
