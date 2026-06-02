@@ -53,6 +53,7 @@ export function NotificationList() {
                 targetType={notif.targetType}
                 targetId={notif.targetId}
                 fromDisplayName={notif.fromDisplayName}
+                fromUsername={notif.fromUsername}
                 fromAccountId={notif.fromAccountId}
                 isRead={notif.isRead}
                 createdAt={notif.createdAt}

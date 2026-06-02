@@ -30,6 +30,9 @@ export class NotificationsResolver {
       fromDisplayName:
         (n as { fromAccount?: { displayName?: string | null } | null })
           .fromAccount?.displayName ?? null,
+      fromUsername:
+        (n as { fromAccount?: { username?: string | null } | null })
+          .fromAccount?.username ?? null,
     }));
   }
 

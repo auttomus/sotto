@@ -32,7 +32,7 @@ export class NotificationsService {
         targetId: params.targetId,
       },
       include: {
-        fromAccount: { select: { displayName: true } },
+        fromAccount: { select: { displayName: true, username: true } },
       },
     });
 
@@ -43,9 +43,8 @@ export class NotificationsService {
       targetType: notif.targetType,
       targetId: notif.targetId,
       fromAccountId: notif.fromAccountId,
-      fromDisplayName:
-        (notif as { fromAccount?: { displayName?: string | null } | null })
-          .fromAccount?.displayName ?? null,
+      fromDisplayName: notif.fromAccount?.displayName ?? null,
+      fromUsername: notif.fromAccount?.username ?? null,
       isRead: notif.isRead,
       createdAt: notif.createdAt,
     });
