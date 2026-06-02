@@ -17,6 +17,8 @@ export class SynergyService {
   private gamma: number;
   private lambdaG: number;
   private lambdaT: number;
+  private freshnessBoost: number;
+  private freshnessDecay: number;
 
   constructor(
     private readonly config: ConfigService,
@@ -28,7 +30,13 @@ export class SynergyService {
     this.beta = parseFloat(this.config.get('SYNERGY_BETA', '0.1'));
     this.gamma = parseFloat(this.config.get('SYNERGY_GAMMA', '0.3'));
     this.lambdaG = parseFloat(this.config.get('SYNERGY_LAMBDA_G', '0.5'));
-    this.lambdaT = parseFloat(this.config.get('SYNERGY_LAMBDA_T', '0.0288'));
+    this.lambdaT = parseFloat(this.config.get('SYNERGY_LAMBDA_T', '0.0577'));
+    this.freshnessBoost = parseFloat(
+      this.config.get('SYNERGY_FRESHNESS_BOOST', '0.5'),
+    );
+    this.freshnessDecay = parseFloat(
+      this.config.get('SYNERGY_FRESHNESS_DECAY', '0.3466'),
+    );
   }
 
   /**
@@ -67,15 +75,17 @@ export class SynergyService {
           post.postId,
         );
 
-        // 4. D(Δt): Peluruhan waktu (time decay)
+        // 4. D(Δt): Peluruhan waktu (time decay) & Freshness Boost
         const ageHours =
           (now - new Date(post.createdAt).getTime()) / (1000 * 3600);
         const timeDecay = Math.exp(-this.lambdaT * ageHours);
+        const freshBoost =
+          this.freshnessBoost * Math.exp(-this.freshnessDecay * ageHours);
 
         // 5. Total Score
-        const score =
-          (this.alpha * affinity + this.beta * proximity + this.gamma * rep) *
-          timeDecay;
+        const baseScore =
+          this.alpha * affinity + this.beta * proximity + this.gamma * rep;
+        const score = baseScore * timeDecay + freshBoost;
 
         return { ...post, score };
       }),

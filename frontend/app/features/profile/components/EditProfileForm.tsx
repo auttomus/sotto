@@ -6,6 +6,7 @@ import { useToastStore } from "~/core/store/useToastStore";
 import { useUpload } from "~/core/hooks/useUpload";
 import { useUpdateProfileMutation, type GetMyProfileQuery } from "~/core/apollo/generated";
 import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
+import { useAuthStore } from "~/core/store/useAuthStore";
 
 interface EditProfileFormProps {
   profile: GetMyProfileQuery['myProfile'];
@@ -14,6 +15,7 @@ interface EditProfileFormProps {
 }
 
 export function EditProfileForm({ profile, onCancel, onSuccess }: EditProfileFormProps) {
+  const { user, setUser } = useAuthStore();
   const [editForm, setEditForm] = React.useState({
     displayName: profile.displayName || "",
     note: profile.note || "",
@@ -29,8 +31,16 @@ export function EditProfileForm({ profile, onCancel, onSuccess }: EditProfileFor
   const addToast = useToastStore(s => s.addToast);
   const { uploadFile } = useUpload();
   const [updateProfileMutation, { loading: updateLoading }] = useUpdateProfileMutation({
-    onCompleted: () => {
+    onCompleted: (data) => {
       addToast('success', 'Profil berhasil diperbarui');
+      if (user && data?.updateProfile) {
+        setUser({
+          ...user,
+          displayName: data.updateProfile.displayName || user.displayName,
+          username: data.updateProfile.username || user.username,
+          avatarObjectKey: data.updateProfile.avatarObjectKey || undefined,
+        });
+      }
       onSuccess();
     },
     onError: (e: any) => addToast('error', e.message),

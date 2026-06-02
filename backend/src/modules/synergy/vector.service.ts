@@ -22,7 +22,7 @@ export class VectorService {
     accountId: string,
   ): Promise<{ vector: number[]; bias: number }> {
     const key = `latent:v1:user:${accountId}`;
-    const cached = await this.redis.getJson<{ vector: number[]; bias: number }>(
+    let cached = await this.redis.getJson<{ vector: number[]; bias: number }>(
       key,
     );
     if (cached) return cached;
@@ -32,7 +32,10 @@ export class VectorService {
       { length: 16 },
       () => (Math.random() - 0.5) * 0.1,
     );
-    return { vector, bias: 0 };
+    cached = { vector, bias: 0 };
+    // Simpan inisialisasi di Redis dengan TTL 7 hari
+    await this.redis.setJson(key, cached, 604800);
+    return cached;
   }
 
   /**
