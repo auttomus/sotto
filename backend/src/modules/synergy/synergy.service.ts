@@ -3,16 +3,11 @@ import { ConfigService } from '@nestjs/config';
 import { VectorService } from './vector.service';
 import { GraphProximityService } from './graph-proximity.service';
 import { ReputationService } from './reputation.service';
-import { COMPLEMENTARITY_MATRIX } from './constants/complementarity-matrix';
 
 interface CandidatePost {
   postId: string;
   authorId: string;
   createdAt: Date;
-}
-
-interface RankedPost extends CandidatePost {
-  score: number;
 }
 
 @Injectable()
@@ -37,92 +32,79 @@ export class SynergyService {
   }
 
   /**
-   * S(u_i, p_j) = [α·C(u_i,p_j) + β·G(u_i,u_k) + γ·R(u_k)] · D(Δt)
-   * Mengurutkan daftar postingan berdasarkan relevansi untuk user tertentu.
+   * Mengurutkan daftar postingan berdasarkan kedekatan latent space, graf sosial, reputasi, dan peluruhan waktu.
    */
-  async rankPosts(
+  async rankPosts<T extends CandidatePost>(
     accountId: string,
-    candidates: CandidatePost[],
+    candidates: T[],
     topN = 20,
-  ): Promise<RankedPost[]> {
+  ): Promise<(T & { score: number })[]> {
     if (candidates.length === 0) return [];
 
-    const demandVector = await this.vectorService.getDemandVector(accountId);
+    const user = await this.vectorService.getLatentUser(accountId);
     const now = Date.now();
 
-    const scored: RankedPost[] = await Promise.all(
+    const scored = await Promise.all(
       candidates.map(async (post) => {
-        // C(u_i, p_j): Komplementaritas vektor
-        const supplyVector = await this.vectorService.buildSupplyVector(
-          post.postId,
+        // 1. C(u_i, p_j): Kemiripan latent space + bias
+        const postLatent = await this.vectorService.getLatentPost(post.postId);
+        const similarity = this.computeLatentSimilarity(
+          user.vector,
+          postLatent.vector,
         );
-        const complementarity = this.computeComplementarity(
-          demandVector,
-          supplyVector,
-        );
+        const affinity = similarity + user.bias + postLatent.bias;
 
-        // G(u_i, u_k): Kedekatan graf
+        // 2. G(u_i, u_k): Kedekatan graf sosial
         const proximity = await this.graphProximity.computeProximity(
           accountId,
           post.authorId,
           this.lambdaG,
         );
 
-        // R(u_k): Reputasi & kualitas
+        // 3. R(u_k): Reputasi & kualitas postingan
         const rep = await this.reputation.computeReputation(
           post.authorId,
           post.postId,
         );
 
-        // D(Δt): Peluruhan waktu
+        // 4. D(Δt): Peluruhan waktu (time decay)
         const ageHours =
           (now - new Date(post.createdAt).getTime()) / (1000 * 3600);
         const timeDecay = Math.exp(-this.lambdaT * ageHours);
 
-        // S(u_i, p_j)
+        // 5. Total Score
         const score =
-          (this.alpha * complementarity +
-            this.beta * proximity +
-            this.gamma * rep) *
+          (this.alpha * affinity + this.beta * proximity + this.gamma * rep) *
           timeDecay;
 
         return { ...post, score };
       }),
     );
 
-    // Sort descending by score, ambil top N
+    // Urutkan berdasarkan skor tertinggi, ambil top N
     scored.sort((a, b) => b.score - a.score);
     return scored.slice(0, topN);
   }
 
   /**
-   * C(u_i, p_j) = d_i^T · M · s_j / (||d_i|| · ||M·s_j||)
-   * Modified cosine similarity melalui matriks komplementaritas.
+   * Menghitung cosine similarity antara dua vektor laten.
    */
-  private computeComplementarity(demand: number[], supply: number[]): number {
-    const M = COMPLEMENTARITY_MATRIX;
-
-    // M·s_j (matrix-vector multiplication)
-    const mTimesSupply = M.map((row) =>
-      row.reduce((sum, val, i) => sum + val * supply[i], 0),
-    );
-
-    // d_i^T · (M·s_j) (dot product)
-    const dotProduct = demand.reduce(
-      (sum, val, i) => sum + val * mTimesSupply[i],
+  private computeLatentSimilarity(
+    userVector: number[],
+    postVector: number[],
+  ): number {
+    const dotProduct = userVector.reduce(
+      (sum, val, idx) => sum + val * postVector[idx],
       0,
     );
-
-    // Norms
-    const normDemand = Math.sqrt(
-      demand.reduce((sum, val) => sum + val * val, 0),
+    const normUser = Math.sqrt(
+      userVector.reduce((sum, val) => sum + val * val, 0),
     );
-    const normMSupply = Math.sqrt(
-      mTimesSupply.reduce((sum, val) => sum + val * val, 0),
+    const normPost = Math.sqrt(
+      postVector.reduce((sum, val) => sum + val * val, 0),
     );
 
-    if (normDemand === 0 || normMSupply === 0) return 0;
-
-    return dotProduct / (normDemand * normMSupply);
+    if (normUser === 0 || normPost === 0) return 0;
+    return dotProduct / (normUser * normPost);
   }
 }

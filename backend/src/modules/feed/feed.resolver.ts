@@ -23,6 +23,7 @@ import { MediaAttachmentModel } from '../media/models/media-attachment.model';
 import { TagModel } from '../tags/models/tag.model';
 import { Public } from '../../common/decorators/public.decorator';
 import { NotificationType } from '@prisma/client';
+import { SynergyService } from '../synergy/synergy.service';
 
 @Resolver(() => PostModel)
 export class FeedResolver {
@@ -32,6 +33,7 @@ export class FeedResolver {
     private readonly tagsService: TagsService,
     private readonly mediaService: MediaService,
     private readonly notificationsService: NotificationsService,
+    private readonly synergyService: SynergyService,
   ) {}
 
   @Mutation(() => PostModel)
@@ -214,11 +216,31 @@ export class FeedResolver {
   @Query(() => [PostModel], { name: 'globalFeed' })
   async getGlobalFeed(
     @Args('limit', { type: () => Int, defaultValue: 20 }) limit: number,
+    @CurrentUser() user?: CurrentUserPayload,
   ): Promise<PostModel[]> {
-    const posts = await this.feedService.getGlobalFeed(Math.min(limit, 50));
-    if (posts.length === 0) return [];
+    // 1. Ambil seluruh postingan aktif sebagai kandidat rekomendasi
+    const candidates = await this.feedService.getGlobalFeed();
+    if (candidates.length === 0) return [];
 
-    const authorIds = [...new Set(posts.map((p) => p.authorId))];
+    // 2. Jika user login, jalankan Synergy Engine. Jika guest, fallback ke kronologis.
+    let rankedCandidates: (Awaited<
+      ReturnType<FeedService['getGlobalFeed']>
+    >[number] & { score?: number })[] = [];
+    if (user?.accountId) {
+      rankedCandidates = await this.synergyService.rankPosts(
+        user.accountId,
+        candidates,
+        limit,
+      );
+    } else {
+      rankedCandidates = candidates
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+        .slice(0, limit);
+    }
+
+    if (rankedCandidates.length === 0) return [];
+
+    const authorIds = [...new Set(rankedCandidates.map((p) => p.authorId))];
     const authors = await this.prisma.account.findMany({
       where: { id: { in: authorIds } },
       select: {
@@ -231,7 +253,7 @@ export class FeedResolver {
     });
     const authorMap = new Map(authors.map((a) => [a.id, a]));
 
-    return posts.map((post) => {
+    return rankedCandidates.map((post) => {
       const author = authorMap.get(post.authorId);
       return {
         ...post,
@@ -259,8 +281,16 @@ export class FeedResolver {
     const postIds = feedItems.map((f) => f.postId);
     const posts = await this.feedService.getPostsByIds(postIds);
 
+    // Filter out posts that have been soft-deleted
+    const activePosts = posts.filter((p) => !p.deletedAt);
+
+    if (activePosts.length === 0) return [];
+
+    // Urutkan secara kronologis (terbaru di atas)
+    activePosts.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
     // Enrich dengan info author dari PostgreSQL
-    const authorIds = [...new Set(posts.map((p) => p.authorId))];
+    const authorIds = [...new Set(activePosts.map((p) => p.authorId))];
     const authors = await this.prisma.account.findMany({
       where: { id: { in: authorIds } },
       select: {
@@ -273,7 +303,7 @@ export class FeedResolver {
     });
     const authorMap = new Map(authors.map((a) => [a.id, a]));
 
-    return posts.map((post) => {
+    return activePosts.map((post) => {
       const author = authorMap.get(post.authorId);
       return {
         ...post,

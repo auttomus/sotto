@@ -9,8 +9,11 @@ export class AccountsService {
   /** Ambil profil berdasarkan username atau ID (public) */
   async getProfileByUsername(usernameOrId: string) {
     // Regex sederhana untuk mengecek format UUID
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(usernameOrId);
-    
+    const isUuid =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        usernameOrId,
+      );
+
     const account = await this.prisma.account.findFirst({
       where: isUuid ? { id: usernameOrId } : { username: usernameOrId },
       include: {
