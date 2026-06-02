@@ -31,6 +31,7 @@ export class MinioService implements OnModuleInit {
         'MINIO_SECRET_KEY',
         'supersecret_minio_password',
       ),
+      region: this.config.get('MINIO_REGION', 'auto'),
     });
 
     // Pastikan bucket ada

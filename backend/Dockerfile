@@ -6,7 +6,10 @@ RUN corepack enable
 FROM base AS dependencies
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --ignore-scripts
+ENV NODE_OPTIONS="--max-old-space-size=2048"
+RUN pnpm config set fetch-retries 10 && \
+    pnpm config set fetch-retry-maxtimeout 120000 && \
+    pnpm install --ignore-scripts
 
 FROM base AS build
 WORKDIR /app
@@ -19,7 +22,10 @@ RUN ./node_modules/.bin/nest build
 FROM base AS prod-dependencies
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --prod --ignore-scripts
+ENV NODE_OPTIONS="--max-old-space-size=2048"
+RUN pnpm config set fetch-retries 10 && \
+    pnpm config set fetch-retry-maxtimeout 120000 && \
+    pnpm install --prod --ignore-scripts
 COPY node_modules/@prisma ./node_modules/@prisma
 COPY node_modules/.pnpm ./node_modules/.pnpm
 
@@ -31,6 +37,7 @@ ENV NODE_ENV=production
 COPY --chown=node:node --from=prod-dependencies /app/node_modules ./node_modules
 COPY --chown=node:node --from=build /app/dist ./dist
 COPY --chown=node:node package.json ./
+COPY --chown=node:node --from=build /app/prisma ./prisma
 
 EXPOSE 3000
 CMD ["node", "dist/main"]

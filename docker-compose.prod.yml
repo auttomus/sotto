@@ -1,0 +1,117 @@
+services:
+  # 1. PRIMARY DATABASE
+  postgres:
+    image: postgres:15-alpine
+    container_name: sotto_postgres
+    restart: unless-stopped
+    env_file:
+      - ./infrastructure/.env.docker
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U platform_admin -d sotto_platform_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - platform_net
+
+  # 2. HIGH-VELOCITY DATABASE
+  scylladb:
+    image: scylladb/scylla:5.4.1
+    container_name: sotto_scylla
+    restart: unless-stopped
+    # Limited to 768M RAM to fit within the 2GB VPS perfectly
+    command: --smp 1 --memory 768M --reserve-memory 0 --developer-mode 1
+    volumes:
+      - scylla_data:/var/lib/scylla
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'DESCRIBE KEYSPACES' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - platform_net
+
+  # 3. CACHE & QUEUE BROKER
+  redis:
+    image: redis:7-alpine
+    container_name: sotto_redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - platform_net
+
+  # 4. BACKEND SERVICE (NestJS)
+  backend:
+    image: ${DOCKER_REGISTRY_USER:-auttomus}/sotto-backend:latest
+    container_name: sotto_backend
+    restart: unless-stopped
+    env_file:
+      - ./infrastructure/.env.docker
+    depends_on:
+      postgres:
+        condition: service_healthy
+      scylladb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - platform_net
+
+  # 5. FRONTEND SERVICE (React Router)
+  frontend:
+    image: ${DOCKER_REGISTRY_USER:-auttomus}/sotto-frontend:latest
+    container_name: sotto_frontend
+    restart: unless-stopped
+    env_file:
+      - ./infrastructure/.env.docker
+    depends_on:
+      - backend
+    networks:
+      - platform_net
+
+  # 6. REVERSE PROXY (Nginx)
+  nginx:
+    image: nginx:alpine
+    container_name: sotto_nginx
+    restart: unless-stopped
+    # Exposing only to the Docker host for monitoring if needed
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - platform_net
+
+  # 7. CLOUDFLARE TUNNEL (Public Production Entry)
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: sotto_tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    env_file:
+      - ./infrastructure/.env.docker
+    depends_on:
+      - nginx
+    networks:
+      - platform_net
+
+networks:
+  platform_net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  scylla_data:
+  redis_data:
