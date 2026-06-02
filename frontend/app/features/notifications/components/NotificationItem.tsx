@@ -10,6 +10,7 @@ interface NotificationItemProps {
   targetId?: string | null;
   fromDisplayName?: string | null;
   fromAccountId?: string | null;
+  fromUsername?: string | null;
   isRead: boolean;
   createdAt: string;
   onMarkAsRead: (id: string) => void;
@@ -75,6 +76,7 @@ function getTargetLink(
   targetId?: string | null,
   fromAccountId?: string | null,
   type?: NotificationType,
+  fromUsername?: string | null,
 ): string {
   if (!targetType || !targetId) return "/notifications";
   if (targetType.startsWith("CustomOffer")) {
@@ -90,7 +92,7 @@ function getTargetLink(
     case "ScyllaPost":
       return `/post/${targetId}`;
     case "Account":
-      return `/profile/${targetId}`;
+      return `/profile/${fromUsername || targetId}`;
     default:
       return "/notifications";
   }
@@ -122,12 +124,13 @@ export function NotificationItem({
   targetId,
   fromDisplayName,
   fromAccountId,
+  fromUsername,
   isRead,
   createdAt,
   onMarkAsRead,
 }: NotificationItemProps) {
   const name = fromDisplayName || "Seseorang";
-  const link = getTargetLink(targetType, targetId, fromAccountId, type);
+  const link = getTargetLink(targetType, targetId, fromAccountId, type, fromUsername);
 
   return (
     <Link

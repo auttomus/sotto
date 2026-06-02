@@ -9,6 +9,7 @@ query GetNotifications($cursor: String, $take: Int) {
     createdAt
     fromAccountId
     fromDisplayName
+    fromUsername
   }
 }
 

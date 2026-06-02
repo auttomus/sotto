@@ -32,7 +32,7 @@ export class NotificationsService {
         targetId: params.targetId,
       },
       include: {
-        fromAccount: { select: { displayName: true } },
+        fromAccount: { select: { displayName: true, username: true } },
       },
     });
 
@@ -46,6 +46,9 @@ export class NotificationsService {
       fromDisplayName:
         (notif as { fromAccount?: { displayName?: string | null } | null })
           .fromAccount?.displayName ?? null,
+      fromUsername:
+        (notif as { fromAccount?: { username?: string | null } | null })
+          .fromAccount?.username ?? null,
       isRead: notif.isRead,
       createdAt: notif.createdAt,
     });
@@ -61,7 +64,7 @@ export class NotificationsService {
       take: take + 1, // Ambil 1 ekstra untuk cek hasMore
       ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
       include: {
-        fromAccount: { select: { displayName: true } },
+        fromAccount: { select: { displayName: true, username: true } },
       },
     });
   }

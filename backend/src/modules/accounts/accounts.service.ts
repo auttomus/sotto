@@ -6,16 +6,23 @@ import { UpdateProfileInput } from './dto/update-profile.input';
 export class AccountsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  /** Ambil profil berdasarkan username (public) */
-  async getProfileByUsername(username: string) {
-    const account = await this.prisma.account.findUnique({
-      where: { username },
+  /** Ambil profil berdasarkan username atau ID (public) */
+  async getProfileByUsername(usernameOrId: string) {
+    // Regex sederhana untuk mengecek format UUID
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(usernameOrId);
+    
+    const account = await this.prisma.account.findFirst({
+      where: isUuid ? { id: usernameOrId } : { username: usernameOrId },
       include: {
         school: { select: { name: true } },
         major: { select: { name: true } },
       },
     });
-    if (!account) throw new NotFoundException('Akun tidak ditemukan.');
+    
+    if (!account) {
+      throw new NotFoundException('Akun tidak ditemukan.');
+    }
+    
     return account;
   }
 

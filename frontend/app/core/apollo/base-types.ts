@@ -445,7 +445,10 @@ export type NotificationModel = {
   accountId: Scalars['ID']['output'];
   createdAt: Scalars['DateTime']['output'];
   fromAccountId?: Maybe<Scalars['String']['output']>;
+  /** Resolved: display name of the triggering account */
   fromDisplayName?: Maybe<Scalars['String']['output']>;
+  /** Resolved: username of the triggering account */
+  fromUsername?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   isRead: Scalars['Boolean']['output'];
   targetId?: Maybe<Scalars['String']['output']>;

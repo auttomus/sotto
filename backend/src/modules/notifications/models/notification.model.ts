@@ -36,4 +36,8 @@ export class NotificationModel {
   /** Resolved: display name of the triggering account */
   @Field(() => String, { nullable: true })
   fromDisplayName?: string | null;
+
+  /** Resolved: username of the triggering account */
+  @Field(() => String, { nullable: true })
+  fromUsername?: string | null;
 }
