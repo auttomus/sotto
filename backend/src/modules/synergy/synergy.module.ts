@@ -5,6 +5,7 @@ import { GraphProximityService } from './graph-proximity.service';
 import { ReputationService } from './reputation.service';
 import { TagsModule } from '../tags/tags.module';
 import { AccountsModule } from '../accounts/accounts.module';
+import { MatrixFactorizationService } from './matrix-factorization.service';
 
 @Module({
   imports: [TagsModule, AccountsModule],
@@ -13,7 +14,13 @@ import { AccountsModule } from '../accounts/accounts.module';
     VectorService,
     GraphProximityService,
     ReputationService,
+    MatrixFactorizationService,
   ],
-  exports: [SynergyService, VectorService, ReputationService],
+  exports: [
+    SynergyService,
+    VectorService,
+    ReputationService,
+    MatrixFactorizationService,
+  ],
 })
 export class SynergyModule {}

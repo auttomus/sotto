@@ -1,10 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ScyllaService } from '../../infrastructure/scylla/scylla.service';
 import { types } from 'cassandra-driver';
+import { MatrixFactorizationService } from '../synergy/matrix-factorization.service';
 
 @Injectable()
 export class FeedService {
-  constructor(private readonly scylla: ScyllaService) {}
+  private readonly logger = new Logger(FeedService.name);
+
+  constructor(
+    private readonly scylla: ScyllaService,
+    private readonly matrixFactorization: MatrixFactorizationService,
+  ) {}
 
   /** Buat postingan baru di ScyllaDB */
   async createPost(
@@ -107,6 +113,13 @@ export class FeedService {
       ],
     );
 
+    // Kirim incremental update rating 5.0 (reply) ke model latent space secara real-time
+    this.matrixFactorization
+      .updateInteraction(authorId, parentPostId, 5.0)
+      .catch((err) => {
+        this.logger.error(`Incremental update komentar gagal: ${err}`);
+      });
+
     return {
       postId: commentId,
       authorId: authorId,
@@ -149,11 +162,8 @@ export class FeedService {
   }
 
   /** Ambil global feed timeline (semua postingan original) */
-  async getGlobalFeed(limit = 100) {
-    const result = await this.scylla.execute(
-      `SELECT * FROM posts LIMIT ? ALLOW FILTERING`,
-      [limit],
-    );
+  async getGlobalFeed() {
+    const result = await this.scylla.execute(`SELECT * FROM posts`);
     const posts = result.rows.map((row) => {
       const r = row as unknown as {
         post_id: { toString(): string };
@@ -287,6 +297,14 @@ export class FeedService {
         `INSERT INTO post_likes (post_id, user_id, created_at) VALUES (?, ?, ?)`,
         [postUuid, userUuid, new Date()],
       );
+
+      // Kirim incremental update rating 3.0 (like) ke model latent space secara real-time
+      this.matrixFactorization
+        .updateInteraction(accountId, postId, 3.0)
+        .catch((err) => {
+          this.logger.error(`Incremental update like gagal: ${err}`);
+        });
+
       return true;
     }
   }

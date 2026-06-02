@@ -112,19 +112,23 @@ export class SearchService {
         content: string;
         linked_service_id?: { toString(): string } | null;
         created_at: Date;
+        deleted_at?: Date | null;
       };
       return {
         postId: r.post_id.toString(),
         authorId: r.author_id.toString(),
         inReplyToPostId: r.in_reply_to_post_id?.toString() ?? null,
-        content: r.content,
+        content: r.deleted_at ? '' : r.content,
         linkedServiceId: r.linked_service_id?.toString() ?? null,
         createdAt: r.created_at,
+        deletedAt: r.deleted_at ?? null,
       };
     });
 
-    // Hanya ambil postingan utama (bukan komentar)
-    let filteredPosts = allPosts.filter((post) => !post.inReplyToPostId);
+    // Hanya ambil postingan utama (bukan komentar) dan yang belum dihapus
+    let filteredPosts = allPosts.filter(
+      (post) => !post.inReplyToPostId && !post.deletedAt,
+    );
 
     // 3. Filter berdasarkan teks query jika ditentukan
     if (query && query.trim().length > 0) {
