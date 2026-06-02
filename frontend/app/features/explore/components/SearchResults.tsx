@@ -102,16 +102,21 @@ export function SearchResults({
 
                 {/* Trust Score Badge */}
                 {account.trustScore !== undefined && account.trustScore !== null && (
-                  <div className="flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-amber-500/10 text-[10px] font-bold text-amber-600 dark:text-amber-500 border border-amber-500/20">
+                  <div className="flex items-center gap-1 mt-1 px-2 py-0.5 text-[10px] font-bold text-amber-600 dark:text-amber-500">
                     <Star className="h-2.5 w-2.5 fill-current shrink-0" />
                     <span>{Number(account.trustScore).toFixed(1)}</span>
                   </div>
                 )}
 
                 {/* School/Institution & Major */}
-                {(account.major || account.schoolName) && (
-                  <span className="text-[10px] mt-2 px-2.5 py-0.5 bg-muted rounded-sm border border-border text-muted-foreground truncate max-w-full normal-case font-medium">
-                    {account.major ? `${account.major} · ` : ""}{account.schoolName || ""}
+                {account.major && (
+                  <span className="text-[10px] text-muted-foreground mt-1.5 font-semibold line-clamp-1 max-w-full">
+                    {account.major}
+                  </span>
+                )}
+                {account.schoolName && (
+                  <span className="text-[10px] text-muted-foreground/85 mt-0.5 font-medium line-clamp-1 max-w-full">
+                    {account.schoolName}
                   </span>
                 )}
 
