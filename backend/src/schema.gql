@@ -235,10 +235,7 @@ type NotificationModel {
   accountId: ID!
   createdAt: DateTime!
   fromAccountId: String
-  """Resolved: display name of the triggering account"""
   fromDisplayName: String
-  """Resolved: username of the triggering account"""
-  fromUsername: String
   id: ID!
   isRead: Boolean!
   targetId: String

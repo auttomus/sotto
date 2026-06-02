@@ -54,7 +54,6 @@ export function NotificationList() {
                 targetId={notif.targetId}
                 fromDisplayName={notif.fromDisplayName}
                 fromAccountId={notif.fromAccountId}
-                fromUsername={notif.fromUsername}
                 isRead={notif.isRead}
                 createdAt={notif.createdAt}
                 onMarkAsRead={markAsRead}

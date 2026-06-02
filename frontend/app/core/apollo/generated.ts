@@ -213,7 +213,7 @@ export type GetNotificationsQueryVariables = Exact<{
 }>;
 
 
-export type GetNotificationsQuery = { notifications: Array<{ id: string, accountId: string, type: Types.NotificationType, targetType: string | null, targetId: string | null, isRead: boolean, createdAt: string, fromAccountId: string | null, fromDisplayName: string | null, fromUsername: string | null }> };
+export type GetNotificationsQuery = { notifications: Array<{ id: string, accountId: string, type: Types.NotificationType, targetType: string | null, targetId: string | null, isRead: boolean, createdAt: string, fromAccountId: string | null, fromDisplayName: string | null }> };
 
 export type GetUnreadNotificationCountQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1829,7 +1829,6 @@ export const GetNotificationsDocument = gql`
     createdAt
     fromAccountId
     fromDisplayName
-    fromUsername
   }
 }
     `;
