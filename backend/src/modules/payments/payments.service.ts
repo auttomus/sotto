@@ -6,9 +6,11 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { createHash } from 'crypto';
-import { NotificationType } from '@prisma/client';
+import { NotificationType, OrderStatus } from '@prisma/client';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationsGateway } from '../notifications/notifications.gateway';
+import { EscrowService } from './escrow.service';
+import { ChatService } from '../chat/chat.service';
 
 @Injectable()
 export class PaymentsService {
@@ -19,6 +21,8 @@ export class PaymentsService {
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
     private readonly notificationsGateway: NotificationsGateway,
+    private readonly escrowService: EscrowService,
+    private readonly chatService: ChatService,
   ) {}
 
   /** Request Snap Token ke Midtrans Sandbox */
@@ -113,6 +117,170 @@ export class PaymentsService {
   }
 
   /**
+   * Memproses hasil pembayaran (baik dari webhook maupun query status langsung).
+   * Update status order, alokasikan escrow, kirim notifikasi & system chat message.
+   */
+  async processPaymentResult(
+    cleanOrderId: string,
+    transactionStatus: string,
+  ): Promise<string> {
+    const order = await this.prisma.order.findUnique({
+      where: { id: cleanOrderId },
+    });
+    if (!order) {
+      this.logger.error(
+        `Order ${cleanOrderId} tidak ditemukan untuk pemrosesan status.`,
+      );
+      return 'NOT_FOUND';
+    }
+
+    // Jika sudah bukan PENDING_PAYMENT, skip pemrosesan agar tidak double-run/race condition
+    if (order.status !== 'PENDING_PAYMENT') {
+      this.logger.log(
+        `Order ${cleanOrderId} sudah berstatus ${order.status}, skip pemrosesan.`,
+      );
+      return order.status;
+    }
+
+    if (transactionStatus === 'settlement' || transactionStatus === 'capture') {
+      const listing = await this.prisma.listing.findUnique({
+        where: { id: order.listingId },
+      });
+      const isDigital = listing?.type === 'DIGITAL_PRODUCT';
+      const nextStatus = isDigital
+        ? OrderStatus.COMPLETED
+        : OrderStatus.IN_PROGRESS;
+
+      // Jalankan sebagai transaksi atomik di database
+      const updatedOrder = await this.prisma.$transaction(async (tx) => {
+        const updated = await tx.order.update({
+          where: { id: cleanOrderId },
+          data: { status: nextStatus },
+        });
+
+        if (nextStatus === OrderStatus.IN_PROGRESS) {
+          // Kunci dana secara virtual di escrow
+          await this.escrowService.holdFunds(
+            cleanOrderId,
+            Number(order.agreedPrice),
+            tx,
+          );
+        } else if (nextStatus === OrderStatus.COMPLETED) {
+          // Jika digital produk, langsung cairkan dana escrow ke wallet seller
+          await this.escrowService.releaseFunds(
+            cleanOrderId,
+            order.sellerAccountId,
+            tx,
+          );
+        }
+
+        return updated;
+      });
+
+      this.logger.log(
+        `Order ${cleanOrderId} telah DIBAYAR. Status diperbarui ke ${nextStatus}.`,
+      );
+
+      // Notifikasi ke seller: pembayaran diterima
+      await this.notificationsService.createNotification({
+        accountId: order.sellerAccountId,
+        fromAccountId: order.buyerAccountId,
+        type: NotificationType.ORDER_UPDATE,
+        targetType: 'Order',
+        targetId: cleanOrderId,
+      });
+
+      // Kirim system message ke direct conversation antara buyer dan seller
+      try {
+        const conversation = await this.prisma.conversation.findFirst({
+          where: {
+            type: 'DIRECT',
+            AND: [
+              { participants: { some: { accountId: order.buyerAccountId } } },
+              { participants: { some: { accountId: order.sellerAccountId } } },
+            ],
+          },
+        });
+
+        if (conversation) {
+          const sysTag =
+            nextStatus === OrderStatus.COMPLETED ? 'COMPLETED' : 'IN_PROGRESS';
+          const sysMsg =
+            nextStatus === OrderStatus.COMPLETED
+              ? 'Pembayaran produk digital sukses. Pesanan langsung selesai!'
+              : 'Pembayaran sukses diverifikasi! Dana escrow aman tersimpan, pesanan resmi dimulai.';
+          await this.chatService.sendMessage(
+            conversation.id,
+            order.buyerAccountId,
+            `[SYSTEM_ORDER_${sysTag}] ${sysMsg}`,
+          );
+        }
+      } catch (chatErr) {
+        this.logger.error(
+          `Gagal mengirim pesan sistem chat untuk order ${cleanOrderId}: ${chatErr instanceof Error ? chatErr.message : String(chatErr)}`,
+        );
+      }
+
+      // Real-time order update ke kedua pihak
+      const payload = {
+        orderId: cleanOrderId,
+        status: updatedOrder.status,
+        updatedAt: updatedOrder.updatedAt,
+      };
+      this.notificationsGateway.emitOrderUpdated(order.buyerAccountId, payload);
+      this.notificationsGateway.emitOrderUpdated(
+        order.sellerAccountId,
+        payload,
+      );
+
+      return nextStatus;
+    } else if (
+      transactionStatus === 'deny' ||
+      transactionStatus === 'cancel' ||
+      transactionStatus === 'expire'
+    ) {
+      const updatedOrder = await this.prisma.order.update({
+        where: { id: cleanOrderId },
+        data: { status: OrderStatus.CANCELLED },
+      });
+      this.logger.log(
+        `Order ${cleanOrderId} BATAL/EXPIRED. Status diperbarui ke CANCELLED.`,
+      );
+
+      // Notifikasi ke kedua pihak: order dibatalkan
+      await this.notificationsService.createNotification({
+        accountId: order.sellerAccountId,
+        fromAccountId: order.buyerAccountId,
+        type: NotificationType.ORDER_UPDATE,
+        targetType: 'Order',
+        targetId: cleanOrderId,
+      });
+      await this.notificationsService.createNotification({
+        accountId: order.buyerAccountId,
+        type: NotificationType.ORDER_UPDATE,
+        targetType: 'Order',
+        targetId: cleanOrderId,
+      });
+
+      // Real-time order update
+      const payload = {
+        orderId: cleanOrderId,
+        status: updatedOrder.status,
+        updatedAt: updatedOrder.updatedAt,
+      };
+      this.notificationsGateway.emitOrderUpdated(order.buyerAccountId, payload);
+      this.notificationsGateway.emitOrderUpdated(
+        order.sellerAccountId,
+        payload,
+      );
+
+      return OrderStatus.CANCELLED;
+    }
+
+    return order.status;
+  }
+
+  /**
    * Verifikasi status pembayaran langsung ke Midtrans Status API.
    * Dipanggil oleh frontend setelah Snap popup onSuccess sebagai
    * fallback jika webhook tidak sampai (e.g. Cloudflare blocking).
@@ -139,15 +307,6 @@ export class PaymentsService {
     }
 
     // 2. Cari transaksi Midtrans terkait (order_id di Midtrans = orderId-timestamp)
-    //    Kita perlu cek semua kemungkinan. Gunakan Midtrans Status API.
-    //    Karena order_id di Midtrans mengandung timestamp, kita list transactions
-    //    yang match dengan prefix orderId.
-    //    Alternatif: simpan midtrans order_id di DB. Untuk sekarang, kita gunakan
-    //    Midtrans API dengan order_id yang paling baru.
-
-    // Coba query Midtrans status API menggunakan pattern order_id
-    // Midtrans menyimpan order_id persis seperti yang kita kirim
-    // Kita perlu mencoba beberapa order_id yang mungkin
     const possibleTransactions =
       await this.findRecentMidtransTransaction(orderId);
 
@@ -164,94 +323,8 @@ export class PaymentsService {
       `Midtrans status untuk order ${orderId}: ${transaction_status}`,
     );
 
-    // 3. Update order berdasarkan status Midtrans
-    if (
-      transaction_status === 'settlement' ||
-      transaction_status === 'capture'
-    ) {
-      const listing = await this.prisma.listing.findUnique({
-        where: { id: order.listingId },
-      });
-      const isDigital = listing?.type === 'DIGITAL_PRODUCT';
-      const nextStatus = isDigital ? 'COMPLETED' : 'IN_PROGRESS';
-
-      const updatedOrder = await this.prisma.order.update({
-        where: { id: orderId },
-        data: { status: nextStatus },
-      });
-      this.logger.log(
-        `Order ${orderId} diverifikasi DIBAYAR via Status API. Status → ${nextStatus}.`,
-      );
-
-      // Notifikasi ke seller: pembayaran diterima
-      await this.notificationsService.createNotification({
-        accountId: order.sellerAccountId,
-        fromAccountId: order.buyerAccountId,
-        type: NotificationType.ORDER_UPDATE,
-        targetType: 'Order',
-        targetId: orderId,
-      });
-
-      // Real-time order update ke kedua pihak
-      const payload = {
-        orderId,
-        status: updatedOrder.status,
-        updatedAt: updatedOrder.updatedAt,
-      };
-      this.notificationsGateway.emitOrderUpdated(order.buyerAccountId, payload);
-      this.notificationsGateway.emitOrderUpdated(
-        order.sellerAccountId,
-        payload,
-      );
-
-      return nextStatus;
-    } else if (
-      transaction_status === 'deny' ||
-      transaction_status === 'cancel' ||
-      transaction_status === 'expire'
-    ) {
-      const updatedOrder = await this.prisma.order.update({
-        where: { id: orderId },
-        data: { status: 'CANCELLED' },
-      });
-      this.logger.log(
-        `Order ${orderId} BATAL/EXPIRED via Status API. Status → CANCELLED.`,
-      );
-
-      // Notifikasi ke kedua pihak: order dibatalkan
-      await this.notificationsService.createNotification({
-        accountId: order.sellerAccountId,
-        fromAccountId: order.buyerAccountId,
-        type: NotificationType.ORDER_UPDATE,
-        targetType: 'Order',
-        targetId: orderId,
-      });
-      await this.notificationsService.createNotification({
-        accountId: order.buyerAccountId,
-        type: NotificationType.ORDER_UPDATE,
-        targetType: 'Order',
-        targetId: orderId,
-      });
-
-      // Real-time order update
-      const payload = {
-        orderId,
-        status: updatedOrder.status,
-        updatedAt: updatedOrder.updatedAt,
-      };
-      this.notificationsGateway.emitOrderUpdated(order.buyerAccountId, payload);
-      this.notificationsGateway.emitOrderUpdated(
-        order.sellerAccountId,
-        payload,
-      );
-
-      return 'CANCELLED';
-    } else if (transaction_status === 'pending') {
-      this.logger.log(`Order ${orderId} masih PENDING di Midtrans.`);
-      return 'PENDING_PAYMENT';
-    }
-
-    return order.status;
+    // 3. Proses status pembayaran terpusat
+    return this.processPaymentResult(orderId, transaction_status);
   }
 
   /**

@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
 import type { GetFeedQuery } from "~/core/apollo/generated";
@@ -13,8 +14,13 @@ interface PostMediaCarouselProps {
 export function PostMediaCarousel({ media }: PostMediaCarouselProps) {
   const [current, setCurrent] = useState(0);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const total = media.length;
+
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const scrollTo = (idx: number) => {
     const clamped = Math.max(0, Math.min(idx, total - 1));
@@ -52,6 +58,33 @@ export function PostMediaCarousel({ media }: PostMediaCarouselProps) {
     };
   }, [lightboxUrl]);
 
+  const renderLightbox = () => {
+    if (!lightboxUrl || !isClient) return null;
+    return createPortal(
+      <div
+        className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center transition-all animate-fade-in duration-200"
+        onClick={() => setLightboxUrl(null)}
+      >
+        <button
+          type="button"
+          onClick={() => setLightboxUrl(null)}
+          className="absolute top-6 right-6 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all hover:scale-105 active:scale-95 z-10 cursor-pointer"
+        >
+          <X className="h-6 w-6" />
+        </button>
+        <div className="max-w-[95vw] max-h-[95vh] flex items-center justify-center p-4">
+          <img
+            src={lightboxUrl}
+            alt="Enlarged media"
+            className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl animate-zoom-in select-none"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      </div>,
+      document.body
+    );
+  };
+
   if (total === 0) return null;
 
   if (total === 1) {
@@ -83,28 +116,7 @@ export function PostMediaCarousel({ media }: PostMediaCarouselProps) {
           </div>
         )}
 
-        {lightboxUrl && (
-          <div
-            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center transition-all animate-fade-in duration-200"
-            onClick={() => setLightboxUrl(null)}
-          >
-            <button
-              type="button"
-              onClick={() => setLightboxUrl(null)}
-              className="absolute top-6 right-6 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all hover:scale-105 active:scale-95 z-55"
-            >
-              <X className="h-6 w-6" />
-            </button>
-            <div className="max-w-[95vw] max-h-[95vh] flex items-center justify-center p-4">
-              <img
-                src={lightboxUrl}
-                alt="Enlarged media"
-                className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl animate-zoom-in select-none"
-                onClick={(e) => e.stopPropagation()}
-              />
-            </div>
-          </div>
-        )}
+        {renderLightbox()}
       </>
     );
   }
@@ -192,28 +204,7 @@ export function PostMediaCarousel({ media }: PostMediaCarouselProps) {
         )}
       </div>
 
-      {lightboxUrl && (
-        <div
-          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center transition-all animate-fade-in duration-200"
-          onClick={() => setLightboxUrl(null)}
-        >
-          <button
-            type="button"
-            onClick={() => setLightboxUrl(null)}
-            className="absolute top-6 right-6 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all hover:scale-105 active:scale-95 z-55"
-          >
-            <X className="h-6 w-6" />
-          </button>
-          <div className="max-w-[95vw] max-h-[95vh] flex items-center justify-center p-4">
-            <img
-              src={lightboxUrl}
-              alt="Enlarged media"
-              className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl animate-zoom-in select-none"
-              onClick={(e) => e.stopPropagation()}
-            />
-          </div>
-        </div>
-      )}
+      {renderLightbox()}
     </>
   );
 }

@@ -34,10 +34,10 @@ export default function PostDetailRoute() {
     );
   }
 
-  if (!post) {
+  if (!post || post.deletedAt) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 gap-4">
-        <p className="text-gray-500">Post tidak ditemukan.</p>
+        <p className="text-gray-500">Post tidak ditemukan atau telah dihapus.</p>
         <button onClick={() => navigate("/")} className="text-indigo-500 font-medium hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer">
           Kembali ke Beranda
         </button>

@@ -70,13 +70,13 @@ export function ChatMessageMedia({ media }: ChatMessageMediaProps) {
 
       {lightboxUrl && (
         <div
-          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center transition-all animate-fade-in duration-200"
+          className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center transition-all animate-fade-in duration-200"
           onClick={() => setLightboxUrl(null)}
         >
           <button
             type="button"
             onClick={() => setLightboxUrl(null)}
-            className="absolute top-6 right-6 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all hover:scale-105 active:scale-95 z-55 cursor-pointer"
+            className="absolute top-6 right-6 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all hover:scale-105 active:scale-95 z-10 cursor-pointer"
           >
             <X className="h-6 w-6" />
           </button>

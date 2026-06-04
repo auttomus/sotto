@@ -236,6 +236,7 @@ type NotificationModel {
   createdAt: DateTime!
   fromAccountId: String
   fromDisplayName: String
+  fromUsername: String
   id: ID!
   isRead: Boolean!
   targetId: String
