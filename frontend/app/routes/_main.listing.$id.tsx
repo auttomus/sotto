@@ -18,11 +18,11 @@ export default function ListingRoute() {
     return <ListingDetailSkeleton />;
   }
 
-  if (error || !data?.listing) {
+  if (error || !data?.listing || data.listing.status === "ARCHIVED") {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] p-4 text-center">
-        <h2 className="text-xl font-bold text-foreground mb-2">Penawaran tidak ditemukan</h2>
-        <p className="text-muted-foreground mb-6">Mungkin penawaran sudah dihapus atau link tidak valid.</p>
+        <h2 className="text-xl font-bold text-foreground mb-2">Penawaran tidak ditemukan atau telah dihapus</h2>
+        <p className="text-muted-foreground mb-6">Mungkin penawaran sudah dihapus atau dinonaktifkan.</p>
         <button 
           onClick={() => navigate(-1)}
           className="px-6 py-2 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition"

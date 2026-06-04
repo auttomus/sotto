@@ -1,5 +1,5 @@
 import { Outlet, useNavigate, useLocation } from "react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import TopHeader from "../components/layout/TopHeader";
 import BottomNav from "../components/layout/BottomNav";
 import DesktopSidebar from "../components/layout/DesktopSidebar";
@@ -8,20 +8,101 @@ import { useAuthStore } from "~/core/store/useAuthStore";
 import { useLayoutStore } from "~/core/store/useLayoutStore";
 import { ROUTES } from "~/core/constants/ROUTES";
 import { cn } from "~/core/utils/cn";
+import { useGetMyProfileLazyQuery } from "~/core/apollo/generated";
+import { Loader2 } from "lucide-react";
 
 export default function MainLayout() {
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [isCheckingSession, setIsCheckingSession] = useState(false);
+  const [hasChecked, setHasChecked] = useState(false);
+
   const initTheme = useThemeStore((s) => s.initTheme);
-  const { isAuthenticated } = useAuthStore();
+  const token = useAuthStore((s) => s.token);
+  const { logout, setUser } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
   const { isSidebarCollapsed, setSidebarCollapsed } = useLayoutStore();
 
+  const [fetchProfile] = useGetMyProfileLazyQuery({
+    fetchPolicy: "network-only",
+  });
+
+  // 1. Wait for hydration of the auth store
+  useEffect(() => {
+    setIsHydrated(useAuthStore.persist.hasHydrated());
+    const unsubHydrate = useAuthStore.persist.onHydrate(() => setIsHydrated(false));
+    const unsubFinish = useAuthStore.persist.onFinishHydration(() => setIsHydrated(true));
+    return () => {
+      unsubHydrate();
+      unsubFinish();
+    };
+  }, []);
+
+  // 2. Validate session once hydrated
   useEffect(() => {
     initTheme();
-    if (!isAuthenticated) {
+
+    if (!isHydrated) return;
+
+    if (!token) {
       navigate(ROUTES.LOGIN, { replace: true });
+      return;
     }
-  }, [initTheme, isAuthenticated, navigate]);
+
+    if (hasChecked) return;
+
+    setIsCheckingSession(true);
+    fetchProfile()
+      .then(({ data, error }) => {
+        if (error) {
+          const apolloErr = error as any;
+          const isNetworkError = !!apolloErr.networkError;
+          const isUnauthorized = Array.isArray(apolloErr.graphQLErrors) && apolloErr.graphQLErrors.some(
+            (ge: any) =>
+              ge.message === "Unauthorized" ||
+              ge.extensions?.code === "UNAUTHORIZED" ||
+              ge.extensions?.code === "UNAUTHENTICATED"
+          );
+
+          if (isUnauthorized) {
+            logout();
+            navigate(ROUTES.LOGIN, { replace: true });
+          } else if (isNetworkError) {
+            // Network issue, preserve session
+            setHasChecked(true);
+          } else {
+            // Other GraphQL errors, keep session just in case it's a backend glitch
+            setHasChecked(true);
+          }
+        } else if (!data?.myProfile) {
+          logout();
+          navigate(ROUTES.LOGIN, { replace: true });
+        } else {
+          setUser({
+            id: data.myProfile.id,
+            accountId: data.myProfile.id,
+            username: data.myProfile.username,
+            displayName: data.myProfile.displayName,
+            avatarObjectKey: data.myProfile.avatarObjectKey ?? undefined,
+          });
+          setHasChecked(true);
+        }
+        setIsCheckingSession(false);
+      })
+      .catch((err) => {
+        const isNetworkError = err && (err.networkError || (err.message && (
+          err.message.toLowerCase().includes("failed to fetch") || 
+          err.message.toLowerCase().includes("network")
+        )));
+        if (!isNetworkError) {
+          logout();
+          navigate(ROUTES.LOGIN, { replace: true });
+        } else {
+          setHasChecked(true);
+        }
+        setIsCheckingSession(false);
+      });
+  }, [isHydrated, token, hasChecked, fetchProfile, logout, setUser, navigate, initTheme]);
 
   // Automate sidebar collapse and BottomNav visibility based on route
   const collapsedRoutes = ["/chats", "/workspace/chat", "/orders", "/workspace/order"];
@@ -33,6 +114,22 @@ export default function MainLayout() {
   useEffect(() => {
     setSidebarCollapsed(shouldCollapseSidebar);
   }, [location.pathname, shouldCollapseSidebar, setSidebarCollapsed]);
+
+  const user = useAuthStore((s) => s.user);
+  const isBlocking = !isHydrated || (token && !user && isCheckingSession);
+
+  if (isBlocking) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground animate-pulse font-medium">
+            Memuat sesi Anda...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans transition-colors duration-300">

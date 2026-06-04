@@ -113,7 +113,13 @@ export default function LandingRoute() {
           <Link to="/" className="text-2xl font-bold tracking-tight text-primary font-serif italic">
             Sotto
           </Link>
-          <div className="flex gap-4 items-center">
+          <div className="flex gap-6 items-center">
+            <Link
+              to="/roadmap"
+              className="text-sm font-semibold text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+            >
+              Roadmap
+            </Link>
             <Link
               to={ROUTES.LOGIN}
               className="px-5 py-2.5 text-sm font-semibold text-muted-foreground hover:text-primary transition-colors"
