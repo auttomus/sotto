@@ -1,0 +1,16 @@
+{
+  "name": "sotto",
+  "private": true,
+  "description": "Sotto Platform Development Scripts",
+  "scripts": {
+    "infra:up": "docker compose up -d postgres scylladb redis minio",
+    "infra:down": "docker compose down",
+    "infra:logs": "docker compose logs -f postgres scylladb redis minio",
+    "backend:dev": "cd backend && pnpm run start:dev",
+    "frontend:dev": "cd frontend && pnpm run dev",
+    "db:migrate": "cd backend && pnpm prisma migrate dev",
+    "db:seed": "cd backend && pnpm prisma db seed",
+    "db:scylla:reset": "docker exec sotto_scylla cqlsh -e \"DROP KEYSPACE IF EXISTS sotto;\"",
+    "dev:hybrid": "pnpm infra:up && echo 'Infrastruktur aktif. Silakan jalankan backend:dev dan frontend:dev di terminal terpisah.'"
+  }
+}
