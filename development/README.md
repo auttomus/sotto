@@ -34,12 +34,14 @@ _Infrastruktur (database, cache, broker) berjalan di dalam Docker, sedangkan kod
    ```
 
    _Ini akan menyalakan kontainer database: `postgres`, `scylladb`, `redis`, dan `minio`._
+
 2. **Jalankan Migrasi & Seeding Database (Hanya untuk Pertama Kali):**
 
    ```bash
    pnpm db:migrate
    pnpm db:seed
    ```
+
 3. **Jalankan Backend NestJS (Terminal 1):**
 
    ```bash
@@ -47,6 +49,7 @@ _Infrastruktur (database, cache, broker) berjalan di dalam Docker, sedangkan kod
    ```
 
    _Berjalan di `http://localhost:3000` dengan GraphQL Playground di `/graphql`._
+
 4. **Jalankan Frontend Vite (Terminal 2):**
 
    ```bash
@@ -99,6 +102,7 @@ Jika Anda ingin membersihkan seluruh data lokal (_fresh install_), lakukan langk
    ```
 
    _Perintah ini akan masuk ke kontainer `sotto_scylla` dan menghapus keyspace `sotto` secara bersih._
+
 3. Jalankan kembali Backend NestJS Anda:
 
    ```bash
@@ -144,13 +148,13 @@ Untuk menguji fitur pembayaran/donasi Midtrans Sandbox, backend Anda wajib mener
 
 Jalankan perintah-perintah terpusat ini langsung dari direktori root monorepo:
 
-| Perintah                 | Deskripsi                                                          |
-| :----------------------- | :----------------------------------------------------------------- |
+| Perintah               | Deskripsi                                                          |
+| :--------------------- | :----------------------------------------------------------------- |
 | `pnpm infra:up`        | Menyalakan database & infra lokal di latar belakang.               |
 | `pnpm infra:down`      | Menghentikan kontainer infrastruktur Docker.                       |
 | `pnpm infra:logs`      | Melihat log kontainer database secara real-time.                   |
 | `pnpm backend:dev`     | Menjalankan backend NestJS dengan mode watch (Hot-Reload) di host. |
-| `pnpm frontend:dev`    | Menjalankan frontend React Router / Vite di host (port `5173`).  |
+| `pnpm frontend:dev`    | Menjalankan frontend React Router / Vite di host (port `5173`).    |
 | `pnpm db:migrate`      | Menjalankan migrasi skema database PostgreSQL secara lokal.        |
 | `pnpm db:seed`         | Memasukkan data dummy awal ke PostgreSQL.                          |
 | `pnpm db:scylla:reset` | Menghapus keyspace ScyllaDB lokal (untuk mereset skema NoSQL).     |
@@ -200,13 +204,13 @@ Berikut adalah daftar perkakas (tools) dan konfigurasi untuk mengamati data pada
 
 ### 1. PostgreSQL (Relational Data)
 
-* **Development (Lokal):**
+- **Development (Lokal):**
   - **Prisma Studio (Web GUI):** Jalankan perintah `pnpm --filter backend prisma studio` di direktori root. Buka [http://localhost:5555](http://localhost:5555) di browser Anda.
   - **Aplikasi GUI (DBeaver / TablePlus):**
     - Host: `localhost` | Port: `5432`
     - Username: `postgres` | Password: `supersecret_postgres_password`
     - Database: `sotto_platform_db`
-* **Production (VPS):**
+- **Production (VPS):**
   - Karena port `5432` di VPS tidak diekspos ke publik demi keamanan, Anda **wajib** menggunakan fitur **SSH Tunneling** di DBeaver atau TablePlus untuk terhubung.
     - SSH Host: `IP_VPS_ANDA` | SSH User: `root` (atau nama user VPS Anda).
     - Database Host: `localhost` | Database Port: `5432`.
@@ -214,7 +218,7 @@ Berikut adalah daftar perkakas (tools) dan konfigurasi untuk mengamati data pada
 
 ### 2. ScyllaDB (NoSQL Data: Posts, Comments, Messages)
 
-* **Development (Lokal):**
+- **Development (Lokal):**
   - **cqlsh (Terminal CLI):** Jalankan perintah berikut di terminal Anda:
 
     ```bash
@@ -222,43 +226,48 @@ Berikut adalah daftar perkakas (tools) dan konfigurasi untuk mengamati data pada
     ```
 
     Gunakan perintah CQL untuk melihat data, contoh:
+
     ```sql
     USE sotto;
     SELECT * FROM posts LIMIT 10;
     ```
-  - **Aplikasi GUI (DbGate / TablePlus / Magda):**
 
+  - **Aplikasi GUI (DbGate / TablePlus / Magda):**
     - **DbGate:** 100% Free & Open Source (mendukung Cassandra/ScyllaDB secara penuh).
     - **TablePlus (Free Tier):** Mendukung Cassandra (terbatas 2 koneksi aktif).
     - **Magda:** GUI khusus Cassandra open-source berbasis Rust.
-    - *Pengaturan Koneksi:* Buat koneksi baru jenis **Cassandra** ➔ Host: `localhost` | Port: `9042`.
-* **Production (VPS):**
+    - _Pengaturan Koneksi:_ Buat koneksi baru jenis **Cassandra** ➔ Host: `localhost` | Port: `9042`.
+
+- **Production (VPS):**
   - **CLI di VPS:** Hubungi VPS Anda melalui SSH, kemudian jalankan: `docker exec -it sotto_scylla cqlsh`.
   - **GUI Client (SSH Tunnel):** Hubungkan **DbGate** atau **TablePlus** lokal Anda dengan mengaktifkan fitur **SSH Tunneling** mengarah ke port `9042` VPS Anda.
 
 ### 3. Redis (Cache & Queue Management)
 
-* **Development (Lokal):**
+- **Development (Lokal):**
   - **redis-cli (Terminal CLI):**
+
     ```bash
     docker exec -it sotto_redis redis-cli
     ```
 
-    *Gunakan perintah `keys *` untuk melihat key, atau `flushall` untuk menghapus seluruh cache.*
+    _Gunakan perintah `keys _`untuk melihat key, atau`flushall` untuk menghapus seluruh cache.\*
+
   - **Aplikasi GUI (Redis Insight):** Alat resmi gratis dari Redis yang sangat visual untuk memantau data cache dan antrean BullMQ. Hubungkan ke Host: `localhost` | Port: `6379`.
-* **Production (VPS):**
+
+- **Production (VPS):**
   - **CLI di VPS:** Hubungi VPS via SSH, jalankan `docker exec -it sotto_redis redis-cli`.
   - **Redis Insight (SSH Tunnel):** Konfigurasi koneksi baru menggunakan **SSH Tunnel** mengarah ke port `6379` VPS Anda.
 
 ### 4. MinIO / Cloudflare R2 (Object Storage)
 
-* **Development (Lokal - MinIO):**
+- **Development (Lokal - MinIO):**
   - Buka antarmuka web konsol MinIO di browser: [http://localhost:9001](http://localhost:9001).
   - Masuk dengan kredensial developer default:
     - Username: `admin_minio`
     - Password: `supersecret_minio_password`
       atau sesuai dengan yang kamu ubah (bila ada mengubahnya)
-* **Production (Cloudflare R2):**
+- **Production (Cloudflare R2):**
   - Buka dashboard resmi Cloudflare ➔ Menu **R2** ➔ Pilih bucket produksi Anda. Semua file media/aset yang diunggah di produksi dapat langsung diinspeksi atau diunduh dari sana.
 
 ---
