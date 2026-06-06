@@ -157,7 +157,7 @@ Untuk menguji fitur pembayaran/donasi Midtrans Sandbox, backend Anda wajib mener
 2. Dapatkan URL publik HTTPS aktif dengan membuka antarmuka web Ngrok di:
    [http://localhost:4040](http://localhost:4040)
 3. Akses aplikasi Anda melalui URL publik Ngrok tersebut. Nginx akan mengarahkan rute `/` ke frontend dan `/graphql` / `/payments/webhook` ke backend.
-4. _Catatan: File [frontend/vite.config.ts](file:///home/auttomus/Documents/Code/PROJECT/sotto/frontend/vite.config.ts) sudah dikonfigurasi dengan `allowedHosts: true` agar browser tidak memblokir akses domain Ngrok._
+4. _Catatan: File [frontend/vite.config.ts](../frontend/vite.config.ts) sudah dikonfigurasi dengan `allowedHosts: true` agar browser tidak memblokir akses domain Ngrok._
 
 ---
 
@@ -315,8 +315,8 @@ Pencarian endpoint Ngrok di backend secara berurutan mengecek:
 
 ### 4. Pemisahan Berkas Environment Docker (Dev vs Prod)
 
-- **`docker-compose.yml` (Development):** Membaca variabel dari [infrastructure/.env.docker](file:///home/auttomus/Documents/Code/PROJECT/sotto/infrastructure/.env.docker).
-- **`docker-compose.prod.yml` (Production VPS):** Membaca variabel dari [infrastructure/.env.prod](file:///home/auttomus/Documents/Code/PROJECT/sotto/infrastructure/.env.prod).
+- **`docker-compose.yml` (Development):** Membaca variabel dari [infrastructure/.env.docker](../infrastructure/.env.docker).
+- **`docker-compose.prod.yml` (Production VPS):** Membaca variabel dari [infrastructure/.env.prod](../infrastructure/.env.prod).
 
 ### 5. Komunikasi Langsung Tanpa Nginx di Mode Hybrid (Dev)
 
@@ -331,6 +331,5 @@ Seluruh modifikasi lokal ini dijamin **tidak akan mengganggu** sistem produksi d
 ---
 
 ## ─── DAFTAR DOKUMENTASI REFERENSI LAIN ──────────────────────────────────────
-
-- **[Panduan Arsitektur &amp; Teknologi (stack-reference.md)](https://github.com/auttomus/sotto/blob/master/development/stack-reference.md)**
-- **[Inisial Prompt &amp; Rencana Awal (initial-prompt.md)](https://github.com/auttomus/sotto/blob/master/development/initial-prompt.md)**
+- **[Panduan Arsitektur & Teknologi (stack-reference.md)](stack-reference.md)**
+- **[Inisial Prompt & Rencana Awal (initial-prompt.md)](initial-prompt.md)**
