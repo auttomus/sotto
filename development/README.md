@@ -17,6 +17,23 @@ Sebelum memulai, pastikan sistem lokal Anda telah terpasang beberapa perkakas be
 
 ---
 
+## ─── PETA PENGGUNAAN FILE ENVIRONMENT (.ENV) ─────────────────────────────────
+
+Sebelum menjalankan proyek, pastikan Anda memahami di mana letak file konfigurasi `.env` yang digunakan oleh masing-masing mode:
+
+* **Mode Hybrid (Opsi A - Kode Dijalankan di Host OS):**
+  * **Backend** NestJS membaca konfigurasi dari **`backend/.env`**.
+  * **Frontend** Vite membaca konfigurasi dari **`frontend/.env`**.
+  * Kontainer database di Docker hanya membaca konfigurasi dasar dari **`infrastructure/.env.docker`**.
+* **Mode Full Docker Compose (Opsi B - Kode Dijalankan di Docker):**
+  * **Semua kontainer** (backend, frontend, database, dsb.) membaca konfigurasi terpusat dari berkas **`infrastructure/.env.docker`**.
+  * File `.env` di dalam folder `backend/` dan `frontend/` **diabaikan sepenuhnya**.
+
+> [!WARNING]
+> Setiap kali Anda ingin mengubah variabel konfigurasi (seperti kredensial DB, Endpoint Object Storage, API Key Midtrans, dll.), **selalu edit berkas `.env` yang sesuai dengan mode eksekusi yang sedang Anda gunakan.**
+
+---
+
 ## ─── CARA MENJALANKAN PROJECT (QUICK START) ──────────────────────────────────
 
 Terdapat dua opsi utama untuk menjalankan dan mengembangkan Sotto di mesin lokal Anda:
@@ -163,6 +180,9 @@ Jalankan perintah-perintah terpusat ini langsung dari direktori root monorepo:
 ---
 
 ## ─── OPSI PENYIMPANAN ASET MEDIA (MINIO VS CLOUDFLARE R2) ──────────────────
+
+> [!TIP]
+> *Ingat kembali peta penggunaan file `.env` di atas. Jika Anda menggunakan **Mode Hybrid**, edit berkas di `backend/.env` dan `frontend/.env`. Jika menggunakan **Mode Full Docker**, edit berkas di `infrastructure/.env.docker`.*
 
 ### Skenario A: Menggunakan Penyimpanan MinIO Lokal (Offline)
 
