@@ -40,7 +40,7 @@ Sotto disebut sebagai platform media sosial terdistribusi karena mendistribusika
 
 Seluruh panduan teknis untuk menjalankan aplikasi di komputer lokal Anda, detail environment, pilihan alur kerja (Hybrid vs Docker), dan pemetaan port telah dipindahkan ke:
 
-* **[Pusat Panduan Pengembangan Lokal (development/README.md)](file:///home/auttomus/Documents/Code/PROJECT/sotto/development/README.md)**
+* **[Pusat Panduan Pengembangan Lokal (development/README.md)](https://github.com/auttomus/sotto/blob/master/development/README.md)**
 
 Silakan merujuk ke dokumen tersebut untuk petunjuk pemasangan langkah-demi-langkah.
 
