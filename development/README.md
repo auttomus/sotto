@@ -332,5 +332,5 @@ Seluruh modifikasi lokal ini dijamin **tidak akan mengganggu** sistem produksi d
 
 ## ─── DAFTAR DOKUMENTASI REFERENSI LAIN ──────────────────────────────────────
 
-- **[Panduan Arsitektur &amp; Teknologi (stack-reference.md)](file:///home/auttomus/Documents/Code/PROJECT/sotto/development/stack-reference.md)**
-- **[Inisial Prompt &amp; Rencana Awal (initial-prompt.md)](file:///home/auttomus/Documents/Code/PROJECT/sotto/development/initial-prompt.md)**
+- **[Panduan Arsitektur &amp; Teknologi (stack-reference.md)](https://github.com/auttomus/sotto/blob/master/development/stack-reference.md)**
+- **[Inisial Prompt &amp; Rencana Awal (initial-prompt.md)](https://github.com/auttomus/sotto/blob/master/development/initial-prompt.md)**
