@@ -1,7 +1,5 @@
-.react-router
-build
 node_modules
-README.md
+dist
 .env
 .env.docker
 .env.prod
