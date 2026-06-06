@@ -243,19 +243,26 @@ export class OrdersResolver {
 
     // Auto-discovery URL Ngrok dinamis jika tidak ada yang diset di .env
     if (!publicUrl) {
-      try {
-        const ngrokRes = await fetch('http://localhost:4040/api/tunnels');
-        if (ngrokRes.ok) {
-          const data = (await ngrokRes.json()) as NgrokApiResponse;
-          const tunnel =
-            data.tunnels?.find((t) => t.proto === 'https') ||
-            data.tunnels?.find((t) => t.proto === 'http');
-          if (tunnel && tunnel.public_url) {
-            publicUrl = tunnel.public_url;
+      const ngrokEndpoints = [
+        process.env.NGROK_API_URL || 'http://localhost:4040/api/tunnels',
+        'http://ngrok:4040/api/tunnels',
+      ];
+      for (const endpoint of ngrokEndpoints) {
+        try {
+          const ngrokRes = await fetch(endpoint);
+          if (ngrokRes.ok) {
+            const data = (await ngrokRes.json()) as NgrokApiResponse;
+            const tunnel =
+              data.tunnels?.find((t) => t.proto === 'https') ||
+              data.tunnels?.find((t) => t.proto === 'http');
+            if (tunnel && tunnel.public_url) {
+              publicUrl = tunnel.public_url;
+              break;
+            }
           }
+        } catch {
+          // Lanjutkan ke endpoint berikutnya jika gagal
         }
-      } catch {
-        // Ngrok API tidak merespons (mungkin mati), lanjutkan ke fallback request header
       }
     }
 

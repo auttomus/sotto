@@ -6,11 +6,20 @@ interface MediaPreviewItemProps {
 }
 
 export function MediaPreviewItem({ file, className = "w-full h-full object-cover" }: MediaPreviewItemProps) {
-  const url = React.useMemo(() => URL.createObjectURL(file), [file]);
+  const [url, setUrl] = React.useState<string>("");
 
   React.useEffect(() => {
-    return () => URL.revokeObjectURL(url);
-  }, [url]);
+    const objectUrl = URL.createObjectURL(file);
+    setUrl(objectUrl);
+
+    return () => {
+      URL.revokeObjectURL(objectUrl);
+    };
+  }, [file]);
+
+  if (!url) {
+    return <div className="w-full h-full bg-muted animate-pulse" />;
+  }
 
   if (file.type.startsWith("video/")) {
     return (

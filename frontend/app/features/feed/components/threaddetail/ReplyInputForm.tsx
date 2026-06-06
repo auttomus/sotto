@@ -5,6 +5,7 @@ import { resolveMediaUrl } from "~/core/utils/resolveMediaUrl";
 import { MentionSuggestions } from "~/components/ui/MentionSuggestions";
 import { ListingCard } from "~/features/listings/components/ListingCard";
 import { useToastStore } from "~/core/store/useToastStore";
+import { MediaPreviewItem } from "~/components/ui/MediaPreviewItem";
 
 interface ReplyInputFormProps {
   currentUser: any;
@@ -70,11 +71,7 @@ export function ReplyInputForm({
             <div className="flex flex-wrap gap-2 mt-2 mb-3">
               {replyFiles.map((file, i) => (
                 <div key={i} className="relative w-16 h-16 rounded-sm overflow-hidden border border-border bg-muted">
-                  <img
-                    src={URL.createObjectURL(file)}
-                    alt="Preview"
-                    className="w-full h-full object-cover"
-                  />
+                  <MediaPreviewItem file={file} />
                   <button
                     type="button"
                     onClick={() => setReplyFiles(replyFiles.filter((_, idx) => idx !== i))}
