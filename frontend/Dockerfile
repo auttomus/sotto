@@ -1,7 +1,7 @@
 FROM node:22-alpine AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+RUN corepack enable && corepack prepare pnpm@11.1.2 --activate
 
 FROM base AS dev-deps
 WORKDIR /app
