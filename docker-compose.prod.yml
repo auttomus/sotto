@@ -51,7 +51,7 @@ services:
 
   # 4. BACKEND SERVICE (NestJS)
   backend:
-    image: ${DOCKER_REGISTRY_USER:-auttomus}/sotto-backend:latest
+    image: ghcr.io/${DOCKER_REGISTRY_USER:-untacorp}/sotto-backend:${IMAGE_TAG:-latest}
     container_name: sotto_backend
     restart: unless-stopped
     env_file:
@@ -68,7 +68,7 @@ services:
 
   # 5. FRONTEND SERVICE (React Router)
   frontend:
-    image: ${DOCKER_REGISTRY_USER:-auttomus}/sotto-frontend:latest
+    image: ghcr.io/${DOCKER_REGISTRY_USER:-untacorp}/sotto-frontend:${IMAGE_TAG:-latest}
     container_name: sotto_frontend
     restart: unless-stopped
     env_file:
