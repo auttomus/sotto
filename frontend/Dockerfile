@@ -30,4 +30,4 @@ COPY --chown=node:node --from=build /app/build ./build
 COPY --chown=node:node package.json ./
 
 EXPOSE 3000
-CMD ["npm", "run", "start"]
+CMD ["pnpm", "start"]
