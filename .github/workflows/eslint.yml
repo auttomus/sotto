@@ -30,24 +30,30 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install ESLint
-        run: |
-          npm install eslint@8.10.0
-          npm install @microsoft/eslint-formatter-sarif@3.1.0
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 11
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: backend/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: backend
 
       - name: Run ESLint
         env:
           SARIF_ESLINT_IGNORE_SUPPRESSED: "true"
-        # fix: Menambahkan backslash (\) untuk menyambung perintah ke baris berikutnya
-        run: npx eslint . \
-          --config .eslintrc.js \
-          --ext .js,.jsx,.ts,.tsx \
-          --format @microsoft/eslint-formatter-sarif \
-          --output-file eslint-results.sarif
+        run: pnpm exec eslint "{src,apps,libs,test}/**/*.ts" --format @microsoft/eslint-formatter-sarif --output-file ../eslint-results.sarif
+        working-directory: backend
         continue-on-error: true
 
       - name: Upload analysis results to GitHub
-        # fix: Mengubah versi v3 menjadi v4 sesuai instruksi peringatan
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: eslint-results.sarif
