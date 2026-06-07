@@ -12,7 +12,7 @@ RUN pnpm install --ignore-scripts
 FROM base AS prod-deps
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
-# Koreksi di sini
+# Install only production dependencies and skip lifecycle scripts
 RUN pnpm install --prod --ignore-scripts
 
 FROM base AS build
