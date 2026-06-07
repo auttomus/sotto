@@ -12,6 +12,7 @@ import { apolloClient } from "~/core/apollo/client";
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import pkg from "../package.json";
 import { ToastProvider } from "~/components/ui/ToastProvider";
 import { DialogProvider } from "~/components/ui/DialogProvider";
 import { useRealtimeGateway } from "~/core/hooks/useRealtimeGateway";
@@ -64,6 +65,8 @@ export async function loader() {
   return {
     ENV: {
       VITE_MIDTRANS_CLIENT_KEY: process.env.MIDTRANS_CLIENT_KEY || process.env.VITE_MIDTRANS_CLIENT_KEY || "",
+      VITE_MINIO_PUBLIC_URL: process.env.MINIO_PUBLIC_URL || process.env.VITE_MINIO_PUBLIC_URL || "",
+      VITE_APP_VERSION: pkg.version || "0.7.0 (beta)",
     }
   };
 }
