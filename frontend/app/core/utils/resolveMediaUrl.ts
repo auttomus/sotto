@@ -13,7 +13,10 @@ export function resolveMediaUrl(objectKeyOrUrl: string | null | undefined): stri
     return objectKeyOrUrl;
   }
 
-  const base = import.meta.env.VITE_MINIO_PUBLIC_URL || 'http://localhost:9000';
+  const base =
+    (typeof window !== 'undefined' && (window as any).ENV?.VITE_MINIO_PUBLIC_URL) ||
+    import.meta.env.VITE_MINIO_PUBLIC_URL ||
+    'http://localhost:9000';
   // Ensure no double slash between base and key
   const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
   const cleanKey = objectKeyOrUrl.startsWith('/') ? objectKeyOrUrl : `/${objectKeyOrUrl}`;

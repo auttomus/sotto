@@ -8,3 +8,8 @@ frontend/build/
 .git/
 .agents/
 .vscode/
+**/.env
+**/.env.docker
+**/.env.prod
+**/.env.*
+!**/.env.example

@@ -27,7 +27,7 @@ export function AboutCard() {
         {/* Version Badge */}
         <div className="flex items-center gap-1.5 px-2.5 py-1 bg-muted rounded-full text-[10px] font-medium text-foreground border border-border/40">
           <Info className="h-3.5 w-3.5 text-primary" />
-          <span>Versi 0.7.0 (beta)</span>
+          <span>Versi {(typeof window !== "undefined" && (window as any).ENV?.VITE_APP_VERSION) || import.meta.env.VITE_APP_VERSION}</span>
         </div>
       </div>
     </section>
