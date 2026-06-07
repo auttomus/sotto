@@ -154,7 +154,10 @@ export class IamService {
  * Membuat inisial nama dengan desain premium & gradasi warna yang dinamis
  */
 function generateSvgAvatar(name: string): string {
-  const initial = name ? name.trim().charAt(0).toUpperCase() : '?';
+  const MAX_NAME_LENGTH = 128;
+  const safeName =
+    typeof name === 'string' ? name.trim().slice(0, MAX_NAME_LENGTH) : '';
+  const initial = safeName ? safeName.charAt(0).toUpperCase() : '?';
 
   // Daftar warna gradasi premium yang modern dan estetis
   const gradients = [
@@ -168,8 +171,8 @@ function generateSvgAvatar(name: string): string {
 
   // Hitung hash deterministik dari nama agar pengguna yang sama selalu mendapat gradasi warna yang sama
   let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  for (let i = 0; i < safeName.length; i++) {
+    hash = safeName.charCodeAt(i) + ((hash << 5) - hash);
   }
   const index = Math.abs(hash) % gradients.length;
   const { start, end } = gradients[index];
