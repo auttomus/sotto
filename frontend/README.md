@@ -1,87 +1,76 @@
-# Welcome to React Router!
+# Sotto Frontend Application
 
-A modern, production-ready template for building full-stack React applications using React Router.
+Aplikasi antarmuka pengguna (SPA) Sotto yang dibangun dengan framework React Router v7. Terhubung secara realtime dengan backend Sotto melalui Apollo GraphQL Client dan WebSockets.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+## Kredit Teknologi & Stack Utama
 
-## Features
+Sotto Frontend memanfaatkan ekosistem teknologi modern berikut:
+* Framework: React Router v7 (Framework Mode / SSR Ready)
+* Build Tool: Vite
+* CSS Framework & Styling: Tailwind CSS v4
+* GraphQL Client: Apollo Client
+* State Management: Zustand
+* Animasi & Transisi: Framer Motion
+* Ikonografi: Lucide React
+* Realtime WebSockets: Socket.io-client
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+## Cara Menjalankan untuk Pengembangan
 
-## Getting Started
+### Persyaratan Sistem
+1. Node.js (v22+)
+2. pnpm (v11+)
 
-### Installation
+### Jalur Pengembangan (Mode Hybrid)
 
-Install the dependencies:
+Dalam mode pengembangan lokal (Hybrid), database dan infrastruktur pendukung dijalankan melalui Docker di latar belakang, sedangkan kode frontend berjalan di sistem lokal Anda.
 
-```bash
-npm install
-```
+#### Skenario 1: Menjalankan dari Root Direktori (Rekomendasi)
+Anda dapat menjalankan server pengembangan frontend langsung dari root direktori proyek:
 
-### Development
+1. Salin dan sesuaikan konfigurasi env:
+   ```bash
+   cp frontend/.env.example frontend/.env
+   ```
+2. Pastikan infrastruktur backend telah berjalan (via `pnpm dev:hybrid`).
+3. Jalankan frontend:
+   ```bash
+   pnpm frontend:dev
+   ```
 
-Start the development server with HMR:
+#### Skenario 2: Menjalankan langsung di dalam Folder Frontend
+Jika Anda ingin beroperasi langsung di dalam folder frontend:
 
-```bash
-npm run dev
-```
+1. Masuk ke folder frontend dan salin env:
+   ```bash
+   cd frontend
+   cp .env.example .env
+   ```
+2. Pasang dependensi secara lokal:
+   ```bash
+   pnpm install --ignore-workspace
+   ```
+3. Jalankan server pengembangan (HMR aktif):
+   ```bash
+   pnpm run dev
+   ```
 
-Your application will be available at `http://localhost:5173`.
+Aplikasi frontend akan aktif dan dapat diakses melalui browser di http://localhost:5173.
 
-## Building for Production
+## Membangun untuk Produksi
 
-Create a production build:
+Jika Anda ingin membundel aplikasi untuk rilis produksi:
 
-```bash
-npm run build
-```
+1. Build aplikasi:
+   ```bash
+   pnpm run build
+   ```
+2. Jalankan hasil build (Production Server):
+   ```bash
+   pnpm run start
+   ```
 
-## Deployment
-
-### Docker Deployment
-
-To build and run using Docker:
-
-```bash
-docker build -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
-```
-
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
+## Dokumen Referensi Pengembang
+Untuk panduan arsitektur sistem, struktur proyek, dan alur kerja pengoperasian yang lebih detail, silakan baca dokumentasi berikut:
+* [Development Hub & Panduan Menjalankan Sistem](../development/README.md)
+* [Referensi Struktur & Arsitektur Backend](../development/backend-reference/structure-reference.md)
+* [Referensi Struktur & Desain Frontend](../development/frontend-reference/structure-reference.md)
