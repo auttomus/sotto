@@ -6,7 +6,7 @@ RUN corepack enable && corepack prepare pnpm@11.1.2 --activate
 FROM base AS dev-deps
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
-# Koreksi di sini
+# Correction here
 RUN pnpm install --ignore-scripts
 
 FROM base AS prod-deps
