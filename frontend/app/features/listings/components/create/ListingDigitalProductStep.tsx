@@ -59,10 +59,27 @@ export function ListingDigitalProductStep() {
     }
   };
 
-  const isGoogleDrive = listingData.digitalLink.toLowerCase().includes("drive.google.com") || 
-                        listingData.digitalLink.toLowerCase().includes("docs.google.com");
-  
-  const isDropbox = listingData.digitalLink.toLowerCase().includes("dropbox.com");
+  const hasAllowedHost = (url: string, allowedHosts: string[]) => {
+    try {
+      const hostname = new URL(url).hostname.toLowerCase();
+      return allowedHosts.some((allowedHost) => {
+        const normalizedAllowedHost = allowedHost.toLowerCase();
+        return (
+          hostname === normalizedAllowedHost ||
+          hostname.endsWith(`.${normalizedAllowedHost}`)
+        );
+      });
+    } catch {
+      return false;
+    }
+  };
+
+  const isGoogleDrive = hasAllowedHost(listingData.digitalLink, [
+    "drive.google.com",
+    "docs.google.com",
+  ]);
+
+  const isDropbox = hasAllowedHost(listingData.digitalLink, ["dropbox.com"]);
 
   return (
     <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">

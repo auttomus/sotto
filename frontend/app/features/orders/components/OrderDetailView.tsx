@@ -141,19 +141,38 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
                         </a>
                       )}
 
-                      {order.listing.digitalLink && (
-                        <a
-                          href={order.listing.digitalLink.startsWith("http") ? order.listing.digitalLink : `https://${order.listing.digitalLink}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-1 inline-flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-sm border border-border bg-background text-foreground font-bold hover:bg-muted transition-all text-xs shadow-sm cursor-pointer"
-                        >
-                          <ExternalLink className="h-4 w-4 shrink-0" />
-                          {order.listing.digitalLink.includes("drive.google.com") || order.listing.digitalLink.includes("docs.google.com") 
-                            ? "Buka Tautan Google Drive" 
-                            : "Akses Tautan Eksternal"}
-                        </a>
-                      )}
+                      {order.listing.digitalLink && (() => {
+                        const externalHref = order.listing.digitalLink.startsWith("http")
+                          ? order.listing.digitalLink
+                          : `https://${order.listing.digitalLink}`;
+
+                        let externalHost = "";
+                        try {
+                          externalHost = new URL(externalHref).hostname.toLowerCase();
+                        } catch {
+                          externalHost = "";
+                        }
+
+                        const isGoogleDocsOrDrive =
+                          externalHost === "drive.google.com" ||
+                          externalHost.endsWith(".drive.google.com") ||
+                          externalHost === "docs.google.com" ||
+                          externalHost.endsWith(".docs.google.com");
+
+                        return (
+                          <a
+                            href={externalHref}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 inline-flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-sm border border-border bg-background text-foreground font-bold hover:bg-muted transition-all text-xs shadow-sm cursor-pointer"
+                          >
+                            <ExternalLink className="h-4 w-4 shrink-0" />
+                            {isGoogleDocsOrDrive
+                              ? "Buka Tautan Google Drive"
+                              : "Akses Tautan Eksternal"}
+                          </a>
+                        );
+                      })()}
                     </div>
                   ) : (
                     <div className="p-4 border border-border bg-muted/30 rounded-sm space-y-2">
